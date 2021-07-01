@@ -1,4 +1,6 @@
 package com.example.upbitautotrade.fragment;
 
-public class CoinListViewFragment {
+import androidx.fragment.app.Fragment;
+
+public class CoinListViewFragment extends Fragment {
 }

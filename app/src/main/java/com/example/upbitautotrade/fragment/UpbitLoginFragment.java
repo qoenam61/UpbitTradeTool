@@ -1,4 +1,6 @@
 package com.example.upbitautotrade.fragment;
 
-public class UpbitLoginFragment {
+import androidx.fragment.app.Fragment;
+
+public class UpBitLoginFragment extends Fragment {
 }
