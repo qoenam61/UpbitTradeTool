@@ -4,6 +4,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
 
+import com.example.upbitautotrade.R;
+
 public class UpbitAutoTradeMainActivity extends AppCompatActivity {
 
     @Override
