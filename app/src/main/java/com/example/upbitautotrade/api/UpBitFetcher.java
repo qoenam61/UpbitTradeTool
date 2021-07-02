@@ -1,4 +1,4 @@
 package com.example.upbitautotrade.api;
 
-public class UpbitFetcher {
+public class UpBitFetcher {
 }
