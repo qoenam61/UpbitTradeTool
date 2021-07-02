@@ -13,6 +13,9 @@ import java.security.GeneralSecurityException;
 public final class UpBitLogInPreferences {
     private final static String TAG = "UpBitLogInPreferences";
 
+    public final static String ACCESS_KEY = "access_key";
+    public final static String SECRET_KEY = "secret_key";
+
     private static SharedPreferences mSharedPreferences = null;
 
     public static void create(Context context) {
@@ -36,18 +39,18 @@ public final class UpBitLogInPreferences {
     public static void setStoredKey(Context context, String key, String data) {
         SharedPreferences pref = mSharedPreferences;
         if (pref == null) {
-            Log.d(TAG, "[DEBUG]setStoredKey: null");
+            Log.d(TAG, "[DEBUG] setStoredKey: null");
             return;
         }
         SharedPreferences.Editor editor = pref.edit();
         // use the shared preferences and editor as you normally would
-        editor.putString(key, data);
+        editor.putString(key, data).apply();
     }
 
-    public static String getStoredKey(Context context, String key) {
+    public static String getStoredKey(String key) {
         SharedPreferences pref = mSharedPreferences;
         if (pref == null) {
-            Log.d(TAG, "[DEBUG]getStoredKey: null");
+            Log.d(TAG, "[DEBUG] getStoredKey: null");
             return null;
         }
         return pref.getString(key, "null");

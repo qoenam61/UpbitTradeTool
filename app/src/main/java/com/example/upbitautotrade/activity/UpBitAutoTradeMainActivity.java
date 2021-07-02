@@ -7,10 +7,10 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.example.upbitautotrade.R;
+import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.fragment.UpBitLoginFragment;
 
 public class UpBitAutoTradeMainActivity extends AppCompatActivity {
-
     private static final String TAG = "PhotoGalleryActivity";
 
     @Override
@@ -19,6 +19,7 @@ public class UpBitAutoTradeMainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_upbit_auto_trade_main);
 
         boolean isFragmentContainer = savedInstanceState == null;
+        UpBitLogInPreferences.create(this);
 
         Log.d(TAG, "onCreate: ");
         if (isFragmentContainer) {
