@@ -24,6 +24,7 @@ public class UpBitViewModel extends AndroidViewModel {
 
     private final MutableLiveData<String> mSearchChanceInfo;
     private final LiveData<Chance> mResultChanceInfo;
+
     private final LiveData<List<Market>> mResultChanceMarketInfo;
     private final LiveData<List<Accounts>> mResultChanceBidInfo;
     private final LiveData<List<Accounts>> mResultChanceAskInfo;
@@ -59,6 +60,18 @@ public class UpBitViewModel extends AndroidViewModel {
 
     public LiveData<Accounts> getAccountsInfo() {
         return mResultAccountsInfo;
+    }
+
+    public LiveData<List<Market>> getResultChanceMarketInfo() {
+        return mResultChanceMarketInfo;
+    }
+
+    public LiveData<List<Accounts>> getResultChanceBidInfo() {
+        return mResultChanceBidInfo;
+    }
+
+    public LiveData<List<Accounts>> getResultChanceAskInfo() {
+        return mResultChanceAskInfo;
     }
 
     public LiveData<Throwable> getErrorLiveData() {

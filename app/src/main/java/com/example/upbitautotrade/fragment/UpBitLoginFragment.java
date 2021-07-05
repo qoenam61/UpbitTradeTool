@@ -11,16 +11,62 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
+import com.example.upbitautotrade.UpBitViewModel;
+import com.example.upbitautotrade.model.Accounts;
+import com.example.upbitautotrade.model.Market;
+
+import java.util.List;
 
 public class UpBitLoginFragment extends Fragment {
     private final String TAG = "UpBitLoginFragment";
 
     private View mView;
+    private UpBitViewModel mUpBitViewModel;
+    private Accounts mAccountsInfo;
+    private List<Market> mMarketInfo;
+    private List<Accounts> mBidInfo;
+    private List<Accounts> mAskInfo;
+
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        mUpBitViewModel = new ViewModelProvider(this).get(UpBitViewModel.class);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mUpBitViewModel.getAccountsInfo().observe(
+                getViewLifecycleOwner(), accounts -> {
+                    mAccountsInfo = accounts;
+                }
+        );
+
+        mUpBitViewModel.getResultChanceMarketInfo().observe(
+                getViewLifecycleOwner(), markets -> {
+                    mMarketInfo = markets;
+                }
+        );
+
+        mUpBitViewModel.getResultChanceBidInfo().observe(
+                getViewLifecycleOwner(), accounts -> {
+                    mBidInfo = accounts;
+                }
+        );
+
+        mUpBitViewModel.getResultChanceAskInfo().observe(
+                getViewLifecycleOwner(), accounts -> {
+                    mAskInfo = accounts;
+                }
+        );
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
