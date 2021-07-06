@@ -8,14 +8,14 @@ public class Accounts {
     @SerializedName("currency")
     private String currency;
 
-    @SerializedName("balance")
+/*    @SerializedName("balance")
     private String balance;
 
     @SerializedName("locked")
     private String locked;
 
     @SerializedName("avg_buy_price")
-    private String avgBuyPrice;
+    private String avgBuyPrice;*/
 
     @SerializedName("avg_buy_price_modified")
     private boolean avgBuyPriceModified;
@@ -31,9 +31,9 @@ public class Accounts {
     public String toString() {
         return "Accounts{" +
                 "currency='" + currency + '\'' +
-                ", balance='" + balance + '\'' +
-                ", locked='" + locked + '\'' +
-                ", avgBuyPrice='" + avgBuyPrice + '\'' +
+//                ", balance='" + balance + '\'' +
+//                ", locked='" + locked + '\'' +
+//                ", avgBuyPrice='" + avgBuyPrice + '\'' +
                 ", avgBuyPriceModified=" + avgBuyPriceModified +
                 ", unitCurrency='" + unitCurrency + '\'' +
                 '}';
@@ -43,7 +43,7 @@ public class Accounts {
         return currency;
     }
 
-    public String getBalance() {
+/*    public String getBalance() {
         return balance;
     }
 
@@ -53,7 +53,7 @@ public class Accounts {
 
     public String getAvgBuyPrice() {
         return avgBuyPrice;
-    }
+    }*/
 
     public boolean isAvgBuyPriceModified() {
         return avgBuyPriceModified;

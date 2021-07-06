@@ -1,6 +1,7 @@
 package com.example.upbitautotrade;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -16,11 +17,12 @@ import com.example.upbitautotrade.model.Price;
 import java.util.List;
 
 public class UpBitViewModel extends AndroidViewModel {
+    private final String TAG = "UpBitViewModel";
 
     private final LiveData<Throwable> mErrorLiveData;
 
     private final MutableLiveData<String> mSearchAccountsInfo;
-    private final LiveData<Accounts> mResultAccountsInfo;
+    private final LiveData<List<Accounts>> mResultAccountsInfo;
 
     private final MutableLiveData<String> mSearchChanceInfo;
     private final LiveData<Chance> mResultChanceInfo;
@@ -28,20 +30,21 @@ public class UpBitViewModel extends AndroidViewModel {
     private final LiveData<List<Market>> mResultChanceMarketInfo;
     private final LiveData<List<Accounts>> mResultChanceBidInfo;
     private final LiveData<List<Accounts>> mResultChanceAskInfo;
+    private UpBitFetcher mUpBitFetcher;
 
     public UpBitViewModel(Application application) {
         super(application);
-        UpBitFetcher fetcher = new UpBitFetcher();
-        mErrorLiveData = fetcher.getErrorLiveData();
+        mUpBitFetcher = new UpBitFetcher();
+        mErrorLiveData = mUpBitFetcher.getErrorLiveData();
 
         mSearchAccountsInfo = new MutableLiveData<>();
         mResultAccountsInfo = Transformations.switchMap(
-                mSearchAccountsInfo, input -> fetcher.getAccounts()
+                mSearchAccountsInfo, input -> mUpBitFetcher.getAccounts()
         );
 
         mSearchChanceInfo = new MutableLiveData<>();
         mResultChanceInfo = Transformations.switchMap(
-                mSearchChanceInfo, input -> fetcher.getOrdersChance(input)
+                mSearchChanceInfo, input -> mUpBitFetcher.getOrdersChance(input)
         );
 
         mResultChanceMarketInfo = Transformations.map(
@@ -58,7 +61,13 @@ public class UpBitViewModel extends AndroidViewModel {
 
     }
 
-    public LiveData<Accounts> getAccountsInfo() {
+    public void searchAccountsInfo() {
+        Log.d(TAG, "[DEBUG] searchAccountsInfo: ");
+        mSearchAccountsInfo.setValue("account");
+    }
+
+    public LiveData<List<Accounts>> getAccountsInfo() {
+        Log.d(TAG, "[DEBUG] getAccountsInfo: ");
         return mResultAccountsInfo;
     }
 
@@ -76,5 +85,13 @@ public class UpBitViewModel extends AndroidViewModel {
 
     public LiveData<Throwable> getErrorLiveData() {
         return mErrorLiveData;
+    }
+
+    public void setKey(String accessKey, String secretKey) {
+        if (mUpBitFetcher == null) {
+            return;
+        }
+        mUpBitFetcher.setAccessKey(accessKey);
+        mUpBitFetcher.setSecretKey(secretKey);
     }
 }

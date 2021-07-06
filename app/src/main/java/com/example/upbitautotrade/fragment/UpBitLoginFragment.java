@@ -19,6 +19,8 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.UpBitViewModel;
+import com.example.upbitautotrade.activity.UpBitAutoTradeMainActivity;
+import com.example.upbitautotrade.appinterface.UpBitAutoTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Market;
 
@@ -27,9 +29,10 @@ import java.util.List;
 public class UpBitLoginFragment extends Fragment {
     private final String TAG = "UpBitLoginFragment";
 
+    private UpBitAutoTradeActivity mActivity;
     private View mView;
     private UpBitViewModel mUpBitViewModel;
-    private Accounts mAccountsInfo;
+    private List<Accounts> mAccountsInfo;
     private List<Market> mMarketInfo;
     private List<Accounts> mBidInfo;
     private List<Accounts> mAskInfo;
@@ -37,6 +40,7 @@ public class UpBitLoginFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mActivity = (UpBitAutoTradeActivity)getActivity();
         mUpBitViewModel = new ViewModelProvider(this).get(UpBitViewModel.class);
     }
 
@@ -86,26 +90,36 @@ public class UpBitLoginFragment extends Fragment {
         TextView accessKey = mView.findViewById(R.id.result_access_key);
         TextView secretKey = mView.findViewById(R.id.result_secret_key);
 
-        accessKey.setText(UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY));
-        secretKey.setText(UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY));
+        if (mAccountsInfo != null) {
+//            accessKey.setText(mAccountsInfo.getBalance());
+            secretKey.setText(mAccountsInfo.get(0).getCurrency());
+        } else {
+            Log.d(TAG, "[DEBUG] onResultButton: null");
+        }
     }
 
     private void onLoginButton() {
-        Log.d(TAG, "[DEBUG] onLoginButton: ");
-        EditText accessKey = mView.findViewById(R.id.edit_access_key);
-        EditText secretKey = mView.findViewById(R.id.edit_secret_key);
-        UpBitLogInPreferences.setStoredKey(getContext(), "access_key", accessKey.getText().toString());
-        UpBitLogInPreferences.setStoredKey(getContext(), "secret_key", secretKey.getText().toString());
+        EditText access = mView.findViewById(R.id.edit_access_key);
+        EditText secret = mView.findViewById(R.id.edit_secret_key);
+        String accessKey = access.getText().toString();
+        String secretKey = secret.getText().toString();
+
+        mActivity.setAccessKey(accessKey);
+        mActivity.setSecretKey(secretKey);
+        Log.d(TAG, "[DEBUG] onLoginButton +accessKey: "+accessKey+" secretKey: "+secretKey);
+        mUpBitViewModel.setKey(accessKey, secretKey);
 
         InputMethodManager mInputMethodManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-        mInputMethodManager.hideSoftInputFromWindow(accessKey.getWindowToken(), 0);
+        mInputMethodManager.hideSoftInputFromWindow(access.getWindowToken(), 0);
 
-        if (isSuccessConnection()) {
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            MyCoinsAssetsFragment myCoinsAssetsFragment = new MyCoinsAssetsFragment();
-            transaction.replace(R.id.fragmentContainer, myCoinsAssetsFragment);
-            transaction.commit();
-        }
+        mUpBitViewModel.searchAccountsInfo();
+//        Log.d(TAG, "[DEBUG] onLoginButton - getAccountsInfo: "+ mAccountsInfo != null ? mAccountsInfo.toString() : null);
+//        if (isSuccessConnection()) {
+//            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+//            MyCoinsAssetsFragment myCoinsAssetsFragment = new MyCoinsAssetsFragment();
+//            transaction.replace(R.id.fragmentContainer, myCoinsAssetsFragment);
+//            transaction.commit();
+//        }
     }
 
     private boolean isSuccessConnection() {

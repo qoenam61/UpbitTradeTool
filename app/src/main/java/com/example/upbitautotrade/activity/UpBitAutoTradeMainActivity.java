@@ -4,17 +4,26 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.UpBitViewModel;
+import com.example.upbitautotrade.appinterface.UpBitAutoTradeActivity;
 import com.example.upbitautotrade.fragment.UpBitLoginFragment;
 
-public class UpBitAutoTradeMainActivity extends AppCompatActivity {
+import java.util.UUID;
+
+public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpBitAutoTradeActivity {
     private static final String TAG = "PhotoGalleryActivity";
+
     private UpBitViewModel mUpBitViewModel;
+    private String mAccessKey;
+    private String mSecretKey;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,5 +45,27 @@ public class UpBitAutoTradeMainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+    }
+
+    @Override
+    public Activity getActivity() {
+        return null;
+    }
+
+    @Override
+    public void setAccessKey(String accessKey) {
+        mAccessKey = accessKey;
+    }
+
+    @Override
+    public void setSecretKey(String secretKey) {
+        mSecretKey = secretKey;
+    }
+
+    @Override
+    public boolean isAuthorization() {
+//        UpBitLogInPreferences.setStoredKey(getContext(), "access_key", accessKey.getText().toString());
+//        UpBitLogInPreferences.setStoredKey(getContext(), "secret_key", secretKey.getText().toString());
+        return false;
     }
 }

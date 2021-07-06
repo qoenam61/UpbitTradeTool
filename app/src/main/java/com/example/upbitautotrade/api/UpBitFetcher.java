@@ -1,14 +1,26 @@
 package com.example.upbitautotrade.api;
 
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
+import java.io.IOException;
+import java.util.List;
+import java.util.UUID;
+
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -19,12 +31,15 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class UpBitFetcher {
     private static final String TAG = "UpBitFetcher";
 
+    private String mAccessKey;
+    private String mSecretKey;
+
     public interface UpBitCallback<T> {
         void onSuccess(T response);
         void onFailure(Throwable t);
     }
 
-    private final UpBitApi mUpbitApi;
+    private final UpBitApi mUpBitApi;
 
     private final MutableLiveData<Throwable> mErrorLiveData;
 
@@ -33,14 +48,18 @@ public class UpBitFetcher {
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();
 
+        OkHttpClient okHttpClient = new OkHttpClient.Builder()
+                .addInterceptor(new HeaderInterceptor())
+                .build();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("https://api.upbit.com")
+                .client(okHttpClient)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        mUpbitApi = retrofit.create(UpBitApi.class);
-
+        mUpBitApi = retrofit.create(UpBitApi.class);
         mErrorLiveData = new MutableLiveData<>();
     }
 
@@ -48,19 +67,22 @@ public class UpBitFetcher {
         return mErrorLiveData;
     }
 
-    public LiveData<Accounts> getAccounts() {
-        MutableLiveData<Accounts> result = new MutableLiveData<>();
-        Call<Accounts> call = mUpbitApi.getAccounts();
-        call.enqueue(new Callback<Accounts>() {
+    public LiveData<List<Accounts>> getAccounts() {
+        MutableLiveData<List<Accounts>> result = new MutableLiveData<>();
+        Call<List<Accounts>> call = mUpBitApi.getAccounts();
+        Log.d(TAG, "[DEBUG] getAccounts: "+call.request());
+        call.enqueue(new Callback<List<Accounts>>() {
             @Override
-            public void onResponse(Call<Accounts> call, Response<Accounts> response) {
+            public void onResponse(Call<List<Accounts>> call, Response<List<Accounts>> response) {
+                Log.d(TAG, "[DEBUG] onResponse: "+response.body()+" call: "+call.toString());
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
             }
 
             @Override
-            public void onFailure(Call<Accounts> call, Throwable t) {
+            public void onFailure(Call<List<Accounts>> call, Throwable t) {
+                Log.d(TAG, "[DEBUG] onFailure: "+t);
                 mErrorLiveData.setValue(t);
             }
         });
@@ -69,7 +91,8 @@ public class UpBitFetcher {
 
     public LiveData<Chance> getOrdersChance(String marketId) {
         MutableLiveData<Chance> result = new MutableLiveData<>();
-        Call<Chance> call = mUpbitApi.getOrdersChance(marketId);
+        Call<Chance> call = mUpBitApi.getOrdersChance(marketId);
+        Log.d(TAG, "[DEBUG] getOrdersChance: "+call.request());
         call.enqueue(new Callback<Chance>() {
             @Override
             public void onResponse(Call<Chance> call, Response<Chance> response) {
@@ -80,9 +103,47 @@ public class UpBitFetcher {
 
             @Override
             public void onFailure(Call<Chance> call, Throwable t) {
+                Log.d(TAG, "[DEBUG] onFailure: "+t.toString());
                 mErrorLiveData.setValue(t);
             }
         });
         return result;
+    }
+
+    public void setAccessKey(String accessKey) {
+        mAccessKey = accessKey;
+    }
+
+    public void setSecretKey(String secretKey) {
+        mSecretKey = secretKey;
+    }
+
+    class HeaderInterceptor implements Interceptor {
+        @Override
+        public okhttp3.Response intercept(Chain chain) throws IOException {
+
+            Request origin = chain.request();
+            Request request = origin.newBuilder()
+                    .header("Content-Type", "application/json")
+                    .addHeader("Authorization", getAuthToken())
+                    .build();
+            Log.d(TAG, "[DEBUG] intercept: "+request);
+            return chain.proceed(request);
+        }
+    }
+
+    private String getAuthToken() {
+        if (mAccessKey == null || mSecretKey == null) {
+            return null;
+        }
+        Algorithm algorithm = Algorithm.HMAC256(mSecretKey);
+        String jwtToken = JWT.create()
+                .withClaim("access_key", mAccessKey)
+                .withClaim("nonce", UUID.randomUUID().toString())
+                .sign(algorithm);
+
+        String authenticationToken = "Bearer " + jwtToken;
+        Log.d(TAG, "[DEBUG] getAuthToken -mAccessKey: "+mAccessKey+" mSecretKey: "+mSecretKey);
+        return authenticationToken;
     }
 }
