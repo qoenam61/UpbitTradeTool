@@ -57,34 +57,4 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:text="Log In"/>
-
-    <LinearLayout
-        android:id="@+id/text_result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="50dp"
-        android:layout_below="@+id/btn_login"
-        android:orientation="vertical">
-        <TextView
-            android:id="@+id/result_access_key"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="null"
-            android:textSize="@dimen/default_text_size"/>
-        <TextView
-            android:id="@+id/result_secret_key"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:hint="null"
-            android:textSize="@dimen/default_text_size"/>
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/btn_result"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/text_result"
-        android:text="Reslut"/>
 </RelativeLayout>

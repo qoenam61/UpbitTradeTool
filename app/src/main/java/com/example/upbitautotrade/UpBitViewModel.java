@@ -47,7 +47,7 @@ public class UpBitViewModel extends AndroidViewModel {
             @Override
             public void onConnection(boolean isConnect) {
                 mIsSuccessfulConnection = isConnect;
-                Log.d(TAG, "[DEBUG] getConnectionState -isConnect: "+isConnect);
+                Log.d(TAG, "getConnectionState -isConnect: "+isConnect);
                 if (isConnect) {
                     UpBitLogInPreferences.setStoredKey(application.getApplicationContext(), UpBitLogInPreferences.ACCESS_KEY, mAccessKey);
                     UpBitLogInPreferences.setStoredKey(application.getApplicationContext(), UpBitLogInPreferences.SECRET_KEY, mSecretKey);
@@ -86,7 +86,7 @@ public class UpBitViewModel extends AndroidViewModel {
     }
 
     public void searchAccountsInfo() {
-        mSearchAccountsInfo.setValue("account");
+        mSearchAccountsInfo.setValue(null);
     }
 
     public boolean isSuccessfulConnection() {

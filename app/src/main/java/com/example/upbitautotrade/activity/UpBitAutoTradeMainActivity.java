@@ -2,6 +2,7 @@ package com.example.upbitautotrade.activity;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
@@ -15,7 +16,10 @@ import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.UpBitViewModel;
 import com.example.upbitautotrade.appinterface.UpBitAutoTradeActivity;
 import com.example.upbitautotrade.fragment.UpBitLoginFragment;
+import com.example.upbitautotrade.model.Accounts;
+import com.example.upbitautotrade.model.Market;
 
+import java.util.List;
 import java.util.UUID;
 
 public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpBitAutoTradeActivity {
@@ -24,6 +28,11 @@ public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpB
     private UpBitViewModel mUpBitViewModel;
     private String mAccessKey;
     private String mSecretKey;
+
+    private List<Accounts> mAccountsInfo;
+    private List<Market> mMarketInfo;
+    private List<Accounts> mBidInfo;
+    private List<Accounts> mAskInfo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,12 +48,37 @@ public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpB
             FragmentManager fm = getSupportFragmentManager();
             fm.beginTransaction().add(R.id.fragmentContainer, upbitLoginFragment).commit();
         }
+        mUpBitViewModel = new ViewModelProvider(this).get(UpBitViewModel.class);
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+        mUpBitViewModel.getAccountsInfo().observe(
+                this
+                , accounts -> {
+                    mAccountsInfo = accounts;
+                }
+        );
 
+        mUpBitViewModel.getResultChanceMarketInfo().observe(
+                this, markets -> {
+                    mMarketInfo = markets;
+                }
+        );
+
+        mUpBitViewModel.getResultChanceBidInfo().observe(
+                this, accounts -> {
+                    mBidInfo = accounts;
+                }
+        );
+
+        mUpBitViewModel.getResultChanceAskInfo().observe(
+                this, accounts -> {
+                    mAskInfo = accounts;
+                }
+        );
     }
 
     @Override
@@ -67,5 +101,15 @@ public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpB
 //        UpBitLogInPreferences.setStoredKey(getContext(), "access_key", accessKey.getText().toString());
 //        UpBitLogInPreferences.setStoredKey(getContext(), "secret_key", secretKey.getText().toString());
         return false;
+    }
+
+    @Override
+    public UpBitViewModel getViewModel() {
+        return mUpBitViewModel;
+    }
+
+    @Override
+    public List<Accounts> getAccountInfo() {
+        return mAccountsInfo;
     }
 }
