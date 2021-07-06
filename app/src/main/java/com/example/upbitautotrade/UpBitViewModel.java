@@ -31,10 +31,30 @@ public class UpBitViewModel extends AndroidViewModel {
     private final LiveData<List<Accounts>> mResultChanceBidInfo;
     private final LiveData<List<Accounts>> mResultChanceAskInfo;
     private UpBitFetcher mUpBitFetcher;
+    private boolean mIsSuccessfulConnection;
+    private String mAccessKey = null;
+    private String mSecretKey = null;
+
+    private LoginState mListener;
+
+    public interface LoginState {
+        void onLoginState(boolean isLogin);
+    }
 
     public UpBitViewModel(Application application) {
         super(application);
-        mUpBitFetcher = new UpBitFetcher();
+        mUpBitFetcher = new UpBitFetcher(new UpBitFetcher.ConnectionState() {
+            @Override
+            public void onConnection(boolean isConnect) {
+                mIsSuccessfulConnection = isConnect;
+                Log.d(TAG, "[DEBUG] getConnectionState -isConnect: "+isConnect);
+                if (isConnect) {
+                    UpBitLogInPreferences.setStoredKey(application.getApplicationContext(), UpBitLogInPreferences.ACCESS_KEY, mAccessKey);
+                    UpBitLogInPreferences.setStoredKey(application.getApplicationContext(), UpBitLogInPreferences.SECRET_KEY, mSecretKey);
+                }
+                mListener.onLoginState(isConnect);
+            }
+        });
         mErrorLiveData = mUpBitFetcher.getErrorLiveData();
 
         mSearchAccountsInfo = new MutableLiveData<>();
@@ -61,13 +81,19 @@ public class UpBitViewModel extends AndroidViewModel {
 
     }
 
+    public void setOnListener(LoginState listener) {
+        mListener = listener;
+    }
+
     public void searchAccountsInfo() {
-        Log.d(TAG, "[DEBUG] searchAccountsInfo: ");
         mSearchAccountsInfo.setValue("account");
     }
 
+    public boolean isSuccessfulConnection() {
+        return mIsSuccessfulConnection;
+    }
+
     public LiveData<List<Accounts>> getAccountsInfo() {
-        Log.d(TAG, "[DEBUG] getAccountsInfo: ");
         return mResultAccountsInfo;
     }
 
@@ -91,6 +117,9 @@ public class UpBitViewModel extends AndroidViewModel {
         if (mUpBitFetcher == null) {
             return;
         }
+        mAccessKey = accessKey;
+        mSecretKey = secretKey;
+
         mUpBitFetcher.setAccessKey(accessKey);
         mUpBitFetcher.setSecretKey(secretKey);
     }

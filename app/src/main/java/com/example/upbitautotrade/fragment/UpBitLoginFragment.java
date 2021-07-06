@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
@@ -19,7 +18,6 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.UpBitViewModel;
-import com.example.upbitautotrade.activity.UpBitAutoTradeMainActivity;
 import com.example.upbitautotrade.appinterface.UpBitAutoTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Market;
@@ -82,16 +80,38 @@ public class UpBitLoginFragment extends Fragment {
         Button resultButton = mView.findViewById(R.id.btn_result);
         resultButton.setOnClickListener(v -> onResultButton());
 
+
+        EditText access = mView.findViewById(R.id.edit_access_key);
+        EditText secret = mView.findViewById(R.id.edit_secret_key);
+
+        String accessKey = UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY);
+        String secretKey = UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY);
+        Log.d(TAG, "[DEBUG] onCreateView -accessKey: "+accessKey+" secretKey: "+secretKey);
+        if (accessKey != null && secretKey != null) {
+            access.setText(accessKey);
+            secret.setText(secretKey);
+        }
+        mUpBitViewModel.setOnListener(new UpBitViewModel.LoginState() {
+            @Override
+            public void onLoginState(boolean isLogin) {
+                Log.d(TAG, "[DEBUG] onLoginState: "+isLogin);
+                if (isLogin) {
+                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                    MyCoinsAssetsFragment myCoinsAssetsFragment = new MyCoinsAssetsFragment();
+                    transaction.replace(R.id.fragmentContainer, myCoinsAssetsFragment);
+                    transaction.commit();
+                }
+            }
+        });
         return mView;
     }
 
     private void onResultButton() {
-        Log.d(TAG, "[DEBUG] onResultButton: ");
         TextView accessKey = mView.findViewById(R.id.result_access_key);
         TextView secretKey = mView.findViewById(R.id.result_secret_key);
 
         if (mAccountsInfo != null) {
-//            accessKey.setText(mAccountsInfo.getBalance());
+            accessKey.setText(mAccountsInfo.get(0).getBalance());
             secretKey.setText(mAccountsInfo.get(0).getCurrency());
         } else {
             Log.d(TAG, "[DEBUG] onResultButton: null");
@@ -104,26 +124,17 @@ public class UpBitLoginFragment extends Fragment {
         String accessKey = access.getText().toString();
         String secretKey = secret.getText().toString();
 
-        mActivity.setAccessKey(accessKey);
-        mActivity.setSecretKey(secretKey);
-        Log.d(TAG, "[DEBUG] onLoginButton +accessKey: "+accessKey+" secretKey: "+secretKey);
         mUpBitViewModel.setKey(accessKey, secretKey);
 
         InputMethodManager mInputMethodManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mInputMethodManager.hideSoftInputFromWindow(access.getWindowToken(), 0);
 
         mUpBitViewModel.searchAccountsInfo();
-//        Log.d(TAG, "[DEBUG] onLoginButton - getAccountsInfo: "+ mAccountsInfo != null ? mAccountsInfo.toString() : null);
-//        if (isSuccessConnection()) {
-//            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-//            MyCoinsAssetsFragment myCoinsAssetsFragment = new MyCoinsAssetsFragment();
-//            transaction.replace(R.id.fragmentContainer, myCoinsAssetsFragment);
-//            transaction.commit();
-//        }
+
+        Log.d(TAG, "[DEBUG] onLoginButton: "+isSuccessConnection());
     }
 
     private boolean isSuccessConnection() {
-        return UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY) != null
-                && UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY) != null;
+        return mUpBitViewModel.isSuccessfulConnection();
     }
 }

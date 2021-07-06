@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
 import com.google.gson.FieldNamingPolicy;
@@ -31,6 +30,8 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class UpBitFetcher {
     private static final String TAG = "UpBitFetcher";
 
+
+    private final ConnectionState mListener;
     private String mAccessKey;
     private String mSecretKey;
 
@@ -39,11 +40,16 @@ public class UpBitFetcher {
         void onFailure(Throwable t);
     }
 
+    public interface ConnectionState {
+        void onConnection(boolean isConnect);
+    }
+
     private final UpBitApi mUpBitApi;
 
     private final MutableLiveData<Throwable> mErrorLiveData;
 
-    public UpBitFetcher() {
+    public UpBitFetcher(ConnectionState listener) {
+        mListener = listener;
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();
@@ -70,13 +76,15 @@ public class UpBitFetcher {
     public LiveData<List<Accounts>> getAccounts() {
         MutableLiveData<List<Accounts>> result = new MutableLiveData<>();
         Call<List<Accounts>> call = mUpBitApi.getAccounts();
-        Log.d(TAG, "[DEBUG] getAccounts: "+call.request());
         call.enqueue(new Callback<List<Accounts>>() {
             @Override
             public void onResponse(Call<List<Accounts>> call, Response<List<Accounts>> response) {
                 Log.d(TAG, "[DEBUG] onResponse: "+response.body()+" call: "+call.toString());
                 if (response.body() != null) {
+                    mListener.onConnection(true);
                     result.setValue(response.body());
+                } else {
+                    mListener.onConnection(false);
                 }
             }
 
@@ -84,6 +92,7 @@ public class UpBitFetcher {
             public void onFailure(Call<List<Accounts>> call, Throwable t) {
                 Log.d(TAG, "[DEBUG] onFailure: "+t);
                 mErrorLiveData.setValue(t);
+                mListener.onConnection(false);
             }
         });
         return result;
@@ -96,6 +105,7 @@ public class UpBitFetcher {
         call.enqueue(new Callback<Chance>() {
             @Override
             public void onResponse(Call<Chance> call, Response<Chance> response) {
+                Log.d(TAG, "[DEBUG] onResponse: "+response.body()+" call: "+call.toString());
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
@@ -103,7 +113,7 @@ public class UpBitFetcher {
 
             @Override
             public void onFailure(Call<Chance> call, Throwable t) {
-                Log.d(TAG, "[DEBUG] onFailure: "+t.toString());
+                Log.d(TAG, "[DEBUG] onFailure: "+t);
                 mErrorLiveData.setValue(t);
             }
         });
@@ -127,7 +137,6 @@ public class UpBitFetcher {
                     .header("Content-Type", "application/json")
                     .addHeader("Authorization", getAuthToken())
                     .build();
-            Log.d(TAG, "[DEBUG] intercept: "+request);
             return chain.proceed(request);
         }
     }
@@ -143,7 +152,6 @@ public class UpBitFetcher {
                 .sign(algorithm);
 
         String authenticationToken = "Bearer " + jwtToken;
-        Log.d(TAG, "[DEBUG] getAuthToken -mAccessKey: "+mAccessKey+" mSecretKey: "+mSecretKey);
         return authenticationToken;
     }
 }

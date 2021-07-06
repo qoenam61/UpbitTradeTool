@@ -39,7 +39,6 @@ public final class UpBitLogInPreferences {
     public static void setStoredKey(Context context, String key, String data) {
         SharedPreferences pref = mSharedPreferences;
         if (pref == null) {
-            Log.d(TAG, "[DEBUG] setStoredKey: null");
             return;
         }
         SharedPreferences.Editor editor = pref.edit();
@@ -50,7 +49,6 @@ public final class UpBitLogInPreferences {
     public static String getStoredKey(String key) {
         SharedPreferences pref = mSharedPreferences;
         if (pref == null) {
-            Log.d(TAG, "[DEBUG] getStoredKey: null");
             return null;
         }
         return pref.getString(key, "null");
