@@ -1,5 +1,6 @@
 package com.example.upbitautotrade.activity;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.LifecycleOwner;
@@ -7,6 +8,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Message;
 import android.util.Log;
 
 import com.auth0.jwt.JWT;
@@ -25,6 +29,8 @@ import java.util.UUID;
 public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpBitAutoTradeActivity {
     private static final String TAG = "PhotoGalleryActivity";
 
+    public static final int REQUEST_GET_ACCOUNTS_INFO = 0;
+
     private UpBitViewModel mUpBitViewModel;
     private String mAccessKey;
     private String mSecretKey;
@@ -33,6 +39,21 @@ public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpB
     private List<Market> mMarketInfo;
     private List<Accounts> mBidInfo;
     private List<Accounts> mAskInfo;
+
+    private HandlerThread mHandlerThread = new HandlerThread("background");
+    private Handler mHandler = new Handler(mHandlerThread.getLooper()) {
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case REQUEST_GET_ACCOUNTS_INFO:
+                    mUpBitViewModel.searchAccountsInfo();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +70,7 @@ public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpB
             fm.beginTransaction().add(R.id.fragmentContainer, upbitLoginFragment).commit();
         }
         mUpBitViewModel = new ViewModelProvider(this).get(UpBitViewModel.class);
+
 
     }
 
@@ -111,5 +133,10 @@ public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpB
     @Override
     public List<Accounts> getAccountInfo() {
         return mAccountsInfo;
+    }
+
+    @Override
+    public Handler getRequestHandler() {
+        return mHandler;
     }
 }

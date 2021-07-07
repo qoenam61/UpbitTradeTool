@@ -18,6 +18,7 @@ import androidx.lifecycle.ViewModelProvider;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.UpBitViewModel;
+import com.example.upbitautotrade.activity.UpBitAutoTradeMainActivity;
 import com.example.upbitautotrade.appinterface.UpBitAutoTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Market;
@@ -82,7 +83,9 @@ public class UpBitLoginFragment extends Fragment {
         String accessKey = access.getText().toString();
         String secretKey = secret.getText().toString();
         mUpBitViewModel.setKey(accessKey, secretKey);
-        mUpBitViewModel.searchAccountsInfo();
+
+        mActivity.getRequestHandler().sendEmptyMessage(UpBitAutoTradeMainActivity.REQUEST_GET_ACCOUNTS_INFO);
+//        mUpBitViewModel.searchAccountsInfo();
 
         InputMethodManager mInputMethodManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mInputMethodManager.hideSoftInputFromWindow(access.getWindowToken(), 0);

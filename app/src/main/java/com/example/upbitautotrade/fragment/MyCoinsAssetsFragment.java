@@ -25,6 +25,8 @@ public class MyCoinsAssetsFragment extends Fragment {
 
         currencyValue.setText(mActivity.getAccountInfo().get(0).getCurrency());
         balanceValue.setText(mActivity.getAccountInfo().get(0).getBalance());
+
+        mActivity.getRequestHandler().sen
         return view;
     }
 }
