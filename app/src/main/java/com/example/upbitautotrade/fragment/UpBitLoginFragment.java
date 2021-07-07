@@ -43,7 +43,12 @@ public class UpBitLoginFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-
+        mUpBitViewModel.getAccountsInfo().observe(
+                getViewLifecycleOwner()
+                , accounts -> {
+                    Log.d(TAG, "[DEBUG] main onStart: ");
+                }
+        );
     }
 
     @Override
@@ -83,9 +88,7 @@ public class UpBitLoginFragment extends Fragment {
         String accessKey = access.getText().toString();
         String secretKey = secret.getText().toString();
         mUpBitViewModel.setKey(accessKey, secretKey);
-
-        mActivity.getRequestHandler().sendEmptyMessage(UpBitAutoTradeMainActivity.REQUEST_GET_ACCOUNTS_INFO);
-//        mUpBitViewModel.searchAccountsInfo();
+        mUpBitViewModel.searchAccountsInfo(true);
 
         InputMethodManager mInputMethodManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mInputMethodManager.hideSoftInputFromWindow(access.getWindowToken(), 0);

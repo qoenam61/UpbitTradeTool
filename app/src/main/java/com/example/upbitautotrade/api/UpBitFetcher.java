@@ -1,5 +1,6 @@
 package com.example.upbitautotrade.api;
 
+import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -7,6 +8,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.upbitautotrade.UpBitViewModel;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
 import com.google.gson.FieldNamingPolicy;
@@ -73,7 +75,7 @@ public class UpBitFetcher {
         return mErrorLiveData;
     }
 
-    public LiveData<List<Accounts>> getAccounts() {
+    public LiveData<List<Accounts>> getAccounts(String isLogIn) {
         MutableLiveData<List<Accounts>> result = new MutableLiveData<>();
         Call<List<Accounts>> call = mUpBitApi.getAccounts();
         call.enqueue(new Callback<List<Accounts>>() {
@@ -81,10 +83,14 @@ public class UpBitFetcher {
             public void onResponse(Call<List<Accounts>> call, Response<List<Accounts>> response) {
                 Log.d(TAG, "[DEBUG] onResponse: "+response.body()+" call: "+call.toString());
                 if (response.body() != null) {
-                    mListener.onConnection(true);
+                    if (isLogIn != null && isLogIn.equals(UpBitViewModel.LOGIN)) {
+                        mListener.onConnection(true);
+                    }
                     result.setValue(response.body());
                 } else {
-                    mListener.onConnection(false);
+                    if (isLogIn != null && isLogIn.equals(UpBitViewModel.LOGIN)) {
+                        mListener.onConnection(false);
+                    }
                 }
             }
 
@@ -92,7 +98,9 @@ public class UpBitFetcher {
             public void onFailure(Call<List<Accounts>> call, Throwable t) {
                 Log.d(TAG, "[DEBUG] onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                mListener.onConnection(false);
+                if (isLogIn != null && isLogIn.equals(UpBitViewModel.LOGIN)) {
+                    mListener.onConnection(false);
+                }
             }
         });
         return result;

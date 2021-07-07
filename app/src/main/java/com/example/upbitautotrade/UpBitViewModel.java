@@ -19,8 +19,9 @@ import java.util.List;
 public class UpBitViewModel extends AndroidViewModel {
     private final String TAG = "UpBitViewModel";
 
-    private final LiveData<Throwable> mErrorLiveData;
+    public static final String LOGIN = "LogIn";
 
+    private final LiveData<Throwable> mErrorLiveData;
     private final MutableLiveData<String> mSearchAccountsInfo;
     private final LiveData<List<Accounts>> mResultAccountsInfo;
 
@@ -59,7 +60,7 @@ public class UpBitViewModel extends AndroidViewModel {
 
         mSearchAccountsInfo = new MutableLiveData<>();
         mResultAccountsInfo = Transformations.switchMap(
-                mSearchAccountsInfo, input -> mUpBitFetcher.getAccounts()
+                mSearchAccountsInfo, input -> mUpBitFetcher.getAccounts(input)
         );
 
         mSearchChanceInfo = new MutableLiveData<>();
@@ -85,8 +86,8 @@ public class UpBitViewModel extends AndroidViewModel {
         mListener = listener;
     }
 
-    public void searchAccountsInfo() {
-        mSearchAccountsInfo.setValue(null);
+    public void searchAccountsInfo(boolean isLogIn) {
+        mSearchAccountsInfo.setValue(isLogIn ? LOGIN : null);
     }
 
     public boolean isSuccessfulConnection() {
