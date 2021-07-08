@@ -12,11 +12,10 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
-import com.example.upbitautotrade.UpBitViewModel;
+import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.activity.TradePagerActivity;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 

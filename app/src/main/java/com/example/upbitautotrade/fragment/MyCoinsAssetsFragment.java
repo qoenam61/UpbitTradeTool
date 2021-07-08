@@ -8,7 +8,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -17,7 +19,9 @@ import androidx.lifecycle.ViewModelProvider;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
-import com.example.upbitautotrade.UpBitViewModel;
+import com.example.upbitautotrade.model.Chance;
+import com.example.upbitautotrade.viewmodel.AccountsViewModel;
+import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
 
@@ -31,7 +35,7 @@ public class MyCoinsAssetsFragment extends Fragment {
     private UpBitTradeActivity mActivity;
     private List<Accounts> mAccountsInfo;
     private View mView;
-    private UpBitViewModel mUpBitViewModel;
+    private AccountsViewModel mViewModel;
 
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -39,7 +43,7 @@ public class MyCoinsAssetsFragment extends Fragment {
             super.handleMessage(msg);
             switch (msg.what) {
                 case PERIODIC_UPDATE_ACCOUNTS_INFO:
-                    mUpBitViewModel.searchAccountsInfo(false);
+                    mViewModel.searchAccountsInfo(false);
                     break;
                 default:
                     break;
@@ -47,18 +51,26 @@ public class MyCoinsAssetsFragment extends Fragment {
         }
     };
     private Thread mProcess;
+    private Chance mChanceInfo;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mUpBitViewModel = new ViewModelProvider(this).get(UpBitViewModel.class);
-        mUpBitViewModel.setKey(UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY),
+        mViewModel = new ViewModelProvider(this).get(AccountsViewModel.class);
+        mViewModel.setKey(UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY),
                 UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY));
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_my_coins_assets, container, false);
+        Button button = mView.findViewById(R.id.button);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mViewModel.searchChanceInfo("KRW-BTC");
+            }
+        });
         return mView;
     }
 
@@ -66,13 +78,30 @@ public class MyCoinsAssetsFragment extends Fragment {
     public void onStart() {
         super.onStart();
         Log.d(TAG, "[DEBUG] onStart: ");
-        mUpBitViewModel.getAccountsInfo().observe(
+        mViewModel.getAccountsInfo().observe(
                 getViewLifecycleOwner()
                 , accounts -> {
                     mAccountsInfo = accounts;
                     updateAccountInfo();
                 }
         );
+
+        mViewModel.getResultChanceInfo().observe(
+                getViewLifecycleOwner(),
+                chance -> {
+                    mChanceInfo = chance;
+                }
+        );
+
+        mViewModel.getErrorLiveData()
+                .observe(
+                        getViewLifecycleOwner(),
+                        t -> {
+                            Toast.makeText(getContext(),
+                                    t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                        }
+                );
+
     }
 
     @Override

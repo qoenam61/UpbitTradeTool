@@ -10,7 +10,7 @@ import android.util.Log;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
-import com.example.upbitautotrade.UpBitViewModel;
+import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.fragment.UpBitLoginFragment;
 

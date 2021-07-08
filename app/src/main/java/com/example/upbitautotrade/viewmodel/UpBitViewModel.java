@@ -1,4 +1,4 @@
-package com.example.upbitautotrade;
+package com.example.upbitautotrade.viewmodel;
 
 import android.app.Application;
 import android.content.Context;
@@ -9,6 +9,7 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.Transformations;
 
+import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.api.UpBitFetcher;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
@@ -26,13 +27,7 @@ public class UpBitViewModel extends AndroidViewModel {
     private final MutableLiveData<String> mSearchAccountsInfo;
     private final LiveData<List<Accounts>> mResultAccountsInfo;
 
-    private final MutableLiveData<String> mSearchChanceInfo;
-    private final LiveData<Chance> mResultChanceInfo;
-
-    private final LiveData<List<Market>> mResultChanceMarketInfo;
-    private final LiveData<List<Accounts>> mResultChanceBidInfo;
-    private final LiveData<List<Accounts>> mResultChanceAskInfo;
-    private UpBitFetcher mUpBitFetcher;
+    protected UpBitFetcher mUpBitFetcher;
     private boolean mIsSuccessfulConnection;
     private String mAccessKey = null;
     private String mSecretKey = null;
@@ -53,27 +48,9 @@ public class UpBitViewModel extends AndroidViewModel {
         mResultAccountsInfo = Transformations.switchMap(
                 mSearchAccountsInfo, input -> mUpBitFetcher.getAccounts(input)
         );
-
-        mSearchChanceInfo = new MutableLiveData<>();
-        mResultChanceInfo = Transformations.switchMap(
-                mSearchChanceInfo, input -> mUpBitFetcher.getOrdersChance(input)
-        );
-
-        mResultChanceMarketInfo = Transformations.map(
-                mResultChanceInfo,
-                Chance::getMarketItems);
-
-        mResultChanceBidInfo = Transformations.map(
-                mResultChanceInfo,
-                Chance::getBidItems);
-
-        mResultChanceAskInfo = Transformations.map(
-                mResultChanceInfo,
-                Chance::getAskItems);
-
     }
 
-    private void initFetcher(Context context) {
+    protected void initFetcher(Context context) {
         mUpBitFetcher = new UpBitFetcher(new UpBitFetcher.ConnectionState() {
             @Override
             public void onConnection(boolean isConnect) {
@@ -103,18 +80,6 @@ public class UpBitViewModel extends AndroidViewModel {
     public LiveData<List<Accounts>> getAccountsInfo() {
         return mResultAccountsInfo;
     }
-
-/*    public LiveData<List<Market>> getResultChanceMarketInfo() {
-        return mResultChanceMarketInfo;
-    }
-
-    public LiveData<List<Accounts>> getResultChanceBidInfo() {
-        return mResultChanceBidInfo;
-    }
-
-    public LiveData<List<Accounts>> getResultChanceAskInfo() {
-        return mResultChanceAskInfo;
-    }*/
 
     public LiveData<Throwable> getErrorLiveData() {
         return mErrorLiveData;

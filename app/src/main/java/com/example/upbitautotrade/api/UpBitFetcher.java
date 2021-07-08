@@ -1,6 +1,5 @@
 package com.example.upbitautotrade.api;
 
-import android.os.SystemClock;
 import android.util.Log;
 
 import androidx.lifecycle.LiveData;
@@ -8,7 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.example.upbitautotrade.UpBitViewModel;
+import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
 import com.google.gson.FieldNamingPolicy;
@@ -46,13 +45,13 @@ public class UpBitFetcher {
         void onConnection(boolean isConnect);
     }
 
-    private final UpBitApi mUpBitApi;
-
+    private final AccountsRetrofit mAccountsRetrofit;
+    private final ChanceRetrofit mChanceRetrofit;
     private final MutableLiveData<Throwable> mErrorLiveData;
 
     public UpBitFetcher(ConnectionState listener) {
         mListener = listener;
-        Gson gson = new GsonBuilder()
+/*        Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();
 
@@ -67,7 +66,10 @@ public class UpBitFetcher {
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
 
-        mUpBitApi = retrofit.create(UpBitApi.class);
+        mUpBitApi = retrofit.create(UpBitApi.class);*/
+        mAccountsRetrofit = new AccountsRetrofit();
+        mChanceRetrofit = new ChanceRetrofit();
+
         mErrorLiveData = new MutableLiveData<>();
     }
 
@@ -76,12 +78,13 @@ public class UpBitFetcher {
     }
 
     public LiveData<List<Accounts>> getAccounts(String isLogIn) {
+
         MutableLiveData<List<Accounts>> result = new MutableLiveData<>();
-        Call<List<Accounts>> call = mUpBitApi.getAccounts();
+        Call<List<Accounts>> call = mAccountsRetrofit.getUpBitApi().getAccounts();
         call.enqueue(new Callback<List<Accounts>>() {
             @Override
             public void onResponse(Call<List<Accounts>> call, Response<List<Accounts>> response) {
-                Log.d(TAG, "[DEBUG] onResponse: "+response.body()+" call: "+call.toString());
+//                Log.d(TAG, "[DEBUG] onResponse: "+response.body()+" call: "+call.toString());
                 if (response.body() != null) {
                     if (isLogIn != null && isLogIn.equals(UpBitViewModel.LOGIN)) {
                         mListener.onConnection(true);
@@ -107,8 +110,9 @@ public class UpBitFetcher {
     }
 
     public LiveData<Chance> getOrdersChance(String marketId) {
+        mChanceRetrofit.setParam(marketId, null, null);
         MutableLiveData<Chance> result = new MutableLiveData<>();
-        Call<Chance> call = mUpBitApi.getOrdersChance(marketId);
+        Call<Chance> call = mChanceRetrofit.getUpBitApi().getOrdersChance(marketId);
         Log.d(TAG, "[DEBUG] getOrdersChance: "+call.request());
         call.enqueue(new Callback<Chance>() {
             @Override
@@ -134,32 +138,5 @@ public class UpBitFetcher {
 
     public void setSecretKey(String secretKey) {
         mSecretKey = secretKey;
-    }
-
-    class HeaderInterceptor implements Interceptor {
-        @Override
-        public okhttp3.Response intercept(Chain chain) throws IOException {
-
-            Request origin = chain.request();
-            Request request = origin.newBuilder()
-                    .header("Content-Type", "application/json")
-                    .addHeader("Authorization", getAuthToken())
-                    .build();
-            return chain.proceed(request);
-        }
-    }
-
-    private String getAuthToken() {
-        if (mAccessKey == null || mSecretKey == null) {
-            return null;
-        }
-        Algorithm algorithm = Algorithm.HMAC256(mSecretKey);
-        String jwtToken = JWT.create()
-                .withClaim("access_key", mAccessKey)
-                .withClaim("nonce", UUID.randomUUID().toString())
-                .sign(algorithm);
-
-        String authenticationToken = "Bearer " + jwtToken;
-        return authenticationToken;
     }
 }

@@ -14,5 +14,5 @@ public interface UpBitApi {
     Call<List<Accounts>> getAccounts();
 
     @GET("/v1/orders/chance")
-    Call<Chance> getOrdersChance(@Query("marketId") String marketId);
+    Call<Chance> getOrdersChance(@Query("market") String marketId);
 }
