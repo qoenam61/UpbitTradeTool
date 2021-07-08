@@ -1,6 +1,7 @@
 package com.example.upbitautotrade;
 
 import android.app.Application;
+import android.content.Context;
 import android.util.Log;
 
 import androidx.lifecycle.AndroidViewModel;
@@ -44,18 +45,8 @@ public class UpBitViewModel extends AndroidViewModel {
 
     public UpBitViewModel(Application application) {
         super(application);
-        mUpBitFetcher = new UpBitFetcher(new UpBitFetcher.ConnectionState() {
-            @Override
-            public void onConnection(boolean isConnect) {
-                mIsSuccessfulConnection = isConnect;
-                Log.d(TAG, "getConnectionState -isConnect: "+isConnect);
-                if (isConnect) {
-                    UpBitLogInPreferences.setStoredKey(application.getApplicationContext(), UpBitLogInPreferences.ACCESS_KEY, mAccessKey);
-                    UpBitLogInPreferences.setStoredKey(application.getApplicationContext(), UpBitLogInPreferences.SECRET_KEY, mSecretKey);
-                }
-                mListener.onLoginState(isConnect);
-            }
-        });
+
+        initFetcher(application.getApplicationContext());
         mErrorLiveData = mUpBitFetcher.getErrorLiveData();
 
         mSearchAccountsInfo = new MutableLiveData<>();
@@ -82,6 +73,21 @@ public class UpBitViewModel extends AndroidViewModel {
 
     }
 
+    private void initFetcher(Context context) {
+        mUpBitFetcher = new UpBitFetcher(new UpBitFetcher.ConnectionState() {
+            @Override
+            public void onConnection(boolean isConnect) {
+                mIsSuccessfulConnection = isConnect;
+                Log.d(TAG, "getConnectionState -isConnect: "+isConnect);
+                if (isConnect) {
+                    UpBitLogInPreferences.setStoredKey(context.getApplicationContext(), UpBitLogInPreferences.ACCESS_KEY, mAccessKey);
+                    UpBitLogInPreferences.setStoredKey(context.getApplicationContext(), UpBitLogInPreferences.SECRET_KEY, mSecretKey);
+                }
+                mListener.onLoginState(isConnect);
+            }
+        });
+    }
+
     public void setOnListener(LoginState listener) {
         mListener = listener;
     }
@@ -98,7 +104,7 @@ public class UpBitViewModel extends AndroidViewModel {
         return mResultAccountsInfo;
     }
 
-    public LiveData<List<Market>> getResultChanceMarketInfo() {
+/*    public LiveData<List<Market>> getResultChanceMarketInfo() {
         return mResultChanceMarketInfo;
     }
 
@@ -108,7 +114,7 @@ public class UpBitViewModel extends AndroidViewModel {
 
     public LiveData<List<Accounts>> getResultChanceAskInfo() {
         return mResultChanceAskInfo;
-    }
+    }*/
 
     public LiveData<Throwable> getErrorLiveData() {
         return mErrorLiveData;

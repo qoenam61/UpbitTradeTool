@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.app.Activity;
 import android.os.Bundle;
 import android.util.Log;
 
@@ -66,6 +67,11 @@ public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTr
                     mAskInfo = accounts;
                 }
         );*/
+    }
+
+    @Override
+    public Activity getActivity() {
+        return getActivity();
     }
 
     @Override

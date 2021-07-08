@@ -9,5 +9,6 @@ import com.example.upbitautotrade.model.Accounts;
 import java.util.List;
 
 public interface UpBitTradeActivity {
+    public Activity getActivity();
     public UpBitViewModel getViewModel();
 }

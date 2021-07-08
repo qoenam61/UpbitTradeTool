@@ -1,6 +1,7 @@
 package com.example.upbitautotrade.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -16,6 +17,7 @@ import androidx.fragment.app.FragmentTransaction;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.UpBitViewModel;
+import com.example.upbitautotrade.activity.TradePagerActivity;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 
 public class UpBitLoginFragment extends Fragment {
@@ -64,11 +66,17 @@ public class UpBitLoginFragment extends Fragment {
             @Override
             public void onLoginState(boolean isLogin) {
                 Log.d(TAG, "onLoginState: "+isLogin);
+/*
                 if (isLogin) {
                     FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                     MyCoinsAssetsFragment myCoinsAssetsFragment = new MyCoinsAssetsFragment();
                     transaction.replace(R.id.fragmentContainer, myCoinsAssetsFragment);
                     transaction.commit();
+                }
+*/
+                if (isLogin) {
+                    Intent intent = new Intent(getActivity(), TradePagerActivity.class);
+                    startActivity(intent);
                 }
             }
         });

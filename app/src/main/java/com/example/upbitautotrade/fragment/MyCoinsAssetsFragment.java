@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,8 +13,10 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import com.example.upbitautotrade.R;
+import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.UpBitViewModel;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
@@ -43,12 +46,14 @@ public class MyCoinsAssetsFragment extends Fragment {
             }
         }
     };
+    private Thread mProcess;
 
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActivity = (UpBitTradeActivity)getActivity();
-        mUpBitViewModel = mActivity.getViewModel();
+        mUpBitViewModel = new ViewModelProvider(this).get(UpBitViewModel.class);
+        mUpBitViewModel.setKey(UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY),
+                UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY));
     }
 
     @Override
@@ -60,7 +65,8 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mActivity.getViewModel().getAccountsInfo().observe(
+        Log.d(TAG, "[DEBUG] onStart: ");
+        mUpBitViewModel.getAccountsInfo().observe(
                 getViewLifecycleOwner()
                 , accounts -> {
                     mAccountsInfo = accounts;
@@ -70,13 +76,25 @@ public class MyCoinsAssetsFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        Log.d(TAG, "[DEBUG] onPause: ");
+
+        Thread process = mProcess;
+        if (process != null) {
+            mProcess.interrupt();
+        }
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "[DEBUG] onResume: ");
         process();
     }
 
     private void process() {
-        new Thread(() -> {
+        mProcess = new Thread(() -> {
             try {
                 long latency = 0;
                 int i = 0;
@@ -88,7 +106,8 @@ public class MyCoinsAssetsFragment extends Fragment {
             } catch(InterruptedException e) {
                 e.printStackTrace();
             }
-        }).start();
+        });
+        mProcess.start();
     }
 
     private void updateAccountInfo() {
