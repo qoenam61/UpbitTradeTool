@@ -4,11 +4,9 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -17,8 +15,7 @@ import androidx.fragment.app.Fragment;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitViewModel;
-import com.example.upbitautotrade.activity.UpBitAutoTradeMainActivity;
-import com.example.upbitautotrade.appinterface.UpBitAutoTradeActivity;
+import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
 
 import java.util.List;
@@ -28,7 +25,7 @@ public class MyCoinsAssetsFragment extends Fragment {
 
     private final int PERIODIC_UPDATE_ACCOUNTS_INFO = 1;
 
-    private UpBitAutoTradeActivity mActivity;
+    private UpBitTradeActivity mActivity;
     private List<Accounts> mAccountsInfo;
     private View mView;
     private UpBitViewModel mUpBitViewModel;
@@ -50,7 +47,7 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActivity = (UpBitAutoTradeActivity)getActivity();
+        mActivity = (UpBitTradeActivity)getActivity();
         mUpBitViewModel = mActivity.getViewModel();
     }
 

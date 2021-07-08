@@ -9,26 +9,19 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-import androidx.lifecycle.ViewModelProvider;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.UpBitViewModel;
-import com.example.upbitautotrade.activity.UpBitAutoTradeMainActivity;
-import com.example.upbitautotrade.appinterface.UpBitAutoTradeActivity;
-import com.example.upbitautotrade.model.Accounts;
-import com.example.upbitautotrade.model.Market;
-
-import java.util.List;
+import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 
 public class UpBitLoginFragment extends Fragment {
     private final String TAG = "UpBitLoginFragment";
 
-    private UpBitAutoTradeActivity mActivity;
+    private UpBitTradeActivity mActivity;
     private View mView;
     private UpBitViewModel mUpBitViewModel;
 
@@ -36,7 +29,7 @@ public class UpBitLoginFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mActivity = (UpBitAutoTradeActivity)getActivity();
+        mActivity = (UpBitTradeActivity)getActivity();
         mUpBitViewModel = mActivity.getViewModel();
     }
 

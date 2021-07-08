@@ -8,6 +8,6 @@ import com.example.upbitautotrade.model.Accounts;
 
 import java.util.List;
 
-public interface UpBitAutoTradeActivity {
+public interface UpBitTradeActivity {
     public UpBitViewModel getViewModel();
 }

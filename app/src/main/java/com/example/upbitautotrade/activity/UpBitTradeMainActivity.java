@@ -1,32 +1,19 @@
 package com.example.upbitautotrade.activity;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentManager;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.HandlerThread;
-import android.os.Message;
 import android.util.Log;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.UpBitViewModel;
-import com.example.upbitautotrade.appinterface.UpBitAutoTradeActivity;
+import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.fragment.UpBitLoginFragment;
-import com.example.upbitautotrade.model.Accounts;
-import com.example.upbitautotrade.model.Market;
 
-import java.util.List;
-import java.util.UUID;
-
-public class UpBitAutoTradeMainActivity extends AppCompatActivity implements UpBitAutoTradeActivity {
+public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTradeActivity {
     private static final String TAG = "PhotoGalleryActivity";
 
     public static final int REQUEST_GET_LOGIN_INFO = 0;
