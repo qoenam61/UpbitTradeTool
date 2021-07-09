@@ -29,7 +29,6 @@ public abstract class DefaultRetrofit {
     public DefaultRetrofit() {
         mAccessKey = UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY);
         mSecretKey = UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY);
-        Log.d(TAG, "[DEBUG] DefaultRetrofit -mAccessKey: "+mAccessKey+" mSecretKey: "+mSecretKey);
 
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
@@ -56,7 +55,6 @@ public abstract class DefaultRetrofit {
                     .header("Content-Type", "application/json")
                     .addHeader("Authorization", getAuthToken())
                     .build();
-            Log.d(TAG, "[DEBUG] intercept: "+request);
             return chain.proceed(request);
         }
     }

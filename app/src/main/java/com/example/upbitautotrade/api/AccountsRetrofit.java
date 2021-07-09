@@ -29,7 +29,6 @@ public class AccountsRetrofit extends DefaultRetrofit{
         if (mAccessKey == null || mSecretKey == null) {
             return null;
         }
-        Log.d(TAG, "[DEBUG] getAuthToken -mAccessKey: "+mAccessKey+" mSecretKey: "+mSecretKey);
         Algorithm algorithm = Algorithm.HMAC256(mSecretKey);
         String jwtToken = JWT.create()
                 .withClaim("access_key", mAccessKey)

@@ -2,30 +2,32 @@ package com.example.upbitautotrade.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
-
 public class Chance {
     @SerializedName("ask_fee")
     private String askFee;
 
     @SerializedName("market")
-    private List<Market> market;
+    private Market market;
 
     @SerializedName("bid_account")
-    private List<Accounts> bidAccount;
+    private OrderPrice bidAccount;
 
     @SerializedName("ask_account")
-    private List<Accounts> askAccount;
+    private OrderPrice askAccount;
 
-    public List<Market> getMarketItems() {
+    public String getAskFee() {
+        return askFee;
+    }
+
+    public Market getMarket() {
         return market;
     }
 
-    public List<Accounts> getBidItems() {
+    public OrderPrice getBidAccount() {
         return bidAccount;
     }
 
-    public List<Accounts> getAskItems() {
+    public OrderPrice getAskAccount() {
         return askAccount;
     }
 }

@@ -40,7 +40,6 @@ public class UpBitLoginFragment extends Fragment {
         mUpBitViewModel.getAccountsInfo().observe(
                 getViewLifecycleOwner()
                 , accounts -> {
-                    Log.d(TAG, "[DEBUG] main onStart: ");
                 }
         );
     }

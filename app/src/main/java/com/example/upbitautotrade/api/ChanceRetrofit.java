@@ -22,11 +22,8 @@ public class ChanceRetrofit extends DefaultRetrofit{
     @Override
     protected String getAuthToken() {
         if (mAccessKey == null || mSecretKey == null) {
-            Log.d(TAG, "[DEBUG] getAuthToken: mAccessKey null");
             return null;
         }
-        Log.d(TAG, "[DEBUG] getAuthToken: ");
-
         String queryString = String.join("&", mQueryElements.toArray(new String[0]));
         MessageDigest md = null;
         try {

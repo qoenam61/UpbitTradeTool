@@ -7,20 +7,20 @@ public class Price {
     private String currency;
 
     @SerializedName("price_unit")
-    private String price_unit;
+    private String priceUnit;
 
     @SerializedName("min_total")
-    private String min_total;
+    private String minTotal;
 
     public String getCurrency() {
         return currency;
     }
 
-    public String getPrice_unit() {
-        return price_unit;
+    public String getPriceUnit() {
+        return priceUnit;
     }
 
-    public String getMin_total() {
-        return min_total;
+    public String getMinTotal() {
+        return minTotal;
     }
 }

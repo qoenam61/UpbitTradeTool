@@ -68,7 +68,6 @@ public class AccountsViewModel extends UpBitViewModel{
     }*/
 
     public void searchChanceInfo(String markerId) {
-        Log.d(TAG, "[DEBUG] searchAccountsInfo: ");
         mSearchChanceInfo.setValue(markerId);
     }
 }

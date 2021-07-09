@@ -2,7 +2,7 @@ package com.example.upbitautotrade.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.List;
+import java.util.ArrayList;
 
 public class Market {
     @SerializedName("id")
@@ -12,16 +12,16 @@ public class Market {
     private String name;
 
     @SerializedName("order_types")
-    private String order_types;
+    private ArrayList<String> order_types;
 
     @SerializedName("order_sides")
-    private String order_sides;
+    private ArrayList<String> order_sides;
 
     @SerializedName("bid")
-    private List<Price> bid;
+    private Price bid;
 
     @SerializedName("ask")
-    private List<Price> ask;
+    private Price ask;
 
     @SerializedName("max_total")
     private String max_total;
@@ -37,19 +37,19 @@ public class Market {
         return name;
     }
 
-    public String getOrder_types() {
+    public ArrayList<String> getOrder_types() {
         return order_types;
     }
 
-    public String getOrder_sides() {
+    public ArrayList<String> getOrder_sides() {
         return order_sides;
     }
 
-    public List<Price> getBid() {
+    public Price getBid() {
         return bid;
     }
 
-    public List<Price> getAsk() {
+    public Price getAsk() {
         return ask;
     }
 

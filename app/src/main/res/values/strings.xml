@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">UpBitAutoTrade</string>
+    <string name="my_accounts_balance">내보유자산</string>
+    <string name="my_accounts_balance_total">총보유자산</string>
+    <string name="my_coin_list">보유 코인 리스트</string>
 </resources>
