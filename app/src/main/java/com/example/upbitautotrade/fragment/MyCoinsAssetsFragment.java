@@ -57,8 +57,8 @@ public class MyCoinsAssetsFragment extends Fragment {
     public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mViewModel = new ViewModelProvider(this).get(AccountsViewModel.class);
-        mViewModel.setKey(UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY),
-                UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY));
+//        mViewModel.setKey(UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY),
+//                UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY));
     }
 
     @Override

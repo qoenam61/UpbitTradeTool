@@ -24,7 +24,7 @@ public class UpBitViewModel extends AndroidViewModel {
     public static final String LOGIN = "LogIn";
 
     private final LiveData<Throwable> mErrorLiveData;
-    private final MutableLiveData<String> mSearchAccountsInfo;
+    private final MutableLiveData<Boolean> mSearchAccountsInfo;
     private final LiveData<List<Accounts>> mResultAccountsInfo;
 
     protected UpBitFetcher mUpBitFetcher;
@@ -55,7 +55,7 @@ public class UpBitViewModel extends AndroidViewModel {
             @Override
             public void onConnection(boolean isConnect) {
                 mIsSuccessfulConnection = isConnect;
-                Log.d(TAG, "getConnectionState -isConnect: "+isConnect);
+                Log.d(TAG, "[DEBUG] getConnectionState -isConnect: "+isConnect);
                 if (isConnect) {
                     UpBitLogInPreferences.setStoredKey(context.getApplicationContext(), UpBitLogInPreferences.ACCESS_KEY, mAccessKey);
                     UpBitLogInPreferences.setStoredKey(context.getApplicationContext(), UpBitLogInPreferences.SECRET_KEY, mSecretKey);
@@ -70,7 +70,7 @@ public class UpBitViewModel extends AndroidViewModel {
     }
 
     public void searchAccountsInfo(boolean isLogIn) {
-        mSearchAccountsInfo.setValue(isLogIn ? LOGIN : null);
+        mSearchAccountsInfo.setValue(isLogIn);
     }
 
     public boolean isSuccessfulConnection() {
@@ -91,8 +91,6 @@ public class UpBitViewModel extends AndroidViewModel {
         }
         mAccessKey = accessKey;
         mSecretKey = secretKey;
-
-        mUpBitFetcher.setAccessKey(accessKey);
-        mUpBitFetcher.setSecretKey(secretKey);
+        mUpBitFetcher.setKey(accessKey, secretKey);
     }
 }

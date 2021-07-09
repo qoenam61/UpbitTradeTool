@@ -77,21 +77,23 @@ public class UpBitFetcher {
         return mErrorLiveData;
     }
 
-    public LiveData<List<Accounts>> getAccounts(String isLogIn) {
-
+    public LiveData<List<Accounts>> getAccounts(boolean isLogIn) {
         MutableLiveData<List<Accounts>> result = new MutableLiveData<>();
+        if (isLogIn) {
+            mAccountsRetrofit.setParam(mAccessKey, mSecretKey, null);
+        }
         Call<List<Accounts>> call = mAccountsRetrofit.getUpBitApi().getAccounts();
         call.enqueue(new Callback<List<Accounts>>() {
             @Override
             public void onResponse(Call<List<Accounts>> call, Response<List<Accounts>> response) {
-//                Log.d(TAG, "[DEBUG] onResponse: "+response.body()+" call: "+call.toString());
+                Log.d(TAG, "[DEBUG] onResponse: "+response.body()+" call: "+call.toString());
                 if (response.body() != null) {
-                    if (isLogIn != null && isLogIn.equals(UpBitViewModel.LOGIN)) {
+                    if (isLogIn) {
                         mListener.onConnection(true);
                     }
                     result.setValue(response.body());
                 } else {
-                    if (isLogIn != null && isLogIn.equals(UpBitViewModel.LOGIN)) {
+                    if (isLogIn) {
                         mListener.onConnection(false);
                     }
                 }
@@ -101,7 +103,7 @@ public class UpBitFetcher {
             public void onFailure(Call<List<Accounts>> call, Throwable t) {
                 Log.d(TAG, "[DEBUG] onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                if (isLogIn != null && isLogIn.equals(UpBitViewModel.LOGIN)) {
+                if (isLogIn) {
                     mListener.onConnection(false);
                 }
             }
@@ -132,11 +134,8 @@ public class UpBitFetcher {
         return result;
     }
 
-    public void setAccessKey(String accessKey) {
+    public void setKey(String accessKey, String secretKey) {
         mAccessKey = accessKey;
-    }
-
-    public void setSecretKey(String secretKey) {
         mSecretKey = secretKey;
     }
 }

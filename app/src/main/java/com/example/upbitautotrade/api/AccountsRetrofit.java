@@ -1,6 +1,7 @@
 package com.example.upbitautotrade.api;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -21,12 +22,14 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class AccountsRetrofit extends DefaultRetrofit{
+    private static final String TAG = "AccountsRetrofit";
 
     @Override
     protected String getAuthToken() {
         if (mAccessKey == null || mSecretKey == null) {
             return null;
         }
+        Log.d(TAG, "[DEBUG] getAuthToken -mAccessKey: "+mAccessKey+" mSecretKey: "+mSecretKey);
         Algorithm algorithm = Algorithm.HMAC256(mSecretKey);
         String jwtToken = JWT.create()
                 .withClaim("access_key", mAccessKey)
@@ -39,6 +42,7 @@ public class AccountsRetrofit extends DefaultRetrofit{
 
     @Override
     public void setParam(String param1, String param2, String param3) {
-
+        mAccessKey = param1;
+        mSecretKey = param2;
     }
 }
