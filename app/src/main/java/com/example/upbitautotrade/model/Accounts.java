@@ -7,13 +7,13 @@ public class Accounts {
     private String currency;
 
     @SerializedName("balance")
-    private String balance;
+    private Number balance;
 
     @SerializedName("locked")
-    private String locked;
+    private Number locked;
 
     @SerializedName("avg_buy_price")
-    private String avgBuyPrice;
+    private Number avgBuyPrice;
 
     @SerializedName("avg_buy_price_modified")
     private boolean avgBuyPriceModified;
@@ -41,19 +41,23 @@ public class Accounts {
         return currency;
     }
 
-    public String getBalance() {
+    public Number getBalance() {
         return balance;
     }
 
-    public String getLocked() {
+    public Number getLocked() {
         return locked;
     }
 
-    public String getAvgBuyPrice() {
+    public Number getAvgBuyPrice() {
         return avgBuyPrice;
     }
 
     public boolean isAvgBuyPriceModified() {
         return avgBuyPriceModified;
+    }
+
+    public int getTotalAmount() {
+        return (int) ((getBalance().floatValue() + getLocked().floatValue()) * getAvgBuyPrice().floatValue());
     }
 }

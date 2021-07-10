@@ -2,6 +2,7 @@ package com.example.upbitautotrade.api;
 
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
+import com.example.upbitautotrade.model.Ticker;
 
 import java.util.List;
 
@@ -15,4 +16,7 @@ public interface UpBitApi {
 
     @GET("/v1/orders/chance")
     Call<Chance> getOrdersChance(@Query("market") String marketId);
+
+    @GET("/v1/ticker")
+    Call<Ticker> getTicker(@Query("market") String marketId);
 }

@@ -32,7 +32,6 @@ public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTr
         boolean isFragmentContainer = savedInstanceState == null;
         UpBitLogInPreferences.create(this);
 
-        Log.d(TAG, "onCreate: ");
         if (isFragmentContainer) {
             UpBitLoginFragment upbitLoginFragment = new UpBitLoginFragment();
             FragmentManager fm = getSupportFragmentManager();

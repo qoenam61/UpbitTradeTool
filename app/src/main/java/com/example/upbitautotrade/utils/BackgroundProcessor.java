@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
@@ -13,20 +12,16 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
 import java.util.Queue;
-import java.util.Set;
 
 public class BackgroundProcessor {
     private static final String TAG = "BackgroundProcessor";
 
     public static final int PERIODIC_UPDATE_ACCOUNTS_INFO = 1;
     public static final int PERIODIC_UPDATE_CHANCE_INFO = 2;
+    public static final int PERIODIC_UPDATE_TICKER_INFO = 3;
 
     private final String PERIODIC_UPDATE_KEY = "periodic_key";
 
@@ -45,12 +40,13 @@ public class BackgroundProcessor {
             super.handleMessage(msg);
             switch (msg.what) {
                 case PERIODIC_UPDATE_ACCOUNTS_INFO:
-                    Log.d(TAG, "[DEBUG] PERIODIC_UPDATE_ACCOUNTS_INFO");
                     mAccountsViewModel.searchAccountsInfo(false);
                     break;
                 case PERIODIC_UPDATE_CHANCE_INFO:
-                    Log.d(TAG, "[DEBUG] PERIODIC_UPDATE_CHANCE_INFO -PERIODIC_UPDATE_KEY: "+msg.getData().getString(PERIODIC_UPDATE_KEY));
                     mAccountsViewModel.searchChanceInfo(msg.getData().getString(PERIODIC_UPDATE_KEY));
+                    break;
+                case PERIODIC_UPDATE_TICKER_INFO:
+                    mAccountsViewModel.searchTickerInfo(msg.getData().getString(PERIODIC_UPDATE_KEY));
                     break;
                 default:
                     break;
@@ -77,19 +73,17 @@ public class BackgroundProcessor {
     }
 
     private void process() {
-        Queue<Integer> queue = mProcesses;
-        if (queue == null || queue.size() <= 0) {
+        if (mProcesses == null || mProcesses.size() <= 0) {
             return;
         }
-        mHandler.sendEmptyMessage(queue.poll());
+        mHandler.sendEmptyMessage(mProcesses.poll());
     }
 
     public void setRegisterProcess(int process) {
-        Queue<Integer> queue = mProcesses;
-        if (queue == null) {
+        if (mProcesses == null) {
             return;
         }
-        queue.offer(process);
+        mProcesses.offer(process);
     }
 
     private void update() {
@@ -99,7 +93,6 @@ public class BackgroundProcessor {
 
         }
         for (Item item:items) {
-            Log.d(TAG, "[DEBUG] update - key: "+item.mKey+" type: "+item.mType);
             Bundle bundle = new Bundle();
             bundle.putString(PERIODIC_UPDATE_KEY, item.mKey);
             Message message = new Message();
@@ -109,7 +102,7 @@ public class BackgroundProcessor {
         }
     }
 
-    public void setRegisterPeriodicUpdate(String key, int type) {
+    public void registerPeriodicUpdate(String key, int type) {
         ArrayList<Item> processes = mUpdateProcesses;
         if (processes == null) {
             return;
@@ -124,13 +117,23 @@ public class BackgroundProcessor {
             return;
 
         }
-
-        mHandler.removeMessages(type);
-
-//        mUpdateProcesses.removeIf(item -> {type -> (item.mType == type)});
         for (Iterator<Item> iterator = mUpdateProcesses.iterator(); iterator.hasNext(); ) {
             Item item = iterator.next();
             if (item.mType == type) {
+                iterator.remove();
+            }
+        }
+        mHandler.removeMessages(type);
+    }
+
+    public void removePeriodicUpdate(String key) {
+        if (mUpdateProcesses == null) {
+            return;
+
+        }
+        for (Iterator<Item> iterator = mUpdateProcesses.iterator(); iterator.hasNext(); ) {
+            Item item = iterator.next();
+            if (item.mKey == key) {
                 iterator.remove();
             }
         }

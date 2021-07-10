@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
@@ -53,6 +54,7 @@ public class UpBitFetcher {
         mListener = listener;
         mAccountsRetrofit = new AccountsRetrofit();
         mChanceRetrofit = new ChanceRetrofit();
+
         mErrorLiveData = new MutableLiveData<>();
     }
 
@@ -69,7 +71,6 @@ public class UpBitFetcher {
         call.enqueue(new Callback<List<Accounts>>() {
             @Override
             public void onResponse(Call<List<Accounts>> call, Response<List<Accounts>> response) {
-                Log.d(TAG, "[DEBUG] onResponse: "+response.body());
                 if (response.body() != null) {
                     if (isLogIn) {
                         mListener.onConnection(true);
@@ -84,7 +85,7 @@ public class UpBitFetcher {
 
             @Override
             public void onFailure(Call<List<Accounts>> call, Throwable t) {
-                Log.d(TAG, "[DEBUG] onFailure: "+t);
+                Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
                 if (isLogIn) {
                     mListener.onConnection(false);
@@ -94,14 +95,13 @@ public class UpBitFetcher {
         return result;
     }
 
-    public LiveData<Chance> getOrdersChance(String marketId) {
+    public LiveData<Ticker> getTicker(String marketId) {
         mChanceRetrofit.setParam(marketId, null, null);
-        MutableLiveData<Chance> result = new MutableLiveData<>();
-        Call<Chance> call = mChanceRetrofit.getUpBitApi().getOrdersChance(marketId);
-        Log.d(TAG, "[DEBUG] getOrdersChance: "+call.request());
-        call.enqueue(new Callback<Chance>() {
+        MutableLiveData<Ticker> result = new MutableLiveData<>();
+        Call<Ticker> call = mChanceRetrofit.getUpBitApi().getTicker(marketId);
+        call.enqueue(new Callback<Ticker>() {
             @Override
-            public void onResponse(Call<Chance> call, Response<Chance> response) {
+            public void onResponse(Call<Ticker> call, Response<Ticker> response) {
                 Log.d(TAG, "[DEBUG] onResponse: "+response.body());
                 if (response.body() != null) {
                     result.setValue(response.body());
@@ -109,8 +109,29 @@ public class UpBitFetcher {
             }
 
             @Override
+            public void onFailure(Call<Ticker> call, Throwable t) {
+                Log.w(TAG, "[DEBUG] onFailure: "+t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<Chance> getOrdersChance(String marketId) {
+        mChanceRetrofit.setParam(marketId, null, null);
+        MutableLiveData<Chance> result = new MutableLiveData<>();
+        Call<Chance> call = mChanceRetrofit.getUpBitApi().getOrdersChance(marketId);
+        call.enqueue(new Callback<Chance>() {
+            @Override
+            public void onResponse(Call<Chance> call, Response<Chance> response) {
+                if (response.body() != null) {
+                    result.setValue(response.body());
+                }
+            }
+
+            @Override
             public void onFailure(Call<Chance> call, Throwable t) {
-                Log.d(TAG, "[DEBUG] onFailure: "+t);
+                Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
             }
         });

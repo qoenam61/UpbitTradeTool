@@ -82,7 +82,7 @@
                 android:id="@+id/assets_balance_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1000000"
+                android:text="0"
                 android:textSize="@dimen/default_text_size"/>
         </LinearLayout>
         <View
@@ -101,10 +101,10 @@
                 android:text="@string/my_accounts_balance_total"
                 android:textSize="@dimen/default_text_size"/>
             <TextView
-                android:id="@+id/assets_total_balance_value"
+                android:id="@+id/assets_total_amount_value"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1000000"
+                android:text="0"
                 android:textSize="@dimen/default_text_size"/>
         </LinearLayout>
     </LinearLayout>

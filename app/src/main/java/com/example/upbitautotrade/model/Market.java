@@ -24,7 +24,7 @@ public class Market {
     private Price ask;
 
     @SerializedName("max_total")
-    private String max_total;
+    private Number max_total;
 
     @SerializedName("state")
     private String state;
@@ -53,7 +53,7 @@ public class Market {
         return ask;
     }
 
-    public String getMax_total() {
+    public Number getMax_total() {
         return max_total;
     }
 

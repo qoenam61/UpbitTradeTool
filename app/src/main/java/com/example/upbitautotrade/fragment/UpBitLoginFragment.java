@@ -37,11 +37,13 @@ public class UpBitLoginFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mUpBitViewModel.getAccountsInfo().observe(
-                getViewLifecycleOwner()
-                , accounts -> {
-                }
-        );
+        if (mUpBitViewModel != null) {
+            mUpBitViewModel.getAccountsInfo().observe(
+                    getViewLifecycleOwner()
+                    , accounts -> {
+                    }
+            );
+        }
     }
 
     @Override
@@ -60,24 +62,17 @@ public class UpBitLoginFragment extends Fragment {
             access.setText(accessKey);
             secret.setText(secretKey);
         }
-        mUpBitViewModel.setOnListener(new UpBitViewModel.LoginState() {
-            @Override
-            public void onLoginState(boolean isLogin) {
-                Log.d(TAG, "onLoginState: "+isLogin);
-/*
-                if (isLogin) {
-                    FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-                    MyCoinsAssetsFragment myCoinsAssetsFragment = new MyCoinsAssetsFragment();
-                    transaction.replace(R.id.fragmentContainer, myCoinsAssetsFragment);
-                    transaction.commit();
+        if (mUpBitViewModel != null) {
+            mUpBitViewModel.setOnListener(new UpBitViewModel.LoginState() {
+                @Override
+                public void onLoginState(boolean isLogin) {
+                    if (isLogin) {
+                        Intent intent = new Intent(getActivity(), TradePagerActivity.class);
+                        startActivity(intent);
+                    }
                 }
-*/
-                if (isLogin) {
-                    Intent intent = new Intent(getActivity(), TradePagerActivity.class);
-                    startActivity(intent);
-                }
-            }
-        });
+            });
+        }
         return mView;
     }
 
@@ -86,9 +81,10 @@ public class UpBitLoginFragment extends Fragment {
         EditText secret = mView.findViewById(R.id.edit_secret_key);
         String accessKey = access.getText().toString();
         String secretKey = secret.getText().toString();
-        mUpBitViewModel.setKey(accessKey, secretKey);
-        mUpBitViewModel.searchAccountsInfo(true);
-
+        if (mUpBitViewModel != null) {
+            mUpBitViewModel.setKey(accessKey, secretKey);
+            mUpBitViewModel.searchAccountsInfo(true);
+        }
         InputMethodManager mInputMethodManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         mInputMethodManager.hideSoftInputFromWindow(access.getWindowToken(), 0);
     }

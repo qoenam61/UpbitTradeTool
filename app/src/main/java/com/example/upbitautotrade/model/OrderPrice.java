@@ -7,13 +7,13 @@ public class OrderPrice {
     String currency;
 
     @SerializedName("balance")
-    String balance;
+    Number balance;
 
     @SerializedName("locked")
-    String locked;
+    Number locked;
 
     @SerializedName("avg_buy_price")
-    String avgBuyPrice;
+    Number avgBuyPrice;
 
     @SerializedName("avg_buy_price_modified")
     boolean avgBuyPriceModified;
@@ -25,15 +25,15 @@ public class OrderPrice {
         return currency;
     }
 
-    public String getBalance() {
+    public Number getBalance() {
         return balance;
     }
 
-    public String getLocked() {
+    public Number getLocked() {
         return locked;
     }
 
-    public String getAvgBuyPrice() {
+    public Number getAvgBuyPrice() {
         return avgBuyPrice;
     }
 

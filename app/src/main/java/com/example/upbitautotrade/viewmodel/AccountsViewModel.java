@@ -12,6 +12,7 @@ import com.example.upbitautotrade.api.UpBitFetcher;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
 import com.example.upbitautotrade.model.Market;
+import com.example.upbitautotrade.model.Ticker;
 
 import java.util.List;
 
@@ -20,6 +21,9 @@ public class AccountsViewModel extends UpBitViewModel{
 
     private final MutableLiveData<String> mSearchChanceInfo;
     private final LiveData<Chance> mResultChanceInfo;
+
+    private final MutableLiveData<String> mSearchTickerInfo;
+    private final LiveData<Ticker> mResultTickerInfo;
 
 /*    private final LiveData<List<Market>> mResultChanceMarketInfo;
     private final LiveData<List<Accounts>> mResultChanceBidInfo;
@@ -31,6 +35,13 @@ public class AccountsViewModel extends UpBitViewModel{
         mResultChanceInfo = Transformations.switchMap(
                 mSearchChanceInfo, input -> mUpBitFetcher.getOrdersChance(input)
         );
+
+        mSearchTickerInfo = new MutableLiveData<>();
+        mResultTickerInfo = Transformations.switchMap(
+                mSearchChanceInfo, input -> mUpBitFetcher.getTicker(input)
+        );
+
+
 
 /*        mResultChanceMarketInfo = Transformations.map(
                 mResultChanceInfo,
@@ -55,19 +66,17 @@ public class AccountsViewModel extends UpBitViewModel{
         return mResultChanceInfo;
     }
 
-/*    public LiveData<List<Market>> getResultChanceMarketInfo() {
-        return mResultChanceMarketInfo;
-    }
-
-    public LiveData<List<Accounts>> getResultChanceBidInfo() {
-        return mResultChanceBidInfo;
-    }
-
-    public LiveData<List<Accounts>> getResultChanceAskInfo() {
-        return mResultChanceAskInfo;
-    }*/
-
     public void searchChanceInfo(String markerId) {
         mSearchChanceInfo.setValue(markerId);
     }
+
+    public LiveData<Ticker> getResultTickerInfo() {
+        return mResultTickerInfo;
+    }
+
+    public void searchTickerInfo(String markerId) {
+        mSearchTickerInfo.setValue(markerId);
+    }
+
+
 }
