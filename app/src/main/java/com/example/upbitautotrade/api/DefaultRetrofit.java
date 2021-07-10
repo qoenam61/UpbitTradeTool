@@ -2,15 +2,12 @@ package com.example.upbitautotrade.api;
 
 import android.util.Log;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
-import java.util.UUID;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -20,7 +17,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public abstract class DefaultRetrofit {
-    private static final String TAG = "DefaultRetrofit";
+    private String TAG = "DefaultRetrofit";
 
     protected String mAccessKey;
     protected String mSecretKey;
@@ -51,12 +48,16 @@ public abstract class DefaultRetrofit {
         @Override
         public okhttp3.Response intercept(Chain chain) throws IOException {
             Request origin = chain.request();
-            Request request = origin.newBuilder()
-                    .header("Content-Type", "application/json")
-                    .addHeader("Authorization", getAuthToken())
-                    .build();
+            Request request = changedRequest(origin);
             return chain.proceed(request);
         }
+    }
+
+    public Request changedRequest(Request origin) {
+        return origin.newBuilder()
+                .header("Content-Type", "application/json")
+                .addHeader("Authorization", getAuthToken())
+                .build();
     }
 
     abstract String getAuthToken();

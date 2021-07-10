@@ -20,67 +20,67 @@ public class Ticker {
     String	tradeTimeKst;
 
     @SerializedName("trade_timestamp")
-    Integer	tradeTimestamp;
+    long	tradeTimestamp;
 
     @SerializedName("opening_price")
-    Integer	openingPrice;
+    Double	openingPrice;
 
     @SerializedName("high_price")
-    Integer	highPrice;
+    Double	highPrice;
 
     @SerializedName("low_price")
-    Integer	lowPrice;
+    Double	lowPrice;
 
     @SerializedName("trade_price")
-    Integer	tradePrice;
+    Double	tradePrice;
 
     @SerializedName("prev_closing_price")
-    Integer	prevClosingPrice;
+    Double	prevClosingPrice;
 
     @SerializedName("change")
     String	change;
 
     @SerializedName("change_price")
-    Integer	changePrice;
+    Double	changePrice;
 
     @SerializedName("changeRate")
-    Number	changeRate;
+    Double	changeRate;
 
     @SerializedName("signed_change_price")
-    Integer	signedChangePrice;
+    Double	signedChangePrice;
 
     @SerializedName("signed_change_rate")
-    Number	signedChangeRate;
+    Double	signedChangeRate;
 
     @SerializedName("trade_volume")
-    Number	tradeVolume;
+    Double	tradeVolume;
 
     @SerializedName("acc_trade_price")
-    Number	accTradePrice;
+    Double	accTradePrice;
 
     @SerializedName("acc_trade_price_24h")
-    Number	accTradePrice24h;
+    Double	accTradePrice24h;
 
     @SerializedName("acc_trade_volume")
-    Number	accTradeVolume;
+    Double	accTradeVolume;
 
     @SerializedName("acc_trade_volume_24h")
-    Number	accTradeVolume24h;
+    Double	accTradeVolume24h;
 
     @SerializedName("highest_52_week_price")
-    Integer	highest52WeekPrice;
+    Double	highest52WeekPrice;
 
     @SerializedName("highest_52_week_date")
     String	highest52WeekDate;
 
     @SerializedName("lowest_52_week_price")
-    Integer	lowest52WeekPrice;
+    Double	lowest52WeekPrice;
 
     @SerializedName("lowest_52_week_date")
     String	lowest52WeekDate;
 
     @SerializedName("timestamp")
-    Integer	timestamp;
+    long timestamp;
 
     public String getMarket() {
         return market;
@@ -102,27 +102,27 @@ public class Ticker {
         return tradeTimeKst;
     }
 
-    public Integer getTradeTimestamp() {
+    public long getTradeTimestamp() {
         return tradeTimestamp;
     }
 
-    public Integer getOpeningPrice() {
+    public Double getOpeningPrice() {
         return openingPrice;
     }
 
-    public Integer getHighPrice() {
+    public Double getHighPrice() {
         return highPrice;
     }
 
-    public Integer getLowPrice() {
+    public Double getLowPrice() {
         return lowPrice;
     }
 
-    public Integer getTradePrice() {
+    public Double getTradePrice() {
         return tradePrice;
     }
 
-    public Integer getPrevClosingPrice() {
+    public Double getPrevClosingPrice() {
         return prevClosingPrice;
     }
 
@@ -130,7 +130,7 @@ public class Ticker {
         return change;
     }
 
-    public Integer getChangePrice() {
+    public Double getChangePrice() {
         return changePrice;
     }
 
@@ -138,7 +138,7 @@ public class Ticker {
         return changeRate;
     }
 
-    public Integer getSignedChangePrice() {
+    public Double getSignedChangePrice() {
         return signedChangePrice;
     }
 
@@ -166,7 +166,7 @@ public class Ticker {
         return accTradeVolume24h;
     }
 
-    public Integer getHighest52WeekPrice() {
+    public Double getHighest52WeekPrice() {
         return highest52WeekPrice;
     }
 
@@ -174,7 +174,7 @@ public class Ticker {
         return highest52WeekDate;
     }
 
-    public Integer getLowest52WeekPrice() {
+    public Double getLowest52WeekPrice() {
         return lowest52WeekPrice;
     }
 
@@ -182,7 +182,7 @@ public class Ticker {
         return lowest52WeekDate;
     }
 
-    public Integer getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 }

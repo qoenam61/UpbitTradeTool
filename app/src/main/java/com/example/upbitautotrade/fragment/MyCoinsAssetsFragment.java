@@ -33,6 +33,7 @@ import java.util.Set;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_ACCOUNTS_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_CHANCE_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO;
 
 public class MyCoinsAssetsFragment extends Fragment {
     private static final String TAG = "MyCoinsAssetsFragment";
@@ -41,14 +42,14 @@ public class MyCoinsAssetsFragment extends Fragment {
     private List<Accounts> mAccountsInfo;
     private View mView;
     private Chance mChanceInfo;
-    private Ticker mTickerInfo;
-    private HashSet<KeySet> mKeySets;
+    private List<Ticker> mTickerInfo;
+    private HashSet<String> mKeySets;
     private CoinListAdapter mCoinListAdapter;
 
     private AccountsViewModel mViewModel;
 
     public MyCoinsAssetsFragment() {
-        mKeySets = new HashSet<>();
+//        mKeySets = new HashSet<>();
     }
 
     @Override
@@ -130,44 +131,57 @@ public class MyCoinsAssetsFragment extends Fragment {
         mActivity.getProcessor().registerPeriodicUpdate(null, PERIODIC_UPDATE_ACCOUNTS_INFO);
     }
 
-    private void updateKeySets(List<Accounts> accounts, int type) {
-        if (accounts != null) {
-            HashSet<KeySet> newKeySet = new HashSet<>();
-            Iterator<Accounts> iterator = accounts.iterator();
-            while (iterator.hasNext()) {
-                Accounts account = iterator.next();
-                String key = account.getCurrency();
-                Log.d(TAG, "[DEBUG] updateKeySets -key: "+key);
-                newKeySet.add(new KeySet(key, type));
-            }
-
-            HashSet<KeySet> sumKeySet = new HashSet<>();
-
-            sumKeySet.addAll(newKeySet);
-            sumKeySet.addAll(mKeySets);
-            sumKeySet.retainAll(newKeySet);
-            sumKeySet.retainAll(mKeySets);
-            if (sumKeySet != null && !sumKeySet.isEmpty()) {
-                Log.d(TAG, "[DEBUG] updateKeySets: not Empty");
-                registerPeriodicUpdate(newKeySet);
+    private void updateTickerInfo() {
+        Iterator<String> iterator = mKeySets.iterator();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            if (!key.equals("KRW-KRW")) {
+                mActivity.getProcessor().registerPeriodicUpdate(key, PERIODIC_UPDATE_TICKER_INFO);
             }
         }
     }
 
-    private void registerPeriodicUpdate(HashSet<KeySet> keySet) {
-        Iterator<KeySet> removeIterator = mKeySets.iterator();
+    private void updateKeySets(List<Accounts> accounts, int type) {
+        if (accounts != null) {
+            HashSet<String> newKeySet = new HashSet<>();
+            Iterator<Accounts> iterator = accounts.iterator();
+            while (iterator.hasNext()) {
+                Accounts account = iterator.next();
+                String key = account.getCurrency();
+                newKeySet.add("KRW-" + key);
+            }
+
+            if (mKeySets == null || mKeySets.isEmpty()) {
+                mKeySets = newKeySet;
+                updateTickerInfo();
+            }
+
+            HashSet<String> sumKeySet = new HashSet<>();
+            sumKeySet.addAll(newKeySet);
+            sumKeySet.addAll(mKeySets);
+            sumKeySet.removeAll(newKeySet);
+            sumKeySet.removeAll(mKeySets);
+
+            if (sumKeySet != null && !sumKeySet.isEmpty()) {
+                registerPeriodicUpdate(newKeySet, type);
+            }
+        }
+    }
+
+    private void registerPeriodicUpdate(HashSet<String> keySet, int type) {
+        Iterator<String> removeIterator = mKeySets.iterator();
         while (removeIterator.hasNext()) {
-            String key = removeIterator.next().getKey();
+            String key = removeIterator.next();
             mActivity.getProcessor().removePeriodicUpdate(key);
         }
         mKeySets = keySet;
 
-        Iterator<KeySet> regIterator = keySet.iterator();
+        Iterator<String> regIterator = keySet.iterator();
         while (regIterator.hasNext()) {
-            String key = regIterator.next().getKey();
-            int type = regIterator.next().type;
+            String key = regIterator.next();
             mActivity.getProcessor().registerPeriodicUpdate(key, type);
         }
+        updateTickerInfo();
     }
 
     private void updateAccountInfo() {
@@ -180,8 +194,6 @@ public class MyCoinsAssetsFragment extends Fragment {
         totalAmountValue.setText(format.format(getTotalAmount()));
     }
 
-
-
     private int getCurrentBalance() {
         List<Accounts> accounts = mAccountsInfo;
         int balance = 0;
@@ -190,7 +202,6 @@ public class MyCoinsAssetsFragment extends Fragment {
                 if (account.getCurrency().equals("KRW")) {
                     balance += account.getBalance().intValue();
                 }
-                Log.d(TAG, "[DEBUG] getCurrentBalance - currency: " + account.getCurrency() + " balance: " + account.getBalance() + " locked: "+account.getLocked());
             }
         }
         return balance;
@@ -202,7 +213,6 @@ public class MyCoinsAssetsFragment extends Fragment {
         if (accounts != null) {
             for (Accounts account : accounts) {
                 balance += account.getTotalAmount();
-                Log.d(TAG, "[DEBUG] getCurrentBalance - getTotalAmount: " + account.getTotalAmount());
             }
         }
         return balance;
@@ -261,7 +271,6 @@ public class MyCoinsAssetsFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(CoinHolder holder, int position) {
-            Log.d(TAG, "[DEBUG] onBindViewHolder: "+position);
             holder.mCoinName.setText(mCoinAccounts.get(position).getCurrency());
             holder.mCoinCurrency.setText(mCoinAccounts.get(position).getCurrency());
             holder.mBalance.setText(mFormat.format(mCoinAccounts.get(position).getTotalBalance()));

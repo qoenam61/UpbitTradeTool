@@ -22,7 +22,7 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 public class AccountsRetrofit extends DefaultRetrofit{
-    private static final String TAG = "AccountsRetrofit";
+    private String TAG = "AccountsRetrofit";
 
     @Override
     protected String getAuthToken() {

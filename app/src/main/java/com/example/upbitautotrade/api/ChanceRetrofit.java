@@ -15,7 +15,7 @@ import java.util.Map;
 import java.util.UUID;
 
 public class ChanceRetrofit extends DefaultRetrofit{
-    private static final String TAG = "ChanceRetrofit";
+    private String TAG = "ChanceRetrofit";
 
     private ArrayList<String> mQueryElements;
 

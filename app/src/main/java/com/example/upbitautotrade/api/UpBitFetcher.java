@@ -48,12 +48,14 @@ public class UpBitFetcher {
 
     private final AccountsRetrofit mAccountsRetrofit;
     private final ChanceRetrofit mChanceRetrofit;
+    private final TickerRetrofit mTickerRetrofit;
     private final MutableLiveData<Throwable> mErrorLiveData;
 
     public UpBitFetcher(ConnectionState listener) {
         mListener = listener;
         mAccountsRetrofit = new AccountsRetrofit();
         mChanceRetrofit = new ChanceRetrofit();
+        mTickerRetrofit = new TickerRetrofit();
 
         mErrorLiveData = new MutableLiveData<>();
     }
@@ -95,22 +97,21 @@ public class UpBitFetcher {
         return result;
     }
 
-    public LiveData<Ticker> getTicker(String marketId) {
+    public LiveData<List<Ticker>> getTicker(String marketId) {
         mChanceRetrofit.setParam(marketId, null, null);
-        MutableLiveData<Ticker> result = new MutableLiveData<>();
-        Call<Ticker> call = mChanceRetrofit.getUpBitApi().getTicker(marketId);
-        call.enqueue(new Callback<Ticker>() {
+        MutableLiveData<List<Ticker>> result = new MutableLiveData<>();
+        Call<List<Ticker>> call = mTickerRetrofit.getUpBitApi().getTicker(marketId);
+        call.enqueue(new Callback<List<Ticker>>() {
             @Override
-            public void onResponse(Call<Ticker> call, Response<Ticker> response) {
-                Log.d(TAG, "[DEBUG] onResponse: "+response.body());
+            public void onResponse(Call<List<Ticker>> call, Response<List<Ticker>> response) {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
             }
 
             @Override
-            public void onFailure(Call<Ticker> call, Throwable t) {
-                Log.w(TAG, "[DEBUG] onFailure: "+t);
+            public void onFailure(Call<List<Ticker>> call, Throwable t) {
+                Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
             }
         });

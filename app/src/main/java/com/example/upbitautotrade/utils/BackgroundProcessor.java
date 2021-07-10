@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModelProvider;
@@ -31,7 +32,7 @@ public class BackgroundProcessor {
 
 
     private long mPeriodicTimer = 1000;
-    private final Queue<Integer> mProcesses;
+    private final Queue<Item> mProcesses;
     private final ArrayList<Item> mUpdateProcesses;
 
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
@@ -76,40 +77,45 @@ public class BackgroundProcessor {
         if (mProcesses == null || mProcesses.size() <= 0) {
             return;
         }
-        mHandler.sendEmptyMessage(mProcesses.poll());
+        Item item = mProcesses.poll();
+        Bundle bundle = new Bundle();
+        bundle.putString(PERIODIC_UPDATE_KEY, item.mKey);
+        Message message = new Message();
+        message.what = item.mType;
+        message.setData(bundle);
+        mHandler.sendMessage(message);
     }
 
-    public void setRegisterProcess(int process) {
+    public void setRegisterProcess(Item item) {
         if (mProcesses == null) {
             return;
         }
-        mProcesses.offer(process);
+        mProcesses.offer(item);
     }
 
     private void update() {
-        ArrayList<Item> items = mUpdateProcesses;
-        if (items == null) {
+        ArrayList<Item> processes = mUpdateProcesses;
+        if (processes == null) {
             return;
 
         }
-        for (Item item:items) {
+        for (Item process:processes) {
             Bundle bundle = new Bundle();
-            bundle.putString(PERIODIC_UPDATE_KEY, item.mKey);
+            bundle.putString(PERIODIC_UPDATE_KEY, process.mKey);
             Message message = new Message();
-            message.what = item.mType;
+            message.what = process.mType;
             message.setData(bundle);
             mHandler.sendMessage(message);
         }
     }
 
     public void registerPeriodicUpdate(String key, int type) {
-        ArrayList<Item> processes = mUpdateProcesses;
-        if (processes == null) {
+        if (mUpdateProcesses == null) {
             return;
 
         }
         Item item = new Item(key, type);
-        processes.add(item);
+        mUpdateProcesses.add(item);
     }
 
     public void removePeriodicUpdate(int type) {
@@ -153,15 +159,5 @@ public class BackgroundProcessor {
 
     public AccountsViewModel getAccountsViewModel() {
         return mAccountsViewModel;
-    }
-
-    private class Item {
-        String mKey;
-        int mType;
-
-        public Item(String key, int type) {
-            mKey = key;
-            mType = type;
-        }
     }
 }
