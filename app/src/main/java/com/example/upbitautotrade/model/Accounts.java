@@ -57,7 +57,11 @@ public class Accounts {
         return avgBuyPriceModified;
     }
 
+    public Number getTotalBalance() {
+        return getBalance().floatValue() + getLocked().floatValue();
+    }
+
     public int getTotalAmount() {
-        return (int) ((getBalance().floatValue() + getLocked().floatValue()) * getAvgBuyPrice().floatValue());
+        return (int) (getTotalBalance().floatValue() * getAvgBuyPrice().floatValue());
     }
 }
