@@ -1,18 +1,31 @@
 package com.example.upbitautotrade.activity;
 
+import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
+import androidx.lifecycle.ViewModel;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.upbitautotrade.R;
+import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.fragment.MyCoinsAssetsFragment;
 import com.example.upbitautotrade.fragment.TradePageFragment;
+import com.example.upbitautotrade.utils.BackgroundProcessor;
+import com.example.upbitautotrade.viewmodel.AccountsViewModel;
+import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 
-public class TradePagerActivity extends FragmentActivity {
+public class TradePagerActivity extends FragmentActivity implements UpBitTradeActivity {
+    private final String TAG = "TradePagerActivity";
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
@@ -23,16 +36,21 @@ public class TradePagerActivity extends FragmentActivity {
      * and next wizard steps.
      */
     private ViewPager2 mViewPager;
+    private BackgroundProcessor mBackgroundProcessor;
 
     /**
      * The pager adapter, which provides the pages to the view pager widget.
      */
     private FragmentStateAdapter pagerAdapter;
 
+    public TradePagerActivity() {
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trade_pager);
+        mBackgroundProcessor = new BackgroundProcessor(this);
 
         // Instantiate a ViewPager2 and a PagerAdapter.
         mViewPager = findViewById(R.id.pager);
@@ -40,6 +58,7 @@ public class TradePagerActivity extends FragmentActivity {
         mViewPager.setAdapter(pagerAdapter);
         mViewPager = findViewById(R.id.pager);
         mViewPager.setPageTransformer(new ZoomOutPageTransformer());
+        mBackgroundProcessor.startBackgroundProcessor();
     }
 
     @Override
@@ -52,6 +71,37 @@ public class TradePagerActivity extends FragmentActivity {
             // Otherwise, select the previous step.
             mViewPager.setCurrentItem(mViewPager.getCurrentItem() - 1);
         }
+        mBackgroundProcessor.stopBackgroundProcessor();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mBackgroundProcessor.stopBackgroundProcessor();
+    }
+
+    @Override
+    public Activity getActivity() {
+        return getActivity();
+    }
+
+    @Override
+    public UpBitViewModel getViewModel() {
+        return null;
+    }
+
+    @Override
+    public AccountsViewModel getAccountsViewModel() {
+        BackgroundProcessor processor = mBackgroundProcessor;
+        if (processor == null) {
+            return null;
+        }
+        return processor.getAccountsViewModel();
+    }
+
+    @Override
+    public BackgroundProcessor getProcessor() {
+        return mBackgroundProcessor;
     }
 
     /**
@@ -122,6 +172,5 @@ public class TradePagerActivity extends FragmentActivity {
             }
         }
     }
-
 
 }

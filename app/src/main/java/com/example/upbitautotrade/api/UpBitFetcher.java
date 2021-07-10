@@ -69,6 +69,7 @@ public class UpBitFetcher {
         call.enqueue(new Callback<List<Accounts>>() {
             @Override
             public void onResponse(Call<List<Accounts>> call, Response<List<Accounts>> response) {
+                Log.d(TAG, "[DEBUG] onResponse: "+response.body());
                 if (response.body() != null) {
                     if (isLogIn) {
                         mListener.onConnection(true);
@@ -83,6 +84,7 @@ public class UpBitFetcher {
 
             @Override
             public void onFailure(Call<List<Accounts>> call, Throwable t) {
+                Log.d(TAG, "[DEBUG] onFailure: "+t);
                 mErrorLiveData.setValue(t);
                 if (isLogIn) {
                     mListener.onConnection(false);
@@ -102,7 +104,6 @@ public class UpBitFetcher {
             public void onResponse(Call<Chance> call, Response<Chance> response) {
                 Log.d(TAG, "[DEBUG] onResponse: "+response.body());
                 if (response.body() != null) {
-                    Log.d(TAG, "[DEBUG] onResponse: setValue");
                     result.setValue(response.body());
                 }
             }

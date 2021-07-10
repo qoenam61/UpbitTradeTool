@@ -10,12 +10,14 @@ import android.util.Log;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
+import com.example.upbitautotrade.utils.BackgroundProcessor;
+import com.example.upbitautotrade.viewmodel.AccountsViewModel;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.fragment.UpBitLoginFragment;
 
 public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTradeActivity {
-    private static final String TAG = "PhotoGalleryActivity";
+    private static final String TAG = "UpBitTradeMainActivity";
 
     public static final int REQUEST_GET_LOGIN_INFO = 0;
     public static final int REQUEST_GET_ACCOUNTS_INFO = 1;
@@ -42,31 +44,6 @@ public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTr
     @Override
     protected void onStart() {
         super.onStart();
-/*        mUpBitViewModel.getAccountsInfo().observe(
-                this
-                , accounts -> {
-                    Log.d(TAG, "[DEBUG] main onStart: ");
-                    mAccountsInfo = accounts;
-                }
-        );
-
-        mUpBitViewModel.getResultChanceMarketInfo().observe(
-                this, markets -> {
-                    mMarketInfo = markets;
-                }
-        );
-
-        mUpBitViewModel.getResultChanceBidInfo().observe(
-                this, accounts -> {
-                    mBidInfo = accounts;
-                }
-        );
-
-        mUpBitViewModel.getResultChanceAskInfo().observe(
-                this, accounts -> {
-                    mAskInfo = accounts;
-                }
-        );*/
     }
 
     @Override
@@ -77,5 +54,15 @@ public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTr
     @Override
     public UpBitViewModel getViewModel() {
         return mUpBitViewModel;
+    }
+
+    @Override
+    public AccountsViewModel getAccountsViewModel() {
+        return null;
+    }
+
+    @Override
+    public BackgroundProcessor getProcessor() {
+        return null;
     }
 }
