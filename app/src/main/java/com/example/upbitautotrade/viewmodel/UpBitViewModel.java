@@ -14,6 +14,7 @@ import com.example.upbitautotrade.api.UpBitFetcher;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
 import com.example.upbitautotrade.model.Market;
+import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.Price;
 
 import java.util.List;
@@ -26,6 +27,8 @@ public class UpBitViewModel extends AndroidViewModel {
     private final LiveData<Throwable> mErrorLiveData;
     private final MutableLiveData<Boolean> mSearchAccountsInfo;
     private final LiveData<List<Accounts>> mResultAccountsInfo;
+    private final MutableLiveData<Boolean> mSearchMarketsInfo;
+    private final LiveData<List<MarketInfo>> mResultMarketsInfo;
 
     protected UpBitFetcher mUpBitFetcher;
     private boolean mIsSuccessfulConnection;
@@ -47,6 +50,11 @@ public class UpBitViewModel extends AndroidViewModel {
         mSearchAccountsInfo = new MutableLiveData<>();
         mResultAccountsInfo = Transformations.switchMap(
                 mSearchAccountsInfo, input -> mUpBitFetcher.getAccounts(input)
+        );
+
+        mSearchMarketsInfo = new MutableLiveData<>();
+        mResultMarketsInfo = Transformations.switchMap(
+                mSearchMarketsInfo, input -> mUpBitFetcher.getMarketInfo(input)
         );
     }
 
@@ -72,12 +80,16 @@ public class UpBitViewModel extends AndroidViewModel {
         mSearchAccountsInfo.setValue(isLogIn);
     }
 
-    public boolean isSuccessfulConnection() {
-        return mIsSuccessfulConnection;
-    }
-
     public LiveData<List<Accounts>> getAccountsInfo() {
         return mResultAccountsInfo;
+    }
+
+    public void searchMarketsInfo(boolean isLogIn) {
+        mSearchMarketsInfo.setValue(isLogIn);
+    }
+
+    public LiveData<List<MarketInfo>> getMarketsInfo() {
+        return mResultMarketsInfo;
     }
 
     public LiveData<Throwable> getErrorLiveData() {

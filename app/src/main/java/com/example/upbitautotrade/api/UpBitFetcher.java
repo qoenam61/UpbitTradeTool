@@ -7,6 +7,7 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.model.Accounts;
@@ -98,7 +99,6 @@ public class UpBitFetcher {
     }
 
     public LiveData<List<Ticker>> getTicker(String marketId) {
-        mChanceRetrofit.setParam(marketId, null, null);
         MutableLiveData<List<Ticker>> result = new MutableLiveData<>();
         Call<List<Ticker>> call = mTickerRetrofit.getUpBitApi().getTicker(marketId);
         call.enqueue(new Callback<List<Ticker>>() {
@@ -132,6 +132,26 @@ public class UpBitFetcher {
 
             @Override
             public void onFailure(Call<Chance> call, Throwable t) {
+                Log.w(TAG, "onFailure: "+t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<List<MarketInfo>> getMarketInfo(boolean isDetails) {
+        MutableLiveData<List<MarketInfo>> result = new MutableLiveData<>();
+        Call<List<MarketInfo>> call = mTickerRetrofit.getUpBitApi().getMarketInfo(isDetails);
+        call.enqueue(new Callback<List<MarketInfo>>() {
+            @Override
+            public void onResponse(Call<List<MarketInfo>> call, Response<List<MarketInfo>> response) {
+                if (response.body() != null) {
+                    result.setValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<MarketInfo>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
             }

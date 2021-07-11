@@ -1,6 +1,7 @@
 package com.example.upbitautotrade.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +15,9 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.model.Chance;
+import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.Ticker;
+import com.example.upbitautotrade.utils.BackgroundProcessor;
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
@@ -37,6 +40,7 @@ public class MyCoinsAssetsFragment extends Fragment {
 
     private View mView;
     private UpBitTradeActivity mActivity;
+    private HashMap<String, MarketInfo> mMarketsMapInfo;
     private HashMap<String, Accounts> mAccountsMapInfo;
     private Chance mChanceInfo;
     private HashMap<String, Ticker> mTickerMapInfo;
@@ -47,6 +51,7 @@ public class MyCoinsAssetsFragment extends Fragment {
     private AccountsViewModel mViewModel;
 
     public MyCoinsAssetsFragment() {
+        mMarketsMapInfo = new HashMap<>();
         mAccountsMapInfo = new HashMap<>();
         mTickerMapInfo = new HashMap<>();
         mTickerTempMapInfo = new HashMap<>();
@@ -74,7 +79,19 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        mActivity.getProcessor().registerProcess(null, BackgroundProcessor.UPDATE_MARKETS_INFO);
         if (mViewModel != null) {
+            mViewModel.getMarketsInfo().observe(
+                    getViewLifecycleOwner(),
+                    marketInfos -> {
+                        Iterator<MarketInfo> iterator = marketInfos.iterator();
+                        while (iterator.hasNext()) {
+                            MarketInfo marketInfo = iterator.next();
+                            mMarketsMapInfo.put(marketInfo.getMarket(), marketInfo);
+                        }
+                    }
+            );
+
             mViewModel.getAccountsInfo().observe(
                     getViewLifecycleOwner()
                     , accounts -> {
@@ -265,7 +282,7 @@ public class MyCoinsAssetsFragment extends Fragment {
         @Override
         public void onBindViewHolder(CoinHolder holder, int position) {
             Accounts account = mCoinAccounts.get(position);
-            holder.mCoinName.setText(account.getCurrency());
+            holder.mCoinName.setText(getCoinName(account));
             holder.mBalance.setText(mFormat.format(account.getTotalBalance()));
             holder.mCoinCurrency.setText(account.getCurrency());
             holder.mCurrentAmount.setText(mNonZeroFormat.format(getCurrentAmount(account)));
@@ -278,6 +295,13 @@ public class MyCoinsAssetsFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mCoinAccounts != null ? mCoinAccounts.size() : 0;
+        }
+
+        private String getCoinName(Accounts account) {
+            if (account == null) {
+                return null;
+            }
+            return mMarketsMapInfo.get(MARKET_NAME + "-" + account.getCurrency()).getKorean_name();
         }
 
         private float getBuyBalance(Accounts account) {

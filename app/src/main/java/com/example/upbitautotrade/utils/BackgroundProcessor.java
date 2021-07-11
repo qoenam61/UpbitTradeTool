@@ -24,19 +24,22 @@ public class BackgroundProcessor {
     public static final int PERIODIC_UPDATE_ACCOUNTS_INFO = 1;
     public static final int PERIODIC_UPDATE_CHANCE_INFO = 2;
     public static final int PERIODIC_UPDATE_TICKER_INFO = 3;
+    public static final int UPDATE_MARKETS_INFO = 4;
 
     private final String PERIODIC_UPDATE_KEY = "periodic_key";
+    private final String PROCESS_UPDATE_KEY = "process_key";
 
     private final Thread mProcessor;
 
     private AccountsViewModel mAccountsViewModel;
 
 
-    private long mPeriodicTimer = 100;
+    private long mPeriodicTimer = 80;
     private final Queue<Item> mProcesses;
     private final ArrayList<Item> mUpdateProcesses;
 
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
+
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
@@ -50,6 +53,8 @@ public class BackgroundProcessor {
                 case PERIODIC_UPDATE_TICKER_INFO:
                     mAccountsViewModel.searchTickerInfo(msg.getData().getString(PERIODIC_UPDATE_KEY + msg.what));
                     break;
+                case UPDATE_MARKETS_INFO:
+                    mAccountsViewModel.searchMarketsInfo(true);
                 default:
                     break;
             }
@@ -73,20 +78,25 @@ public class BackgroundProcessor {
         if (mProcesses == null || mProcesses.isEmpty()) {
             return;
         }
-        Item item = mProcesses.poll();
-        Bundle bundle = new Bundle();
-        bundle.putString(PERIODIC_UPDATE_KEY, item.key);
-        Message message = new Message();
-        message.what = item.type;
-        message.setData(bundle);
-        mHandler.sendMessage(message);
+        try {
+            Item item = mProcesses.poll();
+            Bundle bundle = new Bundle();
+            bundle.putString(PROCESS_UPDATE_KEY + item.type, item.key);
+            Message message = new Message();
+            message.what = item.type;
+            message.setData(bundle);
+            mHandler.sendMessage(message);
+            Thread.sleep(mPeriodicTimer);
+        } catch (InterruptedException e) {
+            Log.w(TAG, "process: Error InterruptedException");
+        }
     }
 
-    public void setRegisterProcess(Item item) {
+    public void registerProcess(String key, int type) {
         if (mProcesses == null) {
             return;
         }
-        mProcesses.offer(item);
+        mProcesses.offer(new Item(key, type));
     }
 
     private void update() {
@@ -112,7 +122,6 @@ public class BackgroundProcessor {
         } catch(InterruptedException e) {
             Log.w(TAG, "update: Error InterruptedException");
         }
-
     }
 
     public void registerPeriodicUpdate(String key, int type) {
@@ -120,8 +129,7 @@ public class BackgroundProcessor {
             return;
 
         }
-        Item item = new Item(key, type);
-        mUpdateProcesses.add(item);
+        mUpdateProcesses.add(new Item(key, type));
     }
 
     public void removePeriodicUpdate(int type) {
