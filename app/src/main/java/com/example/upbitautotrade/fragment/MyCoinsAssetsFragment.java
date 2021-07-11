@@ -1,7 +1,6 @@
 package com.example.upbitautotrade.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.upbitautotrade.R;
-import com.example.upbitautotrade.model.Chance;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.utils.BackgroundProcessor;
@@ -40,10 +38,9 @@ public class MyCoinsAssetsFragment extends Fragment {
 
     private View mView;
     private UpBitTradeActivity mActivity;
-    private HashMap<String, MarketInfo> mMarketsMapInfo;
-    private HashMap<String, Accounts> mAccountsMapInfo;
-    private Chance mChanceInfo;
-    private HashMap<String, Ticker> mTickerMapInfo;
+    private final HashMap<String, MarketInfo> mMarketsMapInfo;
+    private final HashMap<String, Accounts> mAccountsMapInfo;
+    private final HashMap<String, Ticker> mTickerMapInfo;
     private final HashMap<String, Ticker> mTickerTempMapInfo;
     private Set<String> mKeySet;
     private CoinListAdapter mCoinListAdapter;
@@ -79,12 +76,12 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mActivity.getProcessor().registerProcess(null, BackgroundProcessor.UPDATE_MARKETS_INFO);
+        mActivity.getProcessor().registerProcess(null, BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_ACCOUNTS);
         if (mViewModel != null) {
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
-                    marketInfos -> {
-                        Iterator<MarketInfo> iterator = marketInfos.iterator();
+                    marketsInfo -> {
+                        Iterator<MarketInfo> iterator = marketsInfo.iterator();
                         while (iterator.hasNext()) {
                             MarketInfo marketInfo = iterator.next();
                             mMarketsMapInfo.put(marketInfo.getMarket(), marketInfo);
@@ -108,13 +105,6 @@ public class MyCoinsAssetsFragment extends Fragment {
                         updateAccountInfo();
                         mCoinListAdapter.setItems(accounts);
                         mCoinListAdapter.notifyDataSetChanged();
-                    }
-            );
-
-            mViewModel.getResultChanceInfo().observe(
-                    getViewLifecycleOwner(),
-                    chance -> {
-                        mChanceInfo = chance;
                     }
             );
 
@@ -145,6 +135,7 @@ public class MyCoinsAssetsFragment extends Fragment {
         super.onPause();
         mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_ACCOUNTS_INFO);
         mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_CHANCE_INFO);
+        mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO);
     }
 
     @Override
@@ -234,8 +225,6 @@ public class MyCoinsAssetsFragment extends Fragment {
     }
 
     private class CoinHolder extends RecyclerView.ViewHolder {
-        private final View mCoinInfoView;
-
         public TextView mCoinName;
         public TextView mCoinCurrency;
         public TextView mProfitAmount;
@@ -247,7 +236,6 @@ public class MyCoinsAssetsFragment extends Fragment {
 
         public CoinHolder(View itemView) {
             super(itemView);
-            mCoinInfoView = itemView;
             mCoinName = itemView.findViewById(R.id.coin_name);
             mCoinCurrency = itemView.findViewById(R.id.coin_currency);
             mProfitAmount = itemView.findViewById(R.id.coin_profit);
@@ -301,7 +289,8 @@ public class MyCoinsAssetsFragment extends Fragment {
             if (account == null) {
                 return null;
             }
-            return mMarketsMapInfo.get(MARKET_NAME + "-" + account.getCurrency()).getKorean_name();
+            MarketInfo marketInfo = mMarketsMapInfo.get(MARKET_NAME + "-" + account.getCurrency());
+            return marketInfo != null ? marketInfo.getKorean_name() : null;
         }
 
         private float getBuyBalance(Accounts account) {

@@ -12,6 +12,7 @@ import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.utils.BackgroundProcessor;
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
+import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.fragment.UpBitLoginFragment;
@@ -57,6 +58,11 @@ public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTr
 
     @Override
     public AccountsViewModel getAccountsViewModel() {
+        return null;
+    }
+
+    @Override
+    public CoinEvaluationViewModel getCoinEvaluationViewModel() {
         return null;
     }
 

@@ -18,10 +18,11 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
+import com.example.upbitautotrade.fragment.CoinEvaluationFragment;
 import com.example.upbitautotrade.fragment.MyCoinsAssetsFragment;
-import com.example.upbitautotrade.fragment.TradePageFragment;
 import com.example.upbitautotrade.utils.BackgroundProcessor;
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
+import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 
 public class TradePagerActivity extends FragmentActivity implements UpBitTradeActivity {
@@ -29,7 +30,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
-    private static final int NUM_PAGES = 5;
+    private static final int NUM_PAGES = 2;
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -100,6 +101,15 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     }
 
     @Override
+    public CoinEvaluationViewModel getCoinEvaluationViewModel() {
+        BackgroundProcessor processor = mBackgroundProcessor;
+        if (processor == null) {
+            return null;
+        }
+        return processor.getCoinEvaluationViewModel();
+    }
+
+    @Override
     public BackgroundProcessor getProcessor() {
         return mBackgroundProcessor;
     }
@@ -120,8 +130,11 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
                 case 0:
                     fragment = new MyCoinsAssetsFragment();
                     break;
+                case 1:
+                    fragment = new CoinEvaluationFragment();
+                    break;
                 default:
-                    fragment = new TradePageFragment();
+                    fragment = null;
                     break;
             }
             return fragment;

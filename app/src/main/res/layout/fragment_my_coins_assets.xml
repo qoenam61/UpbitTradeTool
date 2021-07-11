@@ -7,21 +7,21 @@
         android:id="@+id/accounts_title"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_text_size"
-        android:layout_margin="@dimen/accounts_balance_margin"
+        android:layout_margin="@dimen/default_margin"
         android:layout_weight="1"
         android:gravity="left|center_vertical"
         android:text="@string/my_accounts_balance"/>
     <LinearLayout
         android:id="@+id/account_info"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/accounts_balance_height"
-        android:layout_margin="@dimen/accounts_balance_margin"
+        android:layout_height="@dimen/default_height"
+        android:layout_margin="@dimen/default_margin"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:layout_below="@+id/accounts_title">
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="@dimen/accounts_balance_height"
+            android:layout_height="@dimen/default_height"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_vertical">
@@ -39,11 +39,11 @@
                 android:textSize="@dimen/default_text_size"/>
         </LinearLayout>
         <View
-            android:layout_width="@dimen/accounts_balance_margin"
+            android:layout_width="@dimen/default_margin"
             android:layout_height="match_parent"/>
         <LinearLayout
             android:layout_width="0dp"
-            android:layout_height="@dimen/accounts_balance_height"
+            android:layout_height="@dimen/default_height"
             android:layout_weight="1"
             android:orientation="vertical"
             android:gravity="center_vertical">
@@ -65,13 +65,13 @@
         android:id="@+id/coin_list_title"
         android:layout_width="match_parent"
         android:layout_height="@dimen/default_text_size"
-        android:layout_margin="@dimen/accounts_balance_margin"
+        android:layout_margin="@dimen/default_margin"
         android:layout_weight="1"
         android:layout_below="@+id/account_info"
         android:gravity="left|center_vertical"
         android:text="@string/my_coin_list"/>
     <View
-        android:layout_width="@dimen/accounts_balance_margin"
+        android:layout_width="@dimen/default_margin"
         android:layout_height="match_parent"/>
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/coin_list"

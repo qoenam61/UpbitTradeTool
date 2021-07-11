@@ -11,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
+import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -24,7 +25,8 @@ public class BackgroundProcessor {
     public static final int PERIODIC_UPDATE_ACCOUNTS_INFO = 1;
     public static final int PERIODIC_UPDATE_CHANCE_INFO = 2;
     public static final int PERIODIC_UPDATE_TICKER_INFO = 3;
-    public static final int UPDATE_MARKETS_INFO = 4;
+    public static final int UPDATE_MARKETS_INFO_FOR_ACCOUNTS = 4;
+    public static final int UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION = 5;
 
     private final String PERIODIC_UPDATE_KEY = "periodic_key";
     private final String PROCESS_UPDATE_KEY = "process_key";
@@ -32,9 +34,10 @@ public class BackgroundProcessor {
     private final Thread mProcessor;
 
     private AccountsViewModel mAccountsViewModel;
+    private CoinEvaluationViewModel mCoinEvaluationViewModel;
 
 
-    private long mPeriodicTimer = 80;
+    private long mPeriodicTimer = 60;
     private final Queue<Item> mProcesses;
     private final ArrayList<Item> mUpdateProcesses;
 
@@ -53,8 +56,10 @@ public class BackgroundProcessor {
                 case PERIODIC_UPDATE_TICKER_INFO:
                     mAccountsViewModel.searchTickerInfo(msg.getData().getString(PERIODIC_UPDATE_KEY + msg.what));
                     break;
-                case UPDATE_MARKETS_INFO:
+                case UPDATE_MARKETS_INFO_FOR_ACCOUNTS:
                     mAccountsViewModel.searchMarketsInfo(true);
+                case UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION:
+                    mCoinEvaluationViewModel.searchMarketsInfo(true);
                 default:
                     break;
             }
@@ -63,6 +68,7 @@ public class BackgroundProcessor {
 
     public BackgroundProcessor(ViewModelStoreOwner owner) {
         mAccountsViewModel = new ViewModelProvider(owner).get(AccountsViewModel.class);
+        mCoinEvaluationViewModel = new ViewModelProvider(owner).get(CoinEvaluationViewModel.class);
 
         mProcesses = new LinkedList<>();
         mUpdateProcesses = new ArrayList<Item>();
@@ -78,6 +84,7 @@ public class BackgroundProcessor {
         if (mProcesses == null || mProcesses.isEmpty()) {
             return;
         }
+        Log.d(TAG, "[DEBUG] process: ");
         try {
             Item item = mProcesses.poll();
             Bundle bundle = new Bundle();
@@ -173,5 +180,9 @@ public class BackgroundProcessor {
 
     public AccountsViewModel getAccountsViewModel() {
         return mAccountsViewModel;
+    }
+
+    public CoinEvaluationViewModel getCoinEvaluationViewModel() {
+        return mCoinEvaluationViewModel;
     }
 }

@@ -4,12 +4,12 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:layout_margin="@dimen/accounts_balance_margin">
+    android:layout_margin="@dimen/default_margin">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/accounts_coin_list_height"
         android:orientation="horizontal"
-        android:layout_margin="@dimen/accounts_balance_margin">
+        android:layout_margin="@dimen/default_margin">
         <TextView
             android:id="@+id/coin_name"
             android:layout_width="0dp"
@@ -69,15 +69,15 @@
     </LinearLayout>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/accounts_balance_height"
+        android:layout_height="@dimen/default_height"
         android:orientation="horizontal"
-        android:layout_margin="@dimen/accounts_balance_margin">
+        android:layout_margin="@dimen/default_margin">
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_margin="@dimen/accounts_balance_margin">
+            android:layout_margin="@dimen/default_margin">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -155,7 +155,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
-            android:layout_margin="@dimen/accounts_balance_margin">
+            android:layout_margin="@dimen/default_margin">
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
