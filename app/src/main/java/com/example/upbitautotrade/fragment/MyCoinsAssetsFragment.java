@@ -5,11 +5,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -21,8 +19,6 @@ import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.util.HashMap;
@@ -38,18 +34,24 @@ import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDA
 public class MyCoinsAssetsFragment extends Fragment {
     private static final String TAG = "MyCoinsAssetsFragment";
 
-    private UpBitTradeActivity mActivity;
-    private List<Accounts> mAccountsInfo;
+    private final String MARKET_NAME = "KRW";
+
     private View mView;
+    private UpBitTradeActivity mActivity;
+    private HashMap<String, Accounts> mAccountsMapInfo;
     private Chance mChanceInfo;
-    private List<Ticker> mTickerInfo;
-    private HashSet<String> mKeySets;
+    private HashMap<String, Ticker> mTickerMapInfo;
+    private final HashMap<String, Ticker> mTickerTempMapInfo;
+    private Set<String> mKeySet;
     private CoinListAdapter mCoinListAdapter;
 
     private AccountsViewModel mViewModel;
 
     public MyCoinsAssetsFragment() {
-//        mKeySets = new HashSet<>();
+        mAccountsMapInfo = new HashMap<>();
+        mTickerMapInfo = new HashMap<>();
+        mTickerTempMapInfo = new HashMap<>();
+        mKeySet = new HashSet<>();
     }
 
     @Override
@@ -65,7 +67,7 @@ public class MyCoinsAssetsFragment extends Fragment {
         RecyclerView coinList = mView.findViewById(R.id.coin_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         coinList.setLayoutManager(layoutManager);
-        mCoinListAdapter = new CoinListAdapter(mAccountsInfo);
+        mCoinListAdapter = new CoinListAdapter();
         coinList.setAdapter(mCoinListAdapter);
         return mView;
     }
@@ -77,17 +79,17 @@ public class MyCoinsAssetsFragment extends Fragment {
             mViewModel.getAccountsInfo().observe(
                     getViewLifecycleOwner()
                     , accounts -> {
-                        mAccountsInfo = accounts;
-                        updateKeySets(accounts, PERIODIC_UPDATE_ACCOUNTS_INFO);
-                        updateAccountInfo();
-
+                        mAccountsMapInfo.clear();
                         Iterator<Accounts> iterator = accounts.iterator();
                         while (iterator.hasNext()) {
-                            Accounts item = iterator.next();
-                            if (item.getCurrency().equals("KRW")) {
+                            Accounts account = iterator.next();
+                            mAccountsMapInfo.put(account.getCurrency(), account);
+                            if (account.getCurrency().equals("KRW")) {
                                 iterator.remove();
                             }
                         }
+                        updateKeySets(mAccountsMapInfo.keySet());
+                        updateAccountInfo();
                         mCoinListAdapter.setItems(accounts);
                         mCoinListAdapter.notifyDataSetChanged();
                     }
@@ -103,7 +105,11 @@ public class MyCoinsAssetsFragment extends Fragment {
             mViewModel.getResultTickerInfo().observe(
                     getViewLifecycleOwner(),
                     ticker -> {
-                        mTickerInfo = ticker;
+                        Iterator<Ticker> iterator = ticker.iterator();
+                        while (iterator.hasNext()) {
+                            Ticker tick = iterator.next();
+                            mTickerMapInfo.put(tick.getMarket(), tick);
+                        }
                     }
             );
 
@@ -131,57 +137,44 @@ public class MyCoinsAssetsFragment extends Fragment {
         mActivity.getProcessor().registerPeriodicUpdate(null, PERIODIC_UPDATE_ACCOUNTS_INFO);
     }
 
-    private void updateTickerInfo() {
-        Iterator<String> iterator = mKeySets.iterator();
+    private void updateKeySets(Set<String> keySet) {
+        boolean update = false;
+        if (!keySet.equals(mKeySet)) {
+            removePeriodicUpdate(mKeySet);
+            mKeySet.clear();
+            mKeySet = keySet;
+            registerPeriodicUpdate(mKeySet);
+            update = true;
+        }
+        if (update) {
+            Iterator<String> iterator = mKeySet.iterator();
+            while (iterator.hasNext()) {
+                String key = iterator.next();
+                if (!keySet.contains(key)) {
+                    mTickerMapInfo.remove(key);
+                }
+            }
+        }
+    }
+
+    private void removePeriodicUpdate(Set<String> keySet) {
+        Iterator<String> iterator = keySet.iterator();
         while (iterator.hasNext()) {
             String key = iterator.next();
-            if (!key.equals("KRW-KRW")) {
-                mActivity.getProcessor().registerPeriodicUpdate(key, PERIODIC_UPDATE_TICKER_INFO);
-            }
+            mActivity.getProcessor().removePeriodicUpdate(MARKET_NAME + "-" + key);
+            mActivity.getProcessor().removePeriodicUpdate(MARKET_NAME + "-" + key);
         }
     }
 
-    private void updateKeySets(List<Accounts> accounts, int type) {
-        if (accounts != null) {
-            HashSet<String> newKeySet = new HashSet<>();
-            Iterator<Accounts> iterator = accounts.iterator();
-            while (iterator.hasNext()) {
-                Accounts account = iterator.next();
-                String key = account.getCurrency();
-                newKeySet.add("KRW-" + key);
-            }
-
-            if (mKeySets == null || mKeySets.isEmpty()) {
-                mKeySets = newKeySet;
-                updateTickerInfo();
-            }
-
-            HashSet<String> sumKeySet = new HashSet<>();
-            sumKeySet.addAll(newKeySet);
-            sumKeySet.addAll(mKeySets);
-            sumKeySet.removeAll(newKeySet);
-            sumKeySet.removeAll(mKeySets);
-
-            if (sumKeySet != null && !sumKeySet.isEmpty()) {
-                registerPeriodicUpdate(newKeySet, type);
-            }
-        }
-    }
-
-    private void registerPeriodicUpdate(HashSet<String> keySet, int type) {
-        Iterator<String> removeIterator = mKeySets.iterator();
-        while (removeIterator.hasNext()) {
-            String key = removeIterator.next();
-            mActivity.getProcessor().removePeriodicUpdate(key);
-        }
-        mKeySets = keySet;
-
+    private void registerPeriodicUpdate(Set<String> keySet) {
         Iterator<String> regIterator = keySet.iterator();
         while (regIterator.hasNext()) {
             String key = regIterator.next();
-            mActivity.getProcessor().registerPeriodicUpdate(key, type);
+            mActivity.getProcessor().registerPeriodicUpdate(MARKET_NAME + "-" + key, PERIODIC_UPDATE_ACCOUNTS_INFO);
+            if (!key.equals("KRW-KRW")) {
+                mActivity.getProcessor().registerPeriodicUpdate(MARKET_NAME + "-" + key, PERIODIC_UPDATE_TICKER_INFO);
+            }
         }
-        updateTickerInfo();
     }
 
     private void updateAccountInfo() {
@@ -190,36 +183,41 @@ public class MyCoinsAssetsFragment extends Fragment {
         TextView balanceValue = mView.findViewById(R.id.assets_balance_value);
         balanceValue.setText(format.format(getCurrentBalance()));
 
+        DecimalFormat formatNonZero = new DecimalFormat("###,###,###");
+        formatNonZero.setDecimalSeparatorAlwaysShown(true);
         TextView totalAmountValue = mView.findViewById(R.id.assets_total_amount_value);
-        totalAmountValue.setText(format.format(getTotalAmount()));
+        totalAmountValue.setText(formatNonZero.format(getTotalAmount()));
     }
 
     private int getCurrentBalance() {
-        List<Accounts> accounts = mAccountsInfo;
         int balance = 0;
-        if (accounts != null) {
-            for (Accounts account : accounts) {
-                if (account.getCurrency().equals("KRW")) {
-                    balance += account.getBalance().intValue();
-                }
-            }
-        }
+        balance += mAccountsMapInfo.get(MARKET_NAME).getBalance().intValue();
+        balance += mAccountsMapInfo.get(MARKET_NAME).getLocked().intValue();
         return balance;
     }
 
-    private int getTotalAmount() {
-        List<Accounts> accounts = mAccountsInfo;
-        int balance = 0;
-        if (accounts != null) {
-            for (Accounts account : accounts) {
-                balance += account.getTotalAmount();
+    private float getTotalAmount() {
+        float balance = 0;
+        if (mTickerMapInfo.isEmpty()) {
+            return -1;
+        }
+
+        Iterator<String> iterator = mKeySet.iterator();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            if (key.equals(MARKET_NAME)) {
+                balance += mAccountsMapInfo.get(key).getBalance().floatValue() + mAccountsMapInfo.get(key).getLocked().floatValue();
+                continue;
             }
+            Ticker ticker = mTickerMapInfo.get(MARKET_NAME+"-"+key);
+            if (ticker == null) {
+                continue;
+            }
+            float price = ticker.getTradePrice().floatValue();
+            balance += mAccountsMapInfo.get(key).getBalance().floatValue() * price;
+            balance += mAccountsMapInfo.get(key).getLocked().floatValue() * price;
         }
         return balance;
-    }
-
-    private float getCurrentPrice() {
-        return 0;
     }
 
     private class CoinHolder extends RecyclerView.ViewHolder {
@@ -252,10 +250,6 @@ public class MyCoinsAssetsFragment extends Fragment {
         private List<Accounts> mCoinAccounts;
         DecimalFormat mFormat;
 
-        public CoinListAdapter(List<Accounts> accounts) {
-            mCoinAccounts = accounts;
-        }
-
         public void setItems(List<Accounts> accounts) {
             mCoinAccounts = accounts;
             mFormat = new DecimalFormat("###,###,###,###.###");
@@ -280,19 +274,6 @@ public class MyCoinsAssetsFragment extends Fragment {
         @Override
         public int getItemCount() {
             return mCoinAccounts != null ? mCoinAccounts.size() : 0;
-        }
-    }
-
-    private class KeySet {
-        public String key;
-        public int type;
-
-        public KeySet(String key, int type) {
-            this.key = key;
-            this.type = type;
-        }
-        public String getKey() {
-            return "KRW-" + key;
         }
     }
 }

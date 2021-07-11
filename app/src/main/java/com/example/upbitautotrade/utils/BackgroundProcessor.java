@@ -13,6 +13,7 @@ import androidx.lifecycle.ViewModelStoreOwner;
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Queue;
@@ -31,7 +32,7 @@ public class BackgroundProcessor {
     private AccountsViewModel mAccountsViewModel;
 
 
-    private long mPeriodicTimer = 1000;
+    private long mPeriodicTimer = 100;
     private final Queue<Item> mProcesses;
     private final ArrayList<Item> mUpdateProcesses;
 
@@ -44,10 +45,10 @@ public class BackgroundProcessor {
                     mAccountsViewModel.searchAccountsInfo(false);
                     break;
                 case PERIODIC_UPDATE_CHANCE_INFO:
-                    mAccountsViewModel.searchChanceInfo(msg.getData().getString(PERIODIC_UPDATE_KEY));
+                    mAccountsViewModel.searchChanceInfo(msg.getData().getString(PERIODIC_UPDATE_KEY + msg.what));
                     break;
                 case PERIODIC_UPDATE_TICKER_INFO:
-                    mAccountsViewModel.searchTickerInfo(msg.getData().getString(PERIODIC_UPDATE_KEY));
+                    mAccountsViewModel.searchTickerInfo(msg.getData().getString(PERIODIC_UPDATE_KEY + msg.what));
                     break;
                 default:
                     break;
@@ -61,27 +62,22 @@ public class BackgroundProcessor {
         mProcesses = new LinkedList<>();
         mUpdateProcesses = new ArrayList<Item>();
         mProcessor = new Thread(() -> {
-            try {
-                while (true) {
-                    process();
-                    update();
-                    Thread.sleep(mPeriodicTimer);
-                }
-            } catch(InterruptedException e) {
-                e.printStackTrace();
+            while (true) {
+                process();
+                update();
             }
         });
     }
 
     private void process() {
-        if (mProcesses == null || mProcesses.size() <= 0) {
+        if (mProcesses == null || mProcesses.isEmpty()) {
             return;
         }
         Item item = mProcesses.poll();
         Bundle bundle = new Bundle();
-        bundle.putString(PERIODIC_UPDATE_KEY, item.mKey);
+        bundle.putString(PERIODIC_UPDATE_KEY, item.key);
         Message message = new Message();
-        message.what = item.mType;
+        message.what = item.type;
         message.setData(bundle);
         mHandler.sendMessage(message);
     }
@@ -95,18 +91,28 @@ public class BackgroundProcessor {
 
     private void update() {
         ArrayList<Item> processes = mUpdateProcesses;
-        if (processes == null) {
+        if (processes == null || processes.isEmpty()) {
             return;
 
         }
-        for (Item process:processes) {
-            Bundle bundle = new Bundle();
-            bundle.putString(PERIODIC_UPDATE_KEY, process.mKey);
-            Message message = new Message();
-            message.what = process.mType;
-            message.setData(bundle);
-            mHandler.sendMessage(message);
+        try {
+            Iterator<Item> iterator = processes.iterator();
+            while (iterator.hasNext()) {
+                Item item = iterator.next();
+                Bundle bundle = new Bundle();
+                bundle.putString(PERIODIC_UPDATE_KEY + item.type, item.key);
+                Message message = new Message();
+                message.what = item.type;
+                message.setData(bundle);
+                mHandler.sendMessage(message);
+                Thread.sleep(mPeriodicTimer);
+            }
+        } catch (ConcurrentModificationException e) {
+            Log.w(TAG, "update: Error ConcurrentModificationException");
+        } catch(InterruptedException e) {
+            Log.w(TAG, "update: Error InterruptedException");
         }
+
     }
 
     public void registerPeriodicUpdate(String key, int type) {
@@ -125,7 +131,7 @@ public class BackgroundProcessor {
         }
         for (Iterator<Item> iterator = mUpdateProcesses.iterator(); iterator.hasNext(); ) {
             Item item = iterator.next();
-            if (item.mType == type) {
+            if (item.type == type) {
                 iterator.remove();
             }
         }
@@ -139,7 +145,7 @@ public class BackgroundProcessor {
         }
         for (Iterator<Item> iterator = mUpdateProcesses.iterator(); iterator.hasNext(); ) {
             Item item = iterator.next();
-            if (item.mKey == key) {
+            if (item.key == key) {
                 iterator.remove();
             }
         }

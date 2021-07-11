@@ -1,11 +1,11 @@
 package com.example.upbitautotrade.utils;
 
 public class Item {
-    String mKey;
-    int mType;
+    String key;
+    int type;
 
     public Item(String key, int type) {
-        mKey = key;
-        mType = type;
+        this.key = key;
+        this.type = type;
     }
 }
