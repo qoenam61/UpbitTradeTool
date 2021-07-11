@@ -25,10 +25,6 @@ public class AccountsViewModel extends UpBitViewModel{
     private final MutableLiveData<String> mSearchTickerInfo;
     private final LiveData<List<Ticker>> mResultTickerInfo;
 
-/*    private final LiveData<List<Market>> mResultChanceMarketInfo;
-    private final LiveData<List<Accounts>> mResultChanceBidInfo;
-    private final LiveData<List<Accounts>> mResultChanceAskInfo;*/
-
     public AccountsViewModel(Application application) {
         super(application);
         mSearchChanceInfo = new MutableLiveData<>();
@@ -40,20 +36,6 @@ public class AccountsViewModel extends UpBitViewModel{
         mResultTickerInfo = Transformations.switchMap(
                 mSearchTickerInfo, input -> mUpBitFetcher.getTicker(input)
         );
-
-
-
-/*        mResultChanceMarketInfo = Transformations.map(
-                mResultChanceInfo,
-                Chance::getMarketItems);
-
-        mResultChanceBidInfo = Transformations.map(
-                mResultChanceInfo,
-                Chance::getBidItems);
-
-        mResultChanceAskInfo = Transformations.map(
-                mResultChanceInfo,
-                Chance::getAskItems);*/
     }
 
 

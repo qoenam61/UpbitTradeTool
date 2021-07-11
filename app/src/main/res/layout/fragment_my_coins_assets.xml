@@ -3,53 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:backgroundTint="@color/white">
-<!--
-    <LinearLayout
-        android:id="@+id/asset_currency"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/text_view_login_height"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_centerInParent="true">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="화폐"
-            android:textSize="@dimen/default_text_size"/>
-        <View
-            android:layout_width="10dp"
-            android:layout_height="wrap_content"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:id="@+id/assets_balance"
-        android:layout_width="wrap_content"
-        android:layout_height="@dimen/text_view_login_height"
-        android:orientation="horizontal"
-        android:gravity="center"
-        android:layout_centerInParent="true"
-        android:layout_below="@+id/asset_currency">
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:gravity="center"
-            android:text="잔고"
-            android:textSize="@dimen/default_text_size"/>
-        <View
-            android:layout_width="10dp"
-            android:layout_height="wrap_content"/>
-
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/button"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
-        android:layout_centerInParent="true"
-        android:layout_below="@+id/assets_balance"/>
--->
     <TextView
         android:id="@+id/accounts_title"
         android:layout_width="match_parent"

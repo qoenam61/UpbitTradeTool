@@ -1,7 +1,6 @@
 package com.example.upbitautotrade.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -178,28 +177,25 @@ public class MyCoinsAssetsFragment extends Fragment {
     }
 
     private void updateAccountInfo() {
-        DecimalFormat format = new DecimalFormat("###,###,###,###");
-        format.setDecimalSeparatorAlwaysShown(true);
-        TextView balanceValue = mView.findViewById(R.id.assets_balance_value);
-        balanceValue.setText(format.format(getCurrentBalance()));
-
         DecimalFormat formatNonZero = new DecimalFormat("###,###,###");
         formatNonZero.setDecimalSeparatorAlwaysShown(true);
+        TextView balanceValue = mView.findViewById(R.id.assets_balance_value);
+        balanceValue.setText(formatNonZero.format(getTotalCurrentBalance()));
         TextView totalAmountValue = mView.findViewById(R.id.assets_total_amount_value);
         totalAmountValue.setText(formatNonZero.format(getTotalAmount()));
     }
 
-    private int getCurrentBalance() {
+    private int getTotalCurrentBalance() {
         int balance = 0;
         balance += mAccountsMapInfo.get(MARKET_NAME).getBalance().intValue();
         balance += mAccountsMapInfo.get(MARKET_NAME).getLocked().intValue();
         return balance;
     }
 
-    private float getTotalAmount() {
+    private int getTotalAmount() {
         float balance = 0;
         if (mTickerMapInfo.isEmpty()) {
-            return -1;
+            return 0;
         }
 
         Iterator<String> iterator = mKeySet.iterator();
@@ -217,7 +213,7 @@ public class MyCoinsAssetsFragment extends Fragment {
             balance += mAccountsMapInfo.get(key).getBalance().floatValue() * price;
             balance += mAccountsMapInfo.get(key).getLocked().floatValue() * price;
         }
-        return balance;
+        return (int) balance;
     }
 
     private class CoinHolder extends RecyclerView.ViewHolder {
@@ -225,35 +221,38 @@ public class MyCoinsAssetsFragment extends Fragment {
 
         public TextView mCoinName;
         public TextView mCoinCurrency;
-        public TextView mProfit;
+        public TextView mProfitAmount;
         public TextView mProfitRate;
         public TextView mBalance;
-        public TextView mPrice;
+        public TextView mCurrentAmount;
         public TextView mAvgPrice;
-        public TextView mAmount;
+        public TextView mBuyAmount;
 
         public CoinHolder(View itemView) {
             super(itemView);
             mCoinInfoView = itemView;
             mCoinName = itemView.findViewById(R.id.coin_name);
             mCoinCurrency = itemView.findViewById(R.id.coin_currency);
-            mProfit = itemView.findViewById(R.id.coin_profit);
+            mProfitAmount = itemView.findViewById(R.id.coin_profit);
             mProfitRate = itemView.findViewById(R.id.coin_profit_rate);
             mBalance = itemView.findViewById(R.id.coin_balance);
-            mPrice = itemView.findViewById(R.id.coin_price);
+            mCurrentAmount = itemView.findViewById(R.id.coin_current_value);
             mAvgPrice = itemView.findViewById(R.id.coin_avg_price);
-            mAmount = itemView.findViewById(R.id.coin_total_price);
+            mBuyAmount = itemView.findViewById(R.id.coin_total_price);
         }
     }
 
     private class CoinListAdapter extends RecyclerView.Adapter<CoinHolder> {
         private List<Accounts> mCoinAccounts;
         DecimalFormat mFormat;
+        DecimalFormat mNonZeroFormat;
+        DecimalFormat mPercentFormat;
 
         public void setItems(List<Accounts> accounts) {
             mCoinAccounts = accounts;
             mFormat = new DecimalFormat("###,###,###,###.###");
-            mFormat.setDecimalSeparatorAlwaysShown(true);
+            mNonZeroFormat = new DecimalFormat("###,###,###,###");
+            mPercentFormat = new DecimalFormat("###.##" + "%");
         }
 
         @Override
@@ -265,15 +264,57 @@ public class MyCoinsAssetsFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(CoinHolder holder, int position) {
-            holder.mCoinName.setText(mCoinAccounts.get(position).getCurrency());
-            holder.mCoinCurrency.setText(mCoinAccounts.get(position).getCurrency());
-            holder.mBalance.setText(mFormat.format(mCoinAccounts.get(position).getTotalBalance()));
-            holder.mPrice.setText(mFormat.format(mCoinAccounts.get(position).getAvgBuyPrice()));
+            Accounts account = mCoinAccounts.get(position);
+            holder.mCoinName.setText(account.getCurrency());
+            holder.mBalance.setText(mFormat.format(account.getTotalBalance()));
+            holder.mCoinCurrency.setText(account.getCurrency());
+            holder.mCurrentAmount.setText(mNonZeroFormat.format(getCurrentAmount(account)));
+            holder.mProfitAmount.setText(mNonZeroFormat.format(getProfitAmount(account)));
+            holder.mProfitRate.setText(mPercentFormat.format(getProfitRate(account)));
+            holder.mAvgPrice.setText(mNonZeroFormat.format(account.getAvgBuyPrice()));
+            holder.mBuyAmount.setText(mNonZeroFormat.format(getBuyAmount(account)));
         }
 
         @Override
         public int getItemCount() {
             return mCoinAccounts != null ? mCoinAccounts.size() : 0;
+        }
+
+        private float getBuyBalance(Accounts account) {
+            if (account == null) {
+                return 0;
+            }
+            return (account.getLocked().floatValue() + account.getBalance().floatValue());
+        }
+
+        private float getCurrentAmount(Accounts account) {
+            if (account == null) {
+                return 0;
+            }
+            return getBuyBalance(account) * getCurrentPrice(account);
+        }
+
+        private float getBuyAmount(Accounts account) {
+            if (account == null) {
+                return 0;
+            }
+            return getBuyBalance(account) * account.getAvgBuyPrice().floatValue();
+        }
+
+        private int getProfitAmount(Accounts account) {
+            return (int) (getCurrentAmount(account) - getBuyAmount(account));
+        }
+
+        private float getProfitRate(Accounts account) {
+            return getProfitAmount(account) / getBuyAmount(account);
+        }
+
+        private float getCurrentPrice(Accounts account) {
+            Ticker ticker = mTickerMapInfo.get(MARKET_NAME+"-"+account.getCurrency());
+            if (ticker == null) {
+                return 0;
+            }
+            return ticker.getTradePrice().floatValue();
         }
     }
 }
