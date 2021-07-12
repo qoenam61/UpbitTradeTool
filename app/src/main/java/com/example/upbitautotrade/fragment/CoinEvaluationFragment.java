@@ -15,28 +15,34 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
+import com.example.upbitautotrade.model.Candle;
+import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
+import com.example.upbitautotrade.model.MonthCandle;
 import com.example.upbitautotrade.model.Ticker;
+import com.example.upbitautotrade.model.WeekCandle;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MONTH_CANDLE_INFO_FOR_COIN_EVALUATION;
 
 public class CoinEvaluationFragment extends Fragment {
     public static final String TAG = "CoinEvaluationFragment";;
 
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
+    private final ArrayList mDeadMarketList;
 
     private View mView;
 
@@ -47,11 +53,40 @@ public class CoinEvaluationFragment extends Fragment {
     private List<String> mCoinKeyList;
     private final HashMap<String, MarketInfo> mMarketsMapInfo;
     private final HashMap<String, Ticker> mTickerMapInfo;
+    private final HashMap<String, Candle> mMinCandleMapInfo;
+    private final HashMap<String, DayCandle> mDayCandleMapInfo;
+    private final HashMap<String, WeekCandle> mWeekCandleMapInfo;
+    private final HashMap<String, MonthCandle> mMonthCandleMapInfo;
+
+    private String[] deadMarket = {
+            "KRW-NEO", "KRW-MTL", "KRW-OMG", "KRW-SNT", "KRW-WAVES",
+            "KRW-XEM", "KRW-QTUM", "KRW-LSK", "KRW-ARDR", "KRW-ARK",
+            "KRW-STORJ", "KRW-GRS", "KRW-REP", "KRW-SBD", "KRW-POWR",
+            "KRW-BTG", "KRW-ICX", "KRW-SC", "KRW-ONT", "KRW-ZIL",
+            "KRW-POLY", "KRW-ZRX", "KRW-LOOM", "KRW-BAT", "KRW-IOST",
+            "KRW-RFR", "KRW-CVC", "KRW-IQ", "KRW-IOTA", "KRW-MFT",
+            "KRW-GAS", "KRW-ELF", "KRW-KNC", "KRW-BSV", "KRW-QKC",
+            "KRW-BTT", "KRW-MOC", "KRW-ENJ", "KRW-TFUEL", "KRW-ANKR",
+            "KRW-AERGO", "KRW-ATOM", "KRW-TT", "KRW-CRE", "KRW-MBL",
+            "KRW-WAXP", "KRW-HBAR", "KRW-MED", "KRW-MLK", "KRW-STPT",
+            "KRW-ORBS", "KRW-CHZ", "KRW-STMX", "KRW-DKA", "KRW-HIVE",
+            "KRW-KAVA", "KRW-AHT", "KRW-XTZ", "KRW-BORA", "KRW-JST",
+            "KRW-TON", "KRW-SXP", "KRW-HUNT", "KRW-PLA", "KRW-SRM",
+            "KRW-MVL", "KRW-STRAX", "KRW-AQT", "KRW-BCHA", " KRW-GLM",
+            "KRW-SSX", "KRW-META", "KRW-FCT2", "KRW-HUM", "KRW-STRK",
+            "KRW-PUNDIX", "KRW-STX",
+    };
 
     public CoinEvaluationFragment() {
         mMarketsMapInfo = new HashMap<>();
         mTickerMapInfo = new HashMap<>();
+        mMinCandleMapInfo = new HashMap<>();
+        mDayCandleMapInfo = new HashMap<>();
+        mWeekCandleMapInfo = new HashMap<>();
+        mMonthCandleMapInfo = new HashMap<>();
         mCoinKeyList = new ArrayList<>();
+        mDeadMarketList = new ArrayList(Arrays.asList(deadMarket));
+
     }
 
 
@@ -89,11 +124,23 @@ public class CoinEvaluationFragment extends Fragment {
                             MarketInfo marketInfo = iterator.next();
                             if (marketInfo.getMarket().contains(MARKET_NAME+"-")
                                     && !marketInfo.getMarket_warning().contains(MARKET_WARNING)) {
+                                if (mDeadMarketList.contains(marketInfo.getMarket())) {
+                                    continue;
+                                }
                                 mMarketsMapInfo.put(marketInfo.getMarket(), marketInfo);
-                                Log.d(TAG, "[DEBUG] onStart: marketInfo: "+marketInfo.getMarket());
                                 mCoinKeyList.add(marketInfo.getMarket());
+
+                                /*
+                                Log.d(TAG, "[DEBUG] onStart: UPDATE_MONTH_CANDLE_INFO_FOR_COIN_EVALUATION");
+                                mActivity.getProcessor().registerProcess(
+                                        marketInfo.getMarket(),
+                                        UPDATE_MONTH_CANDLE_INFO_FOR_COIN_EVALUATION,
+                                        null,
+                                        1);
+                                */
                             }
                         }
+                        registerPeriodicUpdate(mMarketsMapInfo.keySet());
                     }
             );
 
@@ -103,11 +150,23 @@ public class CoinEvaluationFragment extends Fragment {
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
-                            Log.d(TAG, "[DEBUG] onStart: tick: "+tick.getMarket());
                             mTickerMapInfo.put(tick.getMarket(), tick);
                         }
+                        Log.d(TAG, "[DEBUG] onStart: ticker");
                         mCoinListAdapter.setItems(mCoinKeyList);
                         mCoinListAdapter.notifyDataSetChanged();
+                    }
+            );
+
+            mViewModel.getMonthCandleInfo().observe(
+                    getViewLifecycleOwner(),
+                    monthCandle -> {
+                        Iterator<MonthCandle> iterator = monthCandle.iterator();
+                        while (iterator.hasNext()) {
+                            MonthCandle monthInfo = iterator.next();
+                            Log.d(TAG, "[DEBUG] onStart: monthInfo: "+monthInfo.getMarketId());
+                            mMonthCandleMapInfo.put(monthInfo.getMarketId(), monthInfo);
+                        }
                     }
             );
         }
@@ -122,7 +181,6 @@ public class CoinEvaluationFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        registerPeriodicUpdate(mMarketsMapInfo.keySet());
     }
 
     private void registerPeriodicUpdate(Set<String> keySet) {
@@ -133,6 +191,24 @@ public class CoinEvaluationFragment extends Fragment {
                 mActivity.getProcessor().registerPeriodicUpdate(key, PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
             }
         }
+    }
+
+    private void updateKeySet(List<String> keySet, MonthCandle monthCandle) {
+        Iterator<String> iterator = keySet.iterator();
+        while (iterator.hasNext()) {
+            String key = iterator.next();
+            if (key.equals(monthCandle.getMarketId())) {
+                Double tradeAmount = (monthCandle.getCandleAccTradePrice().doubleValue() / 100000000);
+                if (tradeAmount < 10000 && monthCandle.getTradePrice().intValue() < 100) {
+                    iterator.remove();
+                    Log.d(TAG, "[DEBUG] updateKeySet -getCandleAccTradePrice: "
+                            + monthCandle.getMarketId()
+                            + " price: "
+                            + monthCandle.getTradePrice().intValue());
+                }
+            }
+        }
+
     }
 
     private class CoinHolder extends RecyclerView.ViewHolder {

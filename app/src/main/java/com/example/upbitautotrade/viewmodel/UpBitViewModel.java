@@ -12,6 +12,7 @@ import androidx.lifecycle.Transformations;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.api.UpBitFetcher;
 import com.example.upbitautotrade.model.Accounts;
+import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.Chance;
 import com.example.upbitautotrade.model.Market;
 import com.example.upbitautotrade.model.MarketInfo;

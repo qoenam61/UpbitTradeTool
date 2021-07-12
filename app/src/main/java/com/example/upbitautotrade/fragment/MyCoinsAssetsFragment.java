@@ -77,8 +77,8 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
+        mActivity.getProcessor().registerProcess(null, UPDATE_MARKETS_INFO_FOR_ACCOUNTS);
         if (mViewModel != null) {
-            mActivity.getProcessor().registerProcess(null, UPDATE_MARKETS_INFO_FOR_ACCOUNTS);
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
                     marketsInfo -> {
@@ -116,7 +116,6 @@ public class MyCoinsAssetsFragment extends Fragment {
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
-                            Log.d(TAG, "[DEBUG] onStart: tick: "+tick.getMarket());
                             mTickerMapInfo.put(tick.getMarket(), tick);
                         }
                     }

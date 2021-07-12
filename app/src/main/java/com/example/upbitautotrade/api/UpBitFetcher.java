@@ -7,8 +7,12 @@ import androidx.lifecycle.MutableLiveData;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.example.upbitautotrade.model.Candle;
+import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
+import com.example.upbitautotrade.model.MonthCandle;
 import com.example.upbitautotrade.model.Ticker;
+import com.example.upbitautotrade.model.WeekCandle;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
@@ -152,6 +156,94 @@ public class UpBitFetcher {
 
             @Override
             public void onFailure(Call<List<MarketInfo>> call, Throwable t) {
+                Log.w(TAG, "onFailure: "+t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<List<Candle>> getMinCandleInfo(String unit, String marketId, String to, int count) {
+        MutableLiveData<List<Candle>> result = new MutableLiveData<>();
+        Call<List<Candle>> call = to != null ?
+                mTickerRetrofit.getUpBitApi().getMinCandleInfo(unit, marketId, to, count)
+                : mTickerRetrofit.getUpBitApi().getMinCandleInfo(unit, marketId, count);
+        call.enqueue(new Callback<List<Candle>>() {
+            @Override
+            public void onResponse(Call<List<Candle>> call, Response<List<Candle>> response) {
+                if (response.body() != null) {
+                    result.setValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<Candle>> call, Throwable t) {
+                Log.w(TAG, "onFailure: "+t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<List<DayCandle>> getDayCandleInfo(String marketId, String to, int count, String convertingPriceUnit) {
+        MutableLiveData<List<DayCandle>> result = new MutableLiveData<>();
+        Call<List<DayCandle>> call = to != null ?
+                mTickerRetrofit.getUpBitApi().getDayCandleInfo(marketId, to, count, convertingPriceUnit)
+                : mTickerRetrofit.getUpBitApi().getDayCandleInfo(marketId, count, convertingPriceUnit);
+        call.enqueue(new Callback<List<DayCandle>>() {
+            @Override
+            public void onResponse(Call<List<DayCandle>> call, Response<List<DayCandle>> response) {
+                if (response.body() != null) {
+                    result.setValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<DayCandle>> call, Throwable t) {
+                Log.w(TAG, "onFailure: "+t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<List<WeekCandle>> getWeekCandleInfo(String marketId, String to, int count) {
+        MutableLiveData<List<WeekCandle>> result = new MutableLiveData<>();
+        Call<List<WeekCandle>> call = to != null ?
+                mTickerRetrofit.getUpBitApi().getWeekCandleInfo(marketId, to, count)
+                : mTickerRetrofit.getUpBitApi().getWeekCandleInfo(marketId, count);
+        call.enqueue(new Callback<List<WeekCandle>>() {
+            @Override
+            public void onResponse(Call<List<WeekCandle>> call, Response<List<WeekCandle>> response) {
+                if (response.body() != null) {
+                    result.setValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<WeekCandle>> call, Throwable t) {
+                Log.w(TAG, "onFailure: "+t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<List<MonthCandle>> getMonthCandleInfo(String marketId, String to, int count) {
+        MutableLiveData<List<MonthCandle>> result = new MutableLiveData<>();
+        Call<List<MonthCandle>> call = to != null ?
+                mTickerRetrofit.getUpBitApi().getMonthsCandleInfo(marketId, to, count)
+                : mTickerRetrofit.getUpBitApi().getMonthsCandleInfo(marketId, count);
+        call.enqueue(new Callback<List<MonthCandle>>() {
+            @Override
+            public void onResponse(Call<List<MonthCandle>> call, Response<List<MonthCandle>> response) {
+                if (response.body() != null) {
+                    result.setValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<MonthCandle>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
             }
