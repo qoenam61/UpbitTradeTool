@@ -7,13 +7,24 @@ public class Item {
     String to;
     int count;
     String priceUnit;
+    String cursor;
+    int daysAgo;
 
     public Item(String key, int type) {
         this.key = key;
         this.type = type;
     }
 
-    public Item(int unit, String key, int type,  String to, int count) {
+    public Item(String key, int type, String to, int count, String cursor, int daysAgo) {
+        this.key = key;
+        this.type = type;
+        this.to = to;
+        this.count = count;
+        this.cursor = cursor;
+        this.daysAgo = daysAgo;
+    }
+
+    public Item(int unit, String key, int type, String to, int count) {
         this.key = key;
         this.type = type;
         this.unit = unit;

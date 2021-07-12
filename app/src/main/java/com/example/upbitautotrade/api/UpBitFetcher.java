@@ -12,6 +12,7 @@ import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.MonthCandle;
 import com.example.upbitautotrade.model.Ticker;
+import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 import com.example.upbitautotrade.model.Accounts;
@@ -244,6 +245,40 @@ public class UpBitFetcher {
 
             @Override
             public void onFailure(Call<List<MonthCandle>> call, Throwable t) {
+                Log.w(TAG, "onFailure: "+t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<List<TradeInfo>> getTradeInfo(String marketId, String to, int count, String cursor, int daysAgo) {
+        MutableLiveData<List<TradeInfo>> result = new MutableLiveData<>();
+        Call<List<TradeInfo>> call;
+        if (to != null && daysAgo < 0) {
+            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, to, count, daysAgo);
+//            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, to, count, cursor, daysAgo);
+        } else if (to != null && daysAgo > 0) {
+            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, to, count);
+//            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, to, count, cursor);
+        } else if (to == null && daysAgo > 0) {
+            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, count, daysAgo);
+//            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, count, cursor, daysAgo);
+        } else {
+            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, count);
+//            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, count, cursor);
+        }
+
+        call.enqueue(new Callback<List<TradeInfo>>() {
+            @Override
+            public void onResponse(Call<List<TradeInfo>> call, Response<List<TradeInfo>> response) {
+                if (response.body() != null) {
+                    result.setValue(response.body());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<List<TradeInfo>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
             }

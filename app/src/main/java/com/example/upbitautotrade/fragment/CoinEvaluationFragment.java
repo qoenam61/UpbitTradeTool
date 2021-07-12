@@ -20,6 +20,7 @@ import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.MonthCandle;
 import com.example.upbitautotrade.model.Ticker;
+import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 
@@ -30,13 +31,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO_FOR_COIN_EVALUATION;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MONTH_CANDLE_INFO_FOR_COIN_EVALUATION;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO_FOR_COIN_EVALUATION;
 
 public class CoinEvaluationFragment extends Fragment {
     public static final String TAG = "CoinEvaluationFragment";;
@@ -58,6 +60,7 @@ public class CoinEvaluationFragment extends Fragment {
     private final HashMap<String, DayCandle> mDayCandleMapInfo;
     private final HashMap<String, WeekCandle> mWeekCandleMapInfo;
     private final HashMap<String, MonthCandle> mMonthCandleMapInfo;
+    private final LinkedHashMap<String, TradeInfo> mTradeMapInfo;
 
     private String[] deadMarket = {
             "KRW-NEO", "KRW-MTL", "KRW-OMG", "KRW-SNT", "KRW-WAVES",
@@ -87,7 +90,7 @@ public class CoinEvaluationFragment extends Fragment {
         mMonthCandleMapInfo = new HashMap<>();
         mCoinKeyList = new ArrayList<>();
         mDeadMarketList = new ArrayList(Arrays.asList(deadMarket));
-
+        mTradeMapInfo = new LinkedHashMap<>();
     }
 
 
@@ -179,6 +182,18 @@ public class CoinEvaluationFragment extends Fragment {
                         }
                     }
             );
+
+            mViewModel.getTradeInfo().observe(
+                    getViewLifecycleOwner(),
+                    tradeInfos -> {
+                        Iterator<TradeInfo> iterator = tradeInfos.iterator();
+                        while (iterator.hasNext()) {
+                            TradeInfo tradeInfo = iterator.next();
+                            mTradeMapInfo.put(tradeInfo.getMarketId(), tradeInfo);
+                            Log.d(TAG, "[DEBUG] onStart-change_price: "+tradeInfo.getChangePrice()+" getTradeVolume: "+tradeInfo.getTradeVolume()+ " adk_bid: "+tradeInfo.getAskBid());
+                        }
+                    }
+            );
         }
     }
 
@@ -200,6 +215,7 @@ public class CoinEvaluationFragment extends Fragment {
             if (!key.equals("KRW-KRW")) {
                 mActivity.getProcessor().registerPeriodicUpdate(key, PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
                 mActivity.getProcessor().registerPeriodicUpdate(1, key, UPDATE_MIN_CANDLE_INFO_FOR_COIN_EVALUATION, null, 1);
+                mActivity.getProcessor().registerPeriodicUpdate(key, UPDATE_TRADE_INFO_FOR_COIN_EVALUATION, null, 60);
             }
         }
     }

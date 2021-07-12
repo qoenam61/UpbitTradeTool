@@ -32,6 +32,7 @@ public class BackgroundProcessor {
     public static final int UPDATE_DAY_CANDLE_INFO_FOR_COIN_EVALUATION = 8;
     public static final int UPDATE_WEEK_CANDLE_INFO_FOR_COIN_EVALUATION = 9;
     public static final int UPDATE_MONTH_CANDLE_INFO_FOR_COIN_EVALUATION = 10;
+    public static final int UPDATE_TRADE_INFO_FOR_COIN_EVALUATION = 11;
 
     private final String PROCESS_UPDATE_KEY = "process_key";
 
@@ -40,6 +41,8 @@ public class BackgroundProcessor {
     private final String BUNDLE_KEY_TO = "to";
     private final String BUNDLE_KEY_COUNT = "count";
     private final String BUNDLE_KEY_PRICE_UNIT = "convertingPriceUnit";
+    private final String BUNDLE_KEY_CURSOR = "cursor";
+    private final String BUNDLE_KEY_DAYS_AGO = "daysAgo";
 
     private final Thread mProcessor;
 
@@ -61,6 +64,8 @@ public class BackgroundProcessor {
             String to = msg.getData().getString(BUNDLE_KEY_TO + msg.what);
             int count = msg.getData().getInt(BUNDLE_KEY_COUNT + msg.what);
             String priceUnit = msg.getData().getString(BUNDLE_KEY_PRICE_UNIT + msg.what);
+            String cursor = msg.getData().getString(BUNDLE_KEY_CURSOR + msg.what);
+            int daysAgo = msg.getData().getInt(BUNDLE_KEY_DAYS_AGO + msg.what);
 
             switch (msg.what) {
                 case PERIODIC_UPDATE_ACCOUNTS_INFO:
@@ -92,6 +97,9 @@ public class BackgroundProcessor {
                     break;
                 case UPDATE_MONTH_CANDLE_INFO_FOR_COIN_EVALUATION:
                     mCoinEvaluationViewModel.searchMonthCandleInfo(marketId, to, count);
+                    break;
+                case UPDATE_TRADE_INFO_FOR_COIN_EVALUATION:
+                    mCoinEvaluationViewModel.searchTradeInfo(marketId, to, count, cursor, daysAgo);
                     break;
                 default:
                     break;
@@ -131,6 +139,8 @@ public class BackgroundProcessor {
             bundle.putString(BUNDLE_KEY_TO + item.type, item.to);
             bundle.putInt(BUNDLE_KEY_COUNT + item.type, item.count);
             bundle.putString(BUNDLE_KEY_PRICE_UNIT + item.type, item.priceUnit);
+            bundle.putString(BUNDLE_KEY_CURSOR + item.type, item.cursor);
+            bundle.putInt(BUNDLE_KEY_DAYS_AGO + item.type, item.daysAgo);
             Message message = new Message();
             message.what = item.type;
             message.setData(bundle);
@@ -185,6 +195,8 @@ public class BackgroundProcessor {
                 bundle.putString(BUNDLE_KEY_TO + item.type, item.to);
                 bundle.putInt(BUNDLE_KEY_COUNT + item.type, item.count);
                 bundle.putString(BUNDLE_KEY_PRICE_UNIT + item.type, item.priceUnit);
+                bundle.putString(BUNDLE_KEY_CURSOR + item.type, item.cursor);
+                bundle.putInt(BUNDLE_KEY_DAYS_AGO + item.type, item.daysAgo);
                 Message message = new Message();
                 message.what = item.type;
                 message.setData(bundle);
@@ -206,6 +218,13 @@ public class BackgroundProcessor {
         mUpdateProcesses.add(new Item(key, type));
     }
 
+    public void registerPeriodicUpdate(String key, int type, String to, int count, String cursor, int daysAgo) {
+        if (mUpdateProcesses == null) {
+            return;
+
+        }
+        mUpdateProcesses.add(new Item(key, type, to, count, cursor, daysAgo));
+    }
 
     public void registerPeriodicUpdate(int unit, String key, int type, String to, int count) {
         if (mUpdateProcesses == null) {

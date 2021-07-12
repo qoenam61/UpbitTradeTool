@@ -13,6 +13,7 @@ import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.MonthCandle;
 import com.example.upbitautotrade.model.Ticker;
+import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
 
 import java.util.List;
@@ -34,6 +35,9 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
 
     private final MutableLiveData<CandleInput> mSearchMonthCandleInfo;
     private final LiveData<List<MonthCandle>> mResultMonthCandleInfo;
+
+    private final MutableLiveData<TradeInput> mSearchTradeInfo;
+    private final LiveData<List<TradeInfo>> mResultTradeInfo;
 
     public CoinEvaluationViewModel(Application application) {
         super(application);
@@ -84,6 +88,17 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
                         )
         );
 
+        mSearchTradeInfo = new MutableLiveData<>();
+        mResultTradeInfo = Transformations.switchMap(
+                mSearchTradeInfo, input ->
+                        mUpBitFetcher.getTradeInfo(
+                                input.marketId,
+                                input.to,
+                                input.count,
+                                input.cursor,
+                                input.daysAgo
+                        )
+        );
 
     }
 
@@ -139,6 +154,18 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
         return mResultMonthCandleInfo;
     }
 
+    public void searchTradeInfo(String marketId, String to, int count, String cursor, int daysAgo) {
+        TradeInput input = new TradeInput(marketId, to, count, cursor, daysAgo);
+        mSearchTradeInfo.setValue(input);
+    }
+
+    public LiveData<List<TradeInfo>> getTradeInfo() {
+        return mResultTradeInfo;
+    }
+
+
+
+
     private class CandleInput {
         int unit;
         String marketId;
@@ -168,4 +195,39 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
         }
     }
 
+    private class TradeInput {
+        String marketId;
+        String to;
+        int count;
+        String cursor;
+        int daysAgo;
+
+        public TradeInput(String marketId, String to, int count, String cursor, int daysAgo) {
+            this.marketId = marketId;
+            this.to = to;
+            this.count = count;
+            this.cursor = cursor;
+            this.daysAgo = daysAgo;
+        }
+
+        public TradeInput(String marketId, int count, String cursor, int daysAgo) {
+            this.marketId = marketId;
+            this.count = count;
+            this.cursor = cursor;
+            this.daysAgo = daysAgo;
+        }
+
+        public TradeInput(String marketId, String to, int count, String cursor) {
+            this.marketId = marketId;
+            this.to = to;
+            this.count = count;
+            this.cursor = cursor;
+        }
+
+        public TradeInput(String marketId, int count, String cursor) {
+            this.marketId = marketId;
+            this.count = count;
+            this.cursor = cursor;
+        }
+    }
 }

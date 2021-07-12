@@ -7,6 +7,7 @@ import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.MonthCandle;
 import com.example.upbitautotrade.model.Ticker;
+import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
 
 import java.util.List;
@@ -68,4 +69,33 @@ public interface UpBitApi {
     Call<List<MonthCandle>> getMonthsCandleInfo(@Query("market") String marketId,
                                                 @Query("to") String to,
                                                 @Query("count") int count);
+
+
+    @GET("/v1/trades/ticks")
+    Call<List<TradeInfo>> getTradeInfo(@Query("market") String marketId,
+                                       @Query("to") String to,
+                                       @Query("count") int count,
+//                                       @Query("cursor") String cursor,
+                                       @Query("daysAgo") int daysAgo);
+
+
+    @GET("/v1/trades/ticks")
+    Call<List<TradeInfo>> getTradeInfo(@Query("market") String marketId,
+                                       @Query("count") int count,
+//                                       @Query("cursor") String cursor,
+                                       @Query("daysAgo") int daysAgo);
+
+
+    @GET("/v1/trades/ticks")
+    Call<List<TradeInfo>> getTradeInfo(@Query("market") String marketId,
+                                       @Query("to") String to,
+                                       @Query("count") int count
+//                                       @Query("cursor") String cursor
+    );
+
+    @GET("/v1/trades/ticks")
+    Call<List<TradeInfo>> getTradeInfo(@Query("market") String marketId,
+                                       @Query("count") int count
+//                                       @Query("cursor") String cursor
+    );
 }
