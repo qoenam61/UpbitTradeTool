@@ -24,9 +24,10 @@ public class BackgroundProcessor {
 
     public static final int PERIODIC_UPDATE_ACCOUNTS_INFO = 1;
     public static final int PERIODIC_UPDATE_CHANCE_INFO = 2;
-    public static final int PERIODIC_UPDATE_TICKER_INFO = 3;
-    public static final int UPDATE_MARKETS_INFO_FOR_ACCOUNTS = 4;
-    public static final int UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION = 5;
+    public static final int PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS = 3;
+    public static final int PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION = 4;
+    public static final int UPDATE_MARKETS_INFO_FOR_ACCOUNTS = 5;
+    public static final int UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION = 6;
 
     private final String PERIODIC_UPDATE_KEY = "periodic_key";
     private final String PROCESS_UPDATE_KEY = "process_key";
@@ -37,7 +38,7 @@ public class BackgroundProcessor {
     private CoinEvaluationViewModel mCoinEvaluationViewModel;
 
 
-    private long mPeriodicTimer = 60;
+    private long mPeriodicTimer = 20;
     private final Queue<Item> mProcesses;
     private final ArrayList<Item> mUpdateProcesses;
 
@@ -53,11 +54,15 @@ public class BackgroundProcessor {
                 case PERIODIC_UPDATE_CHANCE_INFO:
                     mAccountsViewModel.searchChanceInfo(msg.getData().getString(PERIODIC_UPDATE_KEY + msg.what));
                     break;
-                case PERIODIC_UPDATE_TICKER_INFO:
+                case PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS:
                     mAccountsViewModel.searchTickerInfo(msg.getData().getString(PERIODIC_UPDATE_KEY + msg.what));
+                    break;
+                case PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION:
+                    mCoinEvaluationViewModel.searchTickerInfo(msg.getData().getString(PERIODIC_UPDATE_KEY + msg.what));
                     break;
                 case UPDATE_MARKETS_INFO_FOR_ACCOUNTS:
                     mAccountsViewModel.searchMarketsInfo(true);
+                    break;
                 case UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION:
                     mCoinEvaluationViewModel.searchMarketsInfo(true);
                 default:
@@ -65,6 +70,7 @@ public class BackgroundProcessor {
             }
         }
     };
+    private boolean mPauseProcessor = false;
 
     public BackgroundProcessor(ViewModelStoreOwner owner) {
         mAccountsViewModel = new ViewModelProvider(owner).get(AccountsViewModel.class);
@@ -73,9 +79,14 @@ public class BackgroundProcessor {
         mProcesses = new LinkedList<>();
         mUpdateProcesses = new ArrayList<Item>();
         mProcessor = new Thread(() -> {
-            while (true) {
-                process();
-                update();
+            while (!mPauseProcessor) {
+                try {
+                    process();
+                    update();
+                    Thread.sleep(mPeriodicTimer);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
@@ -84,7 +95,6 @@ public class BackgroundProcessor {
         if (mProcesses == null || mProcesses.isEmpty()) {
             return;
         }
-        Log.d(TAG, "[DEBUG] process: ");
         try {
             Item item = mProcesses.poll();
             Bundle bundle = new Bundle();
@@ -144,13 +154,14 @@ public class BackgroundProcessor {
             return;
 
         }
-        for (Iterator<Item> iterator = mUpdateProcesses.iterator(); iterator.hasNext(); ) {
+        mHandler.removeMessages(type);
+        Iterator<Item> iterator = mUpdateProcesses.iterator();
+        while (iterator.hasNext()) {
             Item item = iterator.next();
             if (item.type == type) {
                 iterator.remove();
             }
         }
-        mHandler.removeMessages(type);
     }
 
     public void removePeriodicUpdate(String key) {
@@ -167,11 +178,17 @@ public class BackgroundProcessor {
     }
 
     public void startBackgroundProcessor() {
+        mPauseProcessor = false;
         mProcessor.start();
     }
 
     public void stopBackgroundProcessor() {
+        mPauseProcessor = true;
         mProcessor.interrupt();
+    }
+
+    public void pauseBackgroundProcessor() {
+        mPauseProcessor = true;
     }
 
     public void setPeriodicTimer(long timer) {

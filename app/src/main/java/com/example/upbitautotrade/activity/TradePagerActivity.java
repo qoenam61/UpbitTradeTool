@@ -76,6 +76,21 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         mBackgroundProcessor.stopBackgroundProcessor();

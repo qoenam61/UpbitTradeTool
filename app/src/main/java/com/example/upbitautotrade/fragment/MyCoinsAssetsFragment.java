@@ -1,6 +1,7 @@
 package com.example.upbitautotrade.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,7 +16,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.Ticker;
-import com.example.upbitautotrade.utils.BackgroundProcessor;
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
@@ -29,7 +29,8 @@ import java.util.Set;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_ACCOUNTS_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_CHANCE_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_ACCOUNTS;
 
 public class MyCoinsAssetsFragment extends Fragment {
     private static final String TAG = "MyCoinsAssetsFragment";
@@ -76,8 +77,8 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mActivity.getProcessor().registerProcess(null, BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_ACCOUNTS);
         if (mViewModel != null) {
+            mActivity.getProcessor().registerProcess(null, UPDATE_MARKETS_INFO_FOR_ACCOUNTS);
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
                     marketsInfo -> {
@@ -85,6 +86,7 @@ public class MyCoinsAssetsFragment extends Fragment {
                         while (iterator.hasNext()) {
                             MarketInfo marketInfo = iterator.next();
                             mMarketsMapInfo.put(marketInfo.getMarket(), marketInfo);
+                            Log.d(TAG, "[DEBUG] onStart: marketInfo: "+marketInfo.getMarket());
                         }
                     }
             );
@@ -114,6 +116,7 @@ public class MyCoinsAssetsFragment extends Fragment {
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
+                            Log.d(TAG, "[DEBUG] onStart: tick: "+tick.getMarket());
                             mTickerMapInfo.put(tick.getMarket(), tick);
                         }
                     }
@@ -135,7 +138,7 @@ public class MyCoinsAssetsFragment extends Fragment {
         super.onPause();
         mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_ACCOUNTS_INFO);
         mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_CHANCE_INFO);
-        mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO);
+        mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS);
     }
 
     @Override
@@ -179,7 +182,7 @@ public class MyCoinsAssetsFragment extends Fragment {
             String key = regIterator.next();
             mActivity.getProcessor().registerPeriodicUpdate(MARKET_NAME + "-" + key, PERIODIC_UPDATE_ACCOUNTS_INFO);
             if (!key.equals("KRW-KRW")) {
-                mActivity.getProcessor().registerPeriodicUpdate(MARKET_NAME + "-" + key, PERIODIC_UPDATE_TICKER_INFO);
+                mActivity.getProcessor().registerPeriodicUpdate(MARKET_NAME + "-" + key, PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS);
             }
         }
     }

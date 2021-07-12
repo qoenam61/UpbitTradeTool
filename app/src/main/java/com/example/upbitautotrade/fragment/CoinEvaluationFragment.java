@@ -17,7 +17,6 @@ import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.Ticker;
-import com.example.upbitautotrade.utils.BackgroundProcessor;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +28,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION;
 
 public class CoinEvaluationFragment extends Fragment {
     public static final String TAG = "CoinEvaluationFragment";;
@@ -76,9 +77,7 @@ public class CoinEvaluationFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        Log.d(TAG, "[DEBUG] onStart: ");
-
-        mActivity.getProcessor().registerProcess(null, BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION);
+        mActivity.getProcessor().registerProcess(null, UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION);
         if (mViewModel != null) {
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
@@ -91,22 +90,23 @@ public class CoinEvaluationFragment extends Fragment {
                             if (marketInfo.getMarket().contains(MARKET_NAME+"-")
                                     && !marketInfo.getMarket_warning().contains(MARKET_WARNING)) {
                                 mMarketsMapInfo.put(marketInfo.getMarket(), marketInfo);
+                                Log.d(TAG, "[DEBUG] onStart: marketInfo: "+marketInfo.getMarket());
                                 mCoinKeyList.add(marketInfo.getMarket());
                             }
                         }
-                        mCoinListAdapter.setItems(mCoinKeyList);
                     }
             );
 
             mViewModel.getResultTickerInfo().observe(
                     getViewLifecycleOwner(),
                     ticker -> {
-                        Log.d(TAG, "[DEBUG] onStart: mTickerMapInfo: ");
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
+                            Log.d(TAG, "[DEBUG] onStart: tick: "+tick.getMarket());
                             mTickerMapInfo.put(tick.getMarket(), tick);
                         }
+                        mCoinListAdapter.setItems(mCoinKeyList);
                         mCoinListAdapter.notifyDataSetChanged();
                     }
             );
@@ -114,9 +114,14 @@ public class CoinEvaluationFragment extends Fragment {
     }
 
     @Override
+    public void onPause() {
+        super.onPause();
+        mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
+    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "[DEBUG] onResume: ");
         registerPeriodicUpdate(mMarketsMapInfo.keySet());
     }
 
@@ -125,8 +130,7 @@ public class CoinEvaluationFragment extends Fragment {
         while (regIterator.hasNext()) {
             String key = regIterator.next();
             if (!key.equals("KRW-KRW")) {
-                Log.d(TAG, "[DEBUG] registerPeriodicUpdate: PERIODIC_UPDATE_TICKER_INFO");
-                mActivity.getProcessor().registerPeriodicUpdate(key, PERIODIC_UPDATE_TICKER_INFO);
+                mActivity.getProcessor().registerPeriodicUpdate(key, PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
             }
         }
     }
@@ -179,9 +183,11 @@ public class CoinEvaluationFragment extends Fragment {
             holder.mCoinName.setText(marketInfo.getKorean_name());
 
             if (ticker == null) {
+                Log.d(TAG, "[DEBUG] onBindViewHolder: ticker == null");
                 return;
             }
-            holder.mCurrentPrice.setText(ticker.getTradePrice().intValue());
+            Log.d(TAG, "[DEBUG] onBindViewHolder: getTradePrice "+ticker.getTradePrice().intValue());
+            holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().intValue()));
         }
 
         @Override
