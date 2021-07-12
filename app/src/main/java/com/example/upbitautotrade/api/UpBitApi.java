@@ -29,15 +29,13 @@ public interface UpBitApi {
     @GET("/v1/market/all")
     Call<List<MarketInfo>> getMarketInfo(@Query("isDetails") boolean isDetails);
 
-    @GET("/v1/candles/minutes/unit")
-    Call<List<Candle>> getMinCandleInfo(@Path("unit") String unit,
-                                        @Query("market") String marketId,
+    @GET("/v1/candles/minutes/1")
+    Call<List<Candle>> get1MinCandleInfo(@Query("market") String marketId,
                                         @Query("count") int count);
 
 
-    @GET("/v1/candles/minutes/unit")
-    Call<List<Candle>> getMinCandleInfo(@Path("unit") String unit,
-                                        @Query("market") String marketId,
+    @GET("/v1/candles/minutes/1")
+    Call<List<Candle>> get1MinCandleInfo(@Query("market") String marketId,
                                         @Query("to") String to,
                                         @Query("count") int count);
 

@@ -35,6 +35,7 @@ import java.util.Set;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO_FOR_COIN_EVALUATION;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MONTH_CANDLE_INFO_FOR_COIN_EVALUATION;
 
 public class CoinEvaluationFragment extends Fragment {
@@ -152,9 +153,19 @@ public class CoinEvaluationFragment extends Fragment {
                             Ticker tick = iterator.next();
                             mTickerMapInfo.put(tick.getMarket(), tick);
                         }
-                        Log.d(TAG, "[DEBUG] onStart: ticker");
                         mCoinListAdapter.setItems(mCoinKeyList);
                         mCoinListAdapter.notifyDataSetChanged();
+                    }
+            );
+
+            mViewModel.getMinCandleInfo().observe(
+                    getViewLifecycleOwner(),
+                    minCandle -> {
+                        Iterator<Candle> iterator = minCandle.iterator();
+                        while (iterator.hasNext()) {
+                            Candle candle = iterator.next();
+                            mMinCandleMapInfo.put(candle.getMarketId(), candle);
+                        }
                     }
             );
 
@@ -163,9 +174,8 @@ public class CoinEvaluationFragment extends Fragment {
                     monthCandle -> {
                         Iterator<MonthCandle> iterator = monthCandle.iterator();
                         while (iterator.hasNext()) {
-                            MonthCandle monthInfo = iterator.next();
-                            Log.d(TAG, "[DEBUG] onStart: monthInfo: "+monthInfo.getMarketId());
-                            mMonthCandleMapInfo.put(monthInfo.getMarketId(), monthInfo);
+                            MonthCandle candle = iterator.next();
+                            mMonthCandleMapInfo.put(candle.getMarketId(), candle);
                         }
                     }
             );
@@ -189,6 +199,7 @@ public class CoinEvaluationFragment extends Fragment {
             String key = regIterator.next();
             if (!key.equals("KRW-KRW")) {
                 mActivity.getProcessor().registerPeriodicUpdate(key, PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
+                mActivity.getProcessor().registerPeriodicUpdate(1, key, UPDATE_MIN_CANDLE_INFO_FOR_COIN_EVALUATION, null, 1);
             }
         }
     }
@@ -201,10 +212,6 @@ public class CoinEvaluationFragment extends Fragment {
                 Double tradeAmount = (monthCandle.getCandleAccTradePrice().doubleValue() / 100000000);
                 if (tradeAmount < 10000 && monthCandle.getTradePrice().intValue() < 100) {
                     iterator.remove();
-                    Log.d(TAG, "[DEBUG] updateKeySet -getCandleAccTradePrice: "
-                            + monthCandle.getMarketId()
-                            + " price: "
-                            + monthCandle.getTradePrice().intValue());
                 }
             }
         }
@@ -259,10 +266,8 @@ public class CoinEvaluationFragment extends Fragment {
             holder.mCoinName.setText(marketInfo.getKorean_name());
 
             if (ticker == null) {
-                Log.d(TAG, "[DEBUG] onBindViewHolder: ticker == null");
                 return;
             }
-            Log.d(TAG, "[DEBUG] onBindViewHolder: getTradePrice "+ticker.getTradePrice().intValue());
             holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().intValue()));
         }
 

@@ -101,7 +101,7 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
     }
 
 
-    public void searchMinCandleInfo(String unit, String marketId, String to, int count) {
+    public void searchMinCandleInfo(int unit, String marketId, String to, int count) {
         CandleInput input = new CandleInput(unit, marketId, to, count);
         mSearchMinCandleInfo.setValue(input);
     }
@@ -140,7 +140,7 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
     }
 
     private class CandleInput {
-        String unit;
+        int unit;
         String marketId;
         String to;
         int count;
@@ -152,7 +152,7 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
             this.count = count;
         }
 
-        public CandleInput(String unit, String marketId, String to, int count) {
+        public CandleInput(int unit, String marketId, String to, int count) {
             this.unit = unit;
             this.marketId = marketId;
             this.to = to;

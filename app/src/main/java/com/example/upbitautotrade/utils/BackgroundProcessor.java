@@ -56,7 +56,7 @@ public class BackgroundProcessor {
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
-            String unit = msg.getData().getString(BUNDLE_KEY_UNIT + msg.what);
+            int unit = msg.getData().getInt(BUNDLE_KEY_UNIT + msg.what);
             String marketId = msg.getData().getString(BUNDLE_KEY_MARKET_ID + msg.what);
             String to = msg.getData().getString(BUNDLE_KEY_TO + msg.what);
             int count = msg.getData().getInt(BUNDLE_KEY_COUNT + msg.what);
@@ -127,7 +127,7 @@ public class BackgroundProcessor {
             Item item = mProcesses.poll();
             Bundle bundle = new Bundle();
             bundle.putString(BUNDLE_KEY_MARKET_ID + item.type, item.key);
-            bundle.putString(BUNDLE_KEY_UNIT + item.type, item.unit);
+            bundle.putInt(BUNDLE_KEY_UNIT + item.type, item.unit);
             bundle.putString(BUNDLE_KEY_TO + item.type, item.to);
             bundle.putInt(BUNDLE_KEY_COUNT + item.type, item.count);
             bundle.putString(BUNDLE_KEY_PRICE_UNIT + item.type, item.priceUnit);
@@ -148,7 +148,7 @@ public class BackgroundProcessor {
         mProcesses.offer(new Item(key, type));
     }
 
-    public void registerProcess(String unit, String key, int type,  String to, int count) {
+    public void registerProcess(int unit, String key, int type,  String to, int count) {
         if (mProcesses == null) {
             return;
         }
@@ -181,7 +181,7 @@ public class BackgroundProcessor {
                 Item item = iterator.next();
                 Bundle bundle = new Bundle();
                 bundle.putString(BUNDLE_KEY_MARKET_ID + item.type, item.key);
-                bundle.putString(BUNDLE_KEY_UNIT + item.type, item.unit);
+                bundle.putInt(BUNDLE_KEY_UNIT + item.type, item.unit);
                 bundle.putString(BUNDLE_KEY_TO + item.type, item.to);
                 bundle.putInt(BUNDLE_KEY_COUNT + item.type, item.count);
                 bundle.putString(BUNDLE_KEY_PRICE_UNIT + item.type, item.priceUnit);
@@ -204,6 +204,15 @@ public class BackgroundProcessor {
 
         }
         mUpdateProcesses.add(new Item(key, type));
+    }
+
+
+    public void registerPeriodicUpdate(int unit, String key, int type, String to, int count) {
+        if (mUpdateProcesses == null) {
+            return;
+
+        }
+        mUpdateProcesses.add(new Item(unit, key, type, to, count));
     }
 
     public void registerPeriodicUpdate(String key, int type, String to, int count) {

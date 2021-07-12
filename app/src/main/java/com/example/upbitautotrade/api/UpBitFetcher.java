@@ -163,11 +163,11 @@ public class UpBitFetcher {
         return result;
     }
 
-    public LiveData<List<Candle>> getMinCandleInfo(String unit, String marketId, String to, int count) {
+    public LiveData<List<Candle>> getMinCandleInfo(int unit, String marketId, String to, int count) {
         MutableLiveData<List<Candle>> result = new MutableLiveData<>();
         Call<List<Candle>> call = to != null ?
-                mTickerRetrofit.getUpBitApi().getMinCandleInfo(unit, marketId, to, count)
-                : mTickerRetrofit.getUpBitApi().getMinCandleInfo(unit, marketId, count);
+                mTickerRetrofit.getUpBitApi().get1MinCandleInfo(marketId, to, count)
+                : mTickerRetrofit.getUpBitApi().get1MinCandleInfo(marketId, count);
         call.enqueue(new Callback<List<Candle>>() {
             @Override
             public void onResponse(Call<List<Candle>> call, Response<List<Candle>> response) {

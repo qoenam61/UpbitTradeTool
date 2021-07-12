@@ -86,7 +86,6 @@ public class MyCoinsAssetsFragment extends Fragment {
                         while (iterator.hasNext()) {
                             MarketInfo marketInfo = iterator.next();
                             mMarketsMapInfo.put(marketInfo.getMarket(), marketInfo);
-                            Log.d(TAG, "[DEBUG] onStart: marketInfo: "+marketInfo.getMarket());
                         }
                     }
             );

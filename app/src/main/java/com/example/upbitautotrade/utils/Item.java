@@ -3,7 +3,7 @@ package com.example.upbitautotrade.utils;
 public class Item {
     String key;
     int type;
-    String unit;
+    int unit;
     String to;
     int count;
     String priceUnit;
@@ -13,7 +13,7 @@ public class Item {
         this.type = type;
     }
 
-    public Item(String unit, String key, int type,  String to, int count) {
+    public Item(int unit, String key, int type,  String to, int count) {
         this.key = key;
         this.type = type;
         this.unit = unit;
