@@ -82,7 +82,7 @@ public class Ticker {
     @SerializedName("timestamp")
     long timestamp;
 
-    public String getMarket() {
+    public String getMarketId() {
         return market;
     }
 

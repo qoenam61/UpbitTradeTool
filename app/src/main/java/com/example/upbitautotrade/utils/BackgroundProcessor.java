@@ -278,6 +278,19 @@ public class BackgroundProcessor {
         }
     }
 
+    public void removePeriodicUpdate(String key, int type) {
+        if (mUpdateProcesses == null) {
+            return;
+
+        }
+        for (Iterator<Item> iterator = mUpdateProcesses.iterator(); iterator.hasNext(); ) {
+            Item item = iterator.next();
+            if (item.key == key) {
+                iterator.remove();
+            }
+        }
+    }
+
     public void startBackgroundProcessor() {
         mPauseProcessor = false;
         mProcessor.start();

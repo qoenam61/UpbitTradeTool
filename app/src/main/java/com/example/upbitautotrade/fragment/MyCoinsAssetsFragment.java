@@ -1,7 +1,6 @@
 package com.example.upbitautotrade.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,7 +114,7 @@ public class MyCoinsAssetsFragment extends Fragment {
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
-                            mTickerMapInfo.put(tick.getMarket(), tick);
+                            mTickerMapInfo.put(tick.getMarketId(), tick);
                         }
                     }
             );
