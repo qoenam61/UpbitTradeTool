@@ -163,9 +163,6 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
         return mResultTradeInfo;
     }
 
-
-
-
     private class CandleInput {
         int unit;
         String marketId;

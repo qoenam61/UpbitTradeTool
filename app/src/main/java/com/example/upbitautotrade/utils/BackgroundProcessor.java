@@ -180,7 +180,7 @@ public class BackgroundProcessor {
     }
 
     private void update() {
-        ArrayList<Item> processes = mUpdateProcesses;
+        ArrayList<Item> processes = (ArrayList<Item>)mUpdateProcesses.clone();
         if (processes == null || processes.isEmpty()) {
             return;
 
@@ -207,7 +207,10 @@ public class BackgroundProcessor {
             Log.w(TAG, "update: Error ConcurrentModificationException");
         } catch(InterruptedException e) {
             Log.w(TAG, "update: Error InterruptedException");
+        } finally {
+            processes.clear();
         }
+
     }
 
     public void registerPeriodicUpdate(String key, int type) {

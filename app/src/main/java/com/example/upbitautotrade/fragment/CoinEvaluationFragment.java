@@ -48,8 +48,10 @@ public class CoinEvaluationFragment extends Fragment {
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
     private final ArrayList mDeadMarketList;
-    private final int MONITOR_TICK_COUNTS = 10;
-    private final double MONITOR_START_RATE = 0.0005;
+    private final int MONITOR_TICK_COUNTS = 60;
+    private final double MONITOR_START_RATE = 0.003;
+    private final double MONITOR_PERIOD_TIME = 30;
+    private final double MONITOR_RISING_COUNT = 6;
 
 
     private View mView;
@@ -269,7 +271,7 @@ public class CoinEvaluationFragment extends Fragment {
                     float rate = (float) (changedPrice / prevPrice);
                     if (rate >= MONITOR_START_RATE) {
                         newTradeInfo.setRisingCount(1);
-                    } else if (rate < MONITOR_START_RATE * -2) {
+                    } else if (rate < MONITOR_START_RATE) {
                         newTradeInfo.setRisingCount(-1);
                     }
                 }
@@ -281,7 +283,9 @@ public class CoinEvaluationFragment extends Fragment {
                     newTradeInfo = tradeInfo;
                     newTradeInfo.setTickCount(prevTradeInfo.getTickCount());
                     newTradeInfo.setEndTime(tradeInfo.getTimestamp());
-                    if (prevTradeInfo.getRisingCount() > 0) {
+                    if (prevTradeInfo.getRisingCount() == 0 && newTradeInfo.getRisingCount() == 1) {
+                        newTradeInfo.setMonitoringStartTime(tradeInfo.getTimestamp());
+                    } else if (prevTradeInfo.getRisingCount() > 0) {
                         newTradeInfo.setMonitoringStartTime(prevTradeInfo.getMonitoringStartTime());
                     } else {
                         newTradeInfo.setMonitoringStartTime(0);
@@ -292,13 +296,27 @@ public class CoinEvaluationFragment extends Fragment {
                 if (newTradeInfo.getTickCount() == MONITOR_TICK_COUNTS) {
                     newTradeInfo.setTickCount(0);
                     newTradeInfo.setStartTime(tradeInfo.getTimestamp());
-                    double changedPrice = newTradeInfo.getTradePrice().doubleValue() - prevTradeInfo.getTradePrice().doubleValue();
-                    double prevPrice = prevTradeInfo.getTradePrice().doubleValue();;
-                    float rate = (float) (changedPrice / prevPrice);
-                    if (rate >= MONITOR_START_RATE) {
-                        newTradeInfo.setRisingCount(prevTradeInfo.getRisingCount() + 1);
-                    } else if (rate < MONITOR_START_RATE * -2) {
-                        newTradeInfo.setRisingCount(prevTradeInfo.getRisingCount() - 1);
+                    if (newTradeInfo.getEndTime() - newTradeInfo.getStartTime() < MONITOR_PERIOD_TIME * 1000) {
+                        double changedPrice = newTradeInfo.getTradePrice().doubleValue() - prevTradeInfo.getTradePrice().doubleValue();
+                        double prevPrice = prevTradeInfo.getTradePrice().doubleValue();;
+                        float rate = (float) (changedPrice / prevPrice);
+                        if (rate >= MONITOR_START_RATE) {
+                            newTradeInfo.setRisingCount(prevTradeInfo.getRisingCount() + 1);
+                        } else if (rate < MONITOR_START_RATE) {
+                            newTradeInfo.setRisingCount(prevTradeInfo.getRisingCount() - 1);
+                        }
+                    } else {
+                        newTradeInfo.setRisingCount(0);
+                    }
+
+                    if (newTradeInfo.getRisingCount() > MONITOR_RISING_COUNT && newTradeInfo.getMonitoringStartTime() - newTradeInfo.getEndTime() < MONITOR_PERIOD_TIME * 2 * 1000) {
+                        //Buy
+                        Log.d(TAG, "[DEBUG] BUY - market: "+newTradeInfo.getMarketId()+" BuyPrice: "+newTradeInfo.getTradePrice());
+                    } else if (newTradeInfo.getRisingCount() <= 0
+                            && (newTradeInfo.getMonitoringStartTime() == 0
+                            || newTradeInfo.getMonitoringStartTime() - newTradeInfo.getEndTime() > MONITOR_PERIOD_TIME * 2 * 1000)) {
+                        newTradeInfo.setRisingCount(0);
+                        newTradeInfo.setMonitoringStartTime(0);
                     }
                 }
                 DateFormat format = new SimpleDateFormat("HH:mm:ss");
