@@ -36,6 +36,10 @@ public class Candle {
     @SerializedName("unit")
     Integer unit;
 
+    int changedPrice;
+
+    float changedRate;
+
     public String getMarketId() {
         return market;
     }
@@ -78,5 +82,21 @@ public class Candle {
 
     public Integer getUnit() {
         return unit;
+    }
+
+    public int getChangedPrice() {
+        return changedPrice;
+    }
+
+    public float getChangedRate() {
+        return changedRate;
+    }
+
+    public void setChangedPrice(int changedPrice) {
+        this.changedPrice = changedPrice;
+    }
+
+    public void setChangedRate(float changedRate) {
+        this.changedRate = changedRate;
     }
 }

@@ -164,11 +164,6 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getMinCandleInfo().observe(
                     getViewLifecycleOwner(),
                     minCandles -> {
-                        Iterator<Candle> iterator = minCandles.iterator();
-                        while (iterator.hasNext()) {
-                            Candle candle = iterator.next();
-                            mMinCandleMapInfo.put(candle.getMarketId(), candle);
-                        }
                         updateMonitorKey(minCandles);
                     }
             );
@@ -319,24 +314,12 @@ public class CoinEvaluationFragment extends Fragment {
                         newTradeInfo.setMonitoringStartTime(0);
                     }
                 }
-                DateFormat format = new SimpleDateFormat("HH:mm:ss");
-                Log.d(TAG, "[DEBUG] getEvaluationTradeInfo - "
-                        + " getMarketId: " + newTradeInfo.getMarketId()
-                        + " getSequentialId: " + newTradeInfo.getSequentialId()
-                        + " time: "+format.format(newTradeInfo.getTimestamp())
-                        +" getRisingCount: "+newTradeInfo.getRisingCount()
-                        +" tickCount: "+newTradeInfo.getTickCount()
-                        +" getStartTime: "+newTradeInfo.getStartTime()
-                        +" getEndTime: "+newTradeInfo.getEndTime()
-                        +" getMonitoringStartTime: "+newTradeInfo.getMonitoringStartTime()
-                );
             }
             i++;
         }
 
         mTradeMapInfo.put(key, newTradeInfo);
 
-/*        mTradeMapInfo.put(key, newTradeInfo);
         DateFormat format = new SimpleDateFormat("HH:mm:ss");
         Log.d(TAG, "[DEBUG] getEvaluationTradeInfo - "
                 + " getMarketId: " + mTradeMapInfo.get(key).getMarketId()
@@ -348,7 +331,7 @@ public class CoinEvaluationFragment extends Fragment {
                 +" getEndTime: "+mTradeMapInfo.get(key).getEndTime()
                 +" getMonitoringStartTime: "+mTradeMapInfo.get(key).getMonitoringStartTime()
         );
-        */
+
     }
 
     private void updateMonitorKey(List<Candle> minCandlesInfo) {
@@ -357,11 +340,14 @@ public class CoinEvaluationFragment extends Fragment {
         }
         float[] tradePrice = new float[2];
         int i = 0;
-        String marketId = null;
+        String key = null;
         Iterator<Candle> iterator = minCandlesInfo.iterator();
         while (iterator.hasNext()) {
             Candle candle = iterator.next();
-            marketId = candle.getMarketId();
+            key = candle.getMarketId();
+            if (i == 0) {
+                mMinCandleMapInfo.put(key, candle);
+            }
             tradePrice[i] = candle.getTradePrice().intValue();
             i++;
         }
@@ -369,25 +355,28 @@ public class CoinEvaluationFragment extends Fragment {
         float changedPrice = tradePrice[0] - tradePrice[1];
         float prevPrice = tradePrice[1];
 
+        mMinCandleMapInfo.get(key).setChangedPrice((int) changedPrice);
+        mMinCandleMapInfo.get(key).setChangedRate(prevPrice != 0 ? (changedPrice / prevPrice) : 0);
+
         if (prevPrice != 0 && (changedPrice / prevPrice) > MONITOR_START_RATE) {
-            if (!mMonitorKeyList.contains(marketId)) {
+            if (!mMonitorKeyList.contains(key)) {
                 removeMonitoringPeriodicUpdate();
-                mMonitorKeyList.add(marketId);
+                mMonitorKeyList.add(key);
                 registerPeriodicUpdate(mMonitorKeyList);
                 mCoinListAdapter.setItems(mMonitorKeyList);
                 mCoinListAdapter.notifyDataSetChanged();
-                Log.d(TAG, "[DEBUG] updateMonitorKey - update: "+marketId);
+                Log.d(TAG, "[DEBUG] updateMonitorKey - update: "+key);
             }
         } else if (prevPrice != 0 && changedPrice / prevPrice < MONITOR_START_RATE * -2) {
-            if (mMonitorKeyList.contains(marketId)) {
+            if (mMonitorKeyList.contains(key)) {
                 removeMonitoringPeriodicUpdate();
-                mMonitorKeyList.remove(marketId);
+                mMonitorKeyList.remove(key);
                 registerPeriodicUpdate(mMonitorKeyList);
                 mCoinListAdapter.setItems(mMonitorKeyList);
                 mCoinListAdapter.notifyDataSetChanged();
-                mTickerMapInfo.remove(marketId);
-                mTradeMapInfo.remove(marketId);
-                Log.d(TAG, "[DEBUG] updateMonitorKey - remove: "+marketId);
+                mTickerMapInfo.remove(key);
+                mTradeMapInfo.remove(key);
+                Log.d(TAG, "[DEBUG] updateMonitorKey - remove: "+key);
             }
         }
     }
@@ -416,80 +405,6 @@ public class CoinEvaluationFragment extends Fragment {
             );
         }
     }
-
-    private TradeInfo getEvaluationTradeInfo(List<TradeInfo> tradesInfo) {
-        DateFormat format = new SimpleDateFormat("HH:mm:ss");
-
-        if (tradesInfo != null) {
-            TradeInfo result= new TradeInfo();
-            Iterator<TradeInfo> iterator = tradesInfo.iterator();
-
-            int i = 0;
-            while (iterator.hasNext()) {
-                TradeInfo tradeInfo = iterator.next();
-                TradeInfo prevTradeInfo = mTradeMapInfo.get(tradeInfo.getMarketId());
-                if (prevTradeInfo == null) {
-                    Log.d(TAG, "[DEBUG] getEvaluationTradeInfo first - getSequentialId: " + tradeInfo.getSequentialId() + " time: "+format.format(tradeInfo.getTimestamp()));
-
-                    return tradeInfo;
-                }
-                if (prevTradeInfo != null && tradeInfo.getSequentialId() > prevTradeInfo.getSequentialId()) {
-                    if (i == 0) {
-                        result = tradeInfo;
-                        result.setTickCount(prevTradeInfo.getTickCount());
-                        result.setStartTime(prevTradeInfo.getStartTime());
-                        if (prevTradeInfo.getRisingCount() > 0) {
-                            result.setMonitoringStartTime(prevTradeInfo.getMonitoringStartTime());
-                        }
-                        result.setRisingCount(prevTradeInfo.getRisingCount());
-                        result.setEndTime(tradeInfo.getEndTime());
-                        result.setSequentialId(tradeInfo.getSequentialId());
-                    }
-
-                    if (result.getTickCount() == MONITOR_TICK_COUNTS - 1) {
-                        result.setTickCount(0);
-//                        if (result.getRisingCount() == 1) {
-//                            result.setMonitoringStartTime(result.getMonitoringStartTime());
-//                        }
-                        result.setStartTime(tradeInfo.getTimestamp());
-
-                        if (result.getEndTime() - result.getStartTime() > 3 * 1000) {
-                            result.setRisingCount(0);
-                        } else {
-                            if (result.getEndTime() - result.getMonitoringStartTime() < 100 * 1000) {
-                                double changedPrice = result.getTradePrice().floatValue() - prevTradeInfo.getTradePrice().floatValue();
-                                double prevPrice = prevTradeInfo.getTradePrice().floatValue();
-                                if (changedPrice / prevPrice > MONITOR_START_RATE) {
-                                    if (result.getRisingCount() == 0) {
-                                        result.setMonitoringStartTime(result.getMonitoringStartTime());
-                                    }
-                                    result.setRisingCount(tradeInfo.getRisingCount() + 1);
-                                } else {
-                                    result.setRisingCount(tradeInfo.getRisingCount() - 1);
-                                }
-                            }
-                        }
-                    }
-                    result.setTickCount(result.getTickCount() + 1);
-
-                    Log.d(TAG, "[DEBUG] getEvaluationTradeInfo - "
-                                    + " getMarketId: " + result.getMarketId()
-                                    + " getSequentialId: " + result.getSequentialId()
-                                    + " time: "+format.format(result.getTimestamp())
-                                    +" getRisingCount: "+result.getRisingCount()
-                                    +" tickCount: "+result.getTickCount()
-                                    +" getStartTime: "+result.getStartTime()
-                                    +" getEndTime: "+result.getEndTime()
-                                    +" getMonitoringStartTime: "+result.getMonitoringStartTime()
-                    );
-                    i++;
-                }
-            }
-            return result;
-        }
-        return null;
-    }
-
 
     @Override
     public void onResume() {
@@ -577,16 +492,24 @@ public class CoinEvaluationFragment extends Fragment {
         @Override
         public void onBindViewHolder(CoinHolder holder, int position) {
             MarketInfo marketInfo = mMarketsMapInfo.get(mCoinListInfo.get(position));
-            Ticker ticker = mTickerMapInfo.get(mCoinListInfo.get(position));
             if (marketInfo == null) {
                 return;
             }
             holder.mCoinName.setText(marketInfo.getKorean_name());
 
-            if (ticker == null) {
-                return;
+            Ticker ticker = mTickerMapInfo.get(mCoinListInfo.get(position));
+            if (ticker != null) {
+                holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().intValue()));
+                holder.mTickAmount.setText(mFormat.format(ticker.getTradeVolume().doubleValue() * ticker.getTradePrice().doubleValue() / 10000000));
             }
-            holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().intValue()));
+
+            Candle candle = mMinCandleMapInfo.get(mCoinListInfo.get(position));
+            if (candle != null) {
+                String amount = mFormat.format(candle.getCandleAccTradeVolume().doubleValue() * candle.getTradePrice().doubleValue() / 10000000);
+                holder.mRatePerMin.setText(mPercentFormat.format(candle.getChangedRate()));
+                holder.mAmountPerMin.setText(amount);
+            }
+
         }
 
         @Override
