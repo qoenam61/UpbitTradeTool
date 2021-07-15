@@ -22,6 +22,7 @@ import com.example.upbitautotrade.model.MonthCandle;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
+import com.example.upbitautotrade.utils.BuyingItem;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 
 import org.jetbrains.annotations.NotNull;
@@ -49,19 +50,21 @@ public class CoinEvaluationFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
     private final ArrayList mDeadMarketList;
     private final int MONITOR_TICK_COUNTS = 60;
-    private final double MONITOR_START_RATE = 0.003;
+    private final double MONITOR_START_RATE = 0.001;
     private final double MONITOR_PERIOD_TIME = 30;
-    private final double MONITOR_RISING_COUNT = 6;
+    private final double MONITOR_RISING_COUNT = 1;
 
 
     private View mView;
 
     private CoinListAdapter mCoinListAdapter;
+    private CoinListAdapter mBuyingListAdapter;
     private UpBitTradeActivity mActivity;
     private CoinEvaluationViewModel mViewModel;
 
     private List<String> mCoinKeyList;
     private List<String> mMonitorKeyList;
+    private List<String> mBuyingKeyList;
     private final Map<String, MarketInfo> mMarketsMapInfo;
     private final Map<String, Ticker> mTickerMapInfo;
     private final Map<String, Candle> mMinCandleMapInfo;
@@ -69,6 +72,7 @@ public class CoinEvaluationFragment extends Fragment {
     private final Map<String, WeekCandle> mWeekCandleMapInfo;
     private final Map<String, MonthCandle> mMonthCandleMapInfo;
     private final Map<String, TradeInfo> mTradeMapInfo;
+    private final ArrayList<BuyingItem> mBuyingItemListInfo;
 
     private String[] deadMarket = {
             "KRW-NEO", "KRW-MTL", "KRW-OMG", "KRW-SNT", "KRW-WAVES",
@@ -100,6 +104,7 @@ public class CoinEvaluationFragment extends Fragment {
         mDeadMarketList = new ArrayList(Arrays.asList(deadMarket));
         mTradeMapInfo = new HashMap<>();
         mMonitorKeyList = new ArrayList<>();
+        mBuyingItemListInfo = new ArrayList<>();
     }
 
 
@@ -115,10 +120,16 @@ public class CoinEvaluationFragment extends Fragment {
                              Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_coin_evaluation, container, false);
         RecyclerView coinList = mView.findViewById(R.id.coin_evaluation_list);
+        RecyclerView buyingList = mView.findViewById(R.id.coin_buying_list);
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         coinList.setLayoutManager(layoutManager);
-        mCoinListAdapter = new CoinListAdapter();
+        mCoinListAdapter = new CoinListAdapter(true);
         coinList.setAdapter(mCoinListAdapter);
+
+        LinearLayoutManager layoutBuyManager = new LinearLayoutManager(getContext());
+        buyingList.setLayoutManager(layoutBuyManager);
+        mBuyingListAdapter = new CoinListAdapter(false);
+        buyingList.setAdapter(mBuyingListAdapter);
         return mView;
     }
 
@@ -156,7 +167,7 @@ public class CoinEvaluationFragment extends Fragment {
                             Ticker tick = iterator.next();
                             mTickerMapInfo.put(tick.getMarketId(), tick);
                         }
-                        mCoinListAdapter.setItems(mMonitorKeyList);
+                        mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                         mCoinListAdapter.notifyDataSetChanged();
                     }
             );
@@ -183,54 +194,6 @@ public class CoinEvaluationFragment extends Fragment {
                     getViewLifecycleOwner(),
                     tradesInfo -> {
                         mappingTradeMapInfo(tradesInfo);
-
-
-
-
-//                        getEvaluationTradeInfo(tradesInfo);
-//
-//                        Iterator<TradeInfo> iterator = tradesInfo.iterator();
-//                        while (iterator.hasNext()) {
-//                            TradeInfo tradeInfo = iterator.next();
-//                        }
-
-//                        mTradeMapInfo.put(tradeInfo.getMarketId(), tradeInfo);
-//
-//                        TradeInfo tradeInfo = getEvaluationTradeInfo(tradesInfo);
-
-/*                        DateFormat format = new SimpleDateFormat("HH:mm:ss");
-                        Iterator<TradeInfo> iterator = tradesInfo.iterator();
-                        while (iterator.hasNext()) {
-                            TradeInfo tradeInfo = iterator.next();
-//                            Log.d(TAG, "[DEBUG] MARKET: "+tradeInfo.getMarketId()
-//                                    + " DATE: "+tradeInfo.getTradeDateUtc()
-//                                    + " TIME: "+tradeInfo.getTradeTimeUtc()
-//                                    + " Price: "+tradeInfo.getTradePrice()
-//                                    + " Volume: "+tradeInfo.getTradeVolume()
-//                                    + " PrevClosingPrice: "+tradeInfo.getPrevClosingPrice()
-//                                    + " RATE: "+tradeInfo.getChangePrice()
-//                                    + " ASK/BID: "+tradeInfo.getAskBid()
-//                                    + " SequentialId: "+tradeInfo.getSequentialId()
-//                            );
-                        }
-                        TradeInfo tradeInfo = getEvaluationTradeInfo(tradesInfo);
-                        mTradeMapInfo.put(tradeInfo.getMarketId(), tradeInfo);
-//                        Log.d(TAG, "[DEBUG] MARKET- Result: "+tradeInfo.getMarketId()
-//                                + " DATE: "+tradeInfo.getTradeDateUtc()
-//                                + " TIME: "+tradeInfo.getTradeTimeUtc()
-//                                + " timeStamp: "+format.format(tradeInfo.getTimestamp())
-//                                + " Price: "+tradeInfo.getTradePrice()
-//                                + " Volume: "+tradeInfo.getTradeVolume()
-//                                + " PrevClosingPrice: "+tradeInfo.getPrevClosingPrice()
-//                                + " RATE: "+tradeInfo.getChangePrice()
-//                                + " ASK/BID: "+tradeInfo.getAskBid()
-//                                + " SequentialId: "+tradeInfo.getSequentialId()
-//                                + " startTime: "+format.format(tradeInfo.getStartTime())
-//                                + " endTime: "+format.format(tradeInfo.getEndTime())
-//                                + " diff0: "+(tradeInfo.getEndTime() - tradeInfo.getStartTime())
-//                                + " diff1: "+format.format(tradeInfo.getEndTime() - tradeInfo.getStartTime())
-//                                + " RisingCount: "+tradeInfo.getTickCount());
-                    */
                     }
             );
         }
@@ -306,6 +269,13 @@ public class CoinEvaluationFragment extends Fragment {
 
                     if (newTradeInfo.getRisingCount() > MONITOR_RISING_COUNT && newTradeInfo.getMonitoringStartTime() - newTradeInfo.getEndTime() < MONITOR_PERIOD_TIME * 2 * 1000) {
                         //Buy
+                        BuyingItem item = new BuyingItem();
+                        item.setMarketId(newTradeInfo.getMarketId());
+                        item.setBuyingPrice(newTradeInfo.getTradePrice().intValue());
+                        item.setBuyingAmount(5000000);
+                        mBuyingItemListInfo.add(item);
+                        mBuyingListAdapter.setBuyingItems(mBuyingItemListInfo);
+                        mBuyingListAdapter.notifyDataSetChanged();
                         Log.d(TAG, "[DEBUG] BUY - market: "+newTradeInfo.getMarketId()+" BuyPrice: "+newTradeInfo.getTradePrice());
                     } else if (newTradeInfo.getRisingCount() <= 0
                             && (newTradeInfo.getMonitoringStartTime() == 0
@@ -363,7 +333,7 @@ public class CoinEvaluationFragment extends Fragment {
                 removeMonitoringPeriodicUpdate();
                 mMonitorKeyList.add(key);
                 registerPeriodicUpdate(mMonitorKeyList);
-                mCoinListAdapter.setItems(mMonitorKeyList);
+                mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                 mCoinListAdapter.notifyDataSetChanged();
                 Log.d(TAG, "[DEBUG] updateMonitorKey - update: "+key);
             }
@@ -372,7 +342,7 @@ public class CoinEvaluationFragment extends Fragment {
                 removeMonitoringPeriodicUpdate();
                 mMonitorKeyList.remove(key);
                 registerPeriodicUpdate(mMonitorKeyList);
-                mCoinListAdapter.setItems(mMonitorKeyList);
+                mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                 mCoinListAdapter.notifyDataSetChanged();
                 mTickerMapInfo.remove(key);
                 mTradeMapInfo.remove(key);
@@ -437,34 +407,31 @@ public class CoinEvaluationFragment extends Fragment {
         mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO_FOR_COIN_EVALUATION);
     }
 
-    private void updateKeySet(List<String> keySet, MonthCandle monthCandle) {
-        Iterator<String> iterator = keySet.iterator();
-        while (iterator.hasNext()) {
-            String key = iterator.next();
-            if (key.equals(monthCandle.getMarketId())) {
-                Double tradeAmount = (monthCandle.getCandleAccTradePrice().doubleValue() / 100000000);
-                if (tradeAmount < 10000 && monthCandle.getTradePrice().intValue() < 100) {
-                    iterator.remove();
-                }
-            }
-        }
-
-    }
-
     private class CoinHolder extends RecyclerView.ViewHolder {
         public TextView mCoinName;
         public TextView mCurrentPrice;
         public TextView mRatePerMin;
         public TextView mTickAmount;
         public TextView mAmountPerMin;
+        public TextView mChangeRate;
+        public TextView mBuyingPrice;
+        public TextView mBuyingAmount;
 
-        public CoinHolder(@NonNull @NotNull View itemView) {
+        public CoinHolder(@NonNull @NotNull View itemView, boolean isMonitor) {
             super(itemView);
-            mCoinName = itemView.findViewById(R.id.coin_name);
-            mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
-            mRatePerMin = itemView.findViewById(R.id.coin_variant_rate);
-            mTickAmount = itemView.findViewById(R.id.coin_tick_amount);
-            mAmountPerMin = itemView.findViewById(R.id.coin_amount);
+            if (isMonitor) {
+                mCoinName = itemView.findViewById(R.id.coin_name);
+                mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
+                mRatePerMin = itemView.findViewById(R.id.coin_change_rate);
+                mTickAmount = itemView.findViewById(R.id.buying_price);
+                mAmountPerMin = itemView.findViewById(R.id.buying_amount);
+            } else {
+                mCoinName = itemView.findViewById(R.id.coin_name);
+                mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
+                mChangeRate = itemView.findViewById(R.id.coin_change_rate);
+                mBuyingPrice = itemView.findViewById(R.id.buying_price);
+                mBuyingAmount = itemView.findViewById(R.id.buying_amount);
+            }
         }
     }
 
@@ -473,48 +440,78 @@ public class CoinEvaluationFragment extends Fragment {
         private DecimalFormat mNonZeroFormat;
         private DecimalFormat mPercentFormat;
         private List<String> mCoinListInfo;
+        private List<BuyingItem> mBuyingListInfo;
+        private boolean mIsMonitor;
 
-        public void setItems(List<String> coinList) {
-            mCoinListInfo = coinList;
-            notifyDataSetChanged();
+        public CoinListAdapter(boolean isMonitor) {
+            mIsMonitor = isMonitor;
             mFormat = new DecimalFormat("###,###,###,###.###");
             mNonZeroFormat = new DecimalFormat("###,###,###,###");
             mPercentFormat = new DecimalFormat("###.##" + "%");
         }
 
+        public void setMonitoringItems(List<String> coinList) {
+            mCoinListInfo = coinList;
+            notifyDataSetChanged();
+        }
+
+        public void setBuyingItems(List<BuyingItem> coinList) {
+            mBuyingListInfo = coinList;
+            notifyDataSetChanged();
+        }
+
         @Override
         public CoinHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            View view = LayoutInflater.from(parent.getContext())
-                    .inflate(R.layout.evaluation_coin_item, parent, false);
-            return new CoinHolder(view);
+            View view;
+            if (mIsMonitor) {
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.evaluation_coin_item, parent, false);
+            } else {
+                view = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.evaluation_buying_coin_item, parent, false);
+            }
+            return new CoinHolder(view, mIsMonitor);
         }
 
         @Override
         public void onBindViewHolder(CoinHolder holder, int position) {
-            MarketInfo marketInfo = mMarketsMapInfo.get(mCoinListInfo.get(position));
-            if (marketInfo == null) {
-                return;
-            }
-            holder.mCoinName.setText(marketInfo.getKorean_name());
+            if (mIsMonitor) {
+                MarketInfo marketInfo = mMarketsMapInfo.get(mCoinListInfo.get(position));
+                if (marketInfo == null) {
+                    return;
+                }
+                holder.mCoinName.setText(marketInfo.getKorean_name());
+                Ticker ticker = mTickerMapInfo.get(mCoinListInfo.get(position));
+                if (ticker != null) {
+                    holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().intValue()));
+                    holder.mTickAmount.setText(mFormat.format(ticker.getTradeVolume().doubleValue() * ticker.getTradePrice().doubleValue() / 10000000));
+                }
 
-            Ticker ticker = mTickerMapInfo.get(mCoinListInfo.get(position));
-            if (ticker != null) {
-                holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().intValue()));
-                holder.mTickAmount.setText(mFormat.format(ticker.getTradeVolume().doubleValue() * ticker.getTradePrice().doubleValue() / 10000000));
+                Candle candle = mMinCandleMapInfo.get(mCoinListInfo.get(position));
+                if (candle != null) {
+                    String amount = mFormat.format(candle.getCandleAccTradeVolume().doubleValue() * candle.getTradePrice().doubleValue() / 10000000);
+                    holder.mRatePerMin.setText(mPercentFormat.format(candle.getChangedRate()));
+                    holder.mAmountPerMin.setText(amount);
+                }
+            } else {
+                MarketInfo marketInfo = mMarketsMapInfo.get(mBuyingListInfo.get(position));
+                Ticker ticker = mTickerMapInfo.get(mBuyingListInfo.get(position));
+                if (ticker != null) {
+                    holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().intValue()));
+                }
             }
-
-            Candle candle = mMinCandleMapInfo.get(mCoinListInfo.get(position));
-            if (candle != null) {
-                String amount = mFormat.format(candle.getCandleAccTradeVolume().doubleValue() * candle.getTradePrice().doubleValue() / 10000000);
-                holder.mRatePerMin.setText(mPercentFormat.format(candle.getChangedRate()));
-                holder.mAmountPerMin.setText(amount);
-            }
-
         }
 
         @Override
         public int getItemCount() {
-            return mCoinListInfo != null ? mCoinListInfo.size() : 0;
+            int count = 0;
+            if (mIsMonitor) {
+                count = mCoinListInfo != null ? mCoinListInfo.size() : 0;
+            } else {
+                count = mBuyingListInfo != null ? mBuyingListInfo.size() : 0;
+            }
+            Log.d(TAG, "[DEBUG] getItemCount: "+count);
+            return count;
         }
     }
 }
