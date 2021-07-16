@@ -84,6 +84,8 @@ public class Ticker implements Serializable {
     @SerializedName("timestamp")
     long timestamp;
 
+    Number sumTradePrice;
+
     public String getMarketId() {
         return market;
     }
@@ -186,5 +188,13 @@ public class Ticker implements Serializable {
 
     public long getTimestamp() {
         return timestamp;
+    }
+
+    public void setSumTradePrice(Number sumTradePrice) {
+        this.sumTradePrice = sumTradePrice;
+    }
+
+    public Number getSumTradePrice() {
+        return sumTradePrice;
     }
 }

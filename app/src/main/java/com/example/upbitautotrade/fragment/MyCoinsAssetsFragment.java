@@ -22,14 +22,12 @@ import com.example.upbitautotrade.model.Accounts;
 
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_ACCOUNTS_INFO;
@@ -104,7 +102,7 @@ public class MyCoinsAssetsFragment extends Fragment {
                         Iterator<MarketInfo> iterator = marketsInfo.iterator();
                         while (iterator.hasNext()) {
                             MarketInfo marketInfo = iterator.next();
-                            mMarketsMapInfo.put(marketInfo.getMarket(), marketInfo);
+                            mMarketsMapInfo.put(marketInfo.getMarketId(), marketInfo);
                         }
                     }
             );

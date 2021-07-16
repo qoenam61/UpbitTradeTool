@@ -56,18 +56,18 @@ public class CoinEvaluationFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
 
     private final int MONITOR_TICK_COUNTS = 60;
-    private final double MONITOR_START_RATE = 0.0001;
+    private final double MONITOR_START_RATE = 0.01;
     private final double MONITOR_PERIOD_TIME = 30;
-    private final double MONITOR_RISING_COUNT = 1;
+    private final double MONITOR_RISING_COUNT = 6;
 
     private View mView;
 
-    private CoinListAdapter mCoinListAdapter;
-    private CoinListAdapter mBuyingListAdapter;
+
     private UpBitTradeActivity mActivity;
     private CoinEvaluationViewModel mViewModel;
 
-    private List<String> mCoinKeyList;
+    private CoinListAdapter mCoinListAdapter;
+    private CoinListAdapter mBuyingListAdapter;
     private List<String> mMonitorKeyList;
     private List<String> mBuyingItemKeyList;
     private ArrayList mDeadMarketList;
@@ -83,22 +83,11 @@ public class CoinEvaluationFragment extends Fragment {
     boolean mIsStarting = false;
 
     private String[] deadMarket = {
-            "KRW-NEO", "KRW-MTL", "KRW-OMG", "KRW-SNT", "KRW-WAVES",
-            "KRW-XEM", "KRW-QTUM", "KRW-LSK", "KRW-ARDR", "KRW-ARK",
-            "KRW-STORJ", "KRW-GRS", "KRW-REP", "KRW-SBD", "KRW-POWR",
-            "KRW-BTG", "KRW-ICX", "KRW-SC", "KRW-ONT", "KRW-ZIL",
-            "KRW-POLY", "KRW-ZRX", "KRW-LOOM", "KRW-BAT", "KRW-IOST",
-            "KRW-RFR", "KRW-CVC", "KRW-IQ", "KRW-IOTA", "KRW-MFT",
-            "KRW-GAS", "KRW-ELF", "KRW-KNC", "KRW-BSV", "KRW-QKC",
-            "KRW-BTT", "KRW-MOC", "KRW-ENJ", "KRW-TFUEL", "KRW-ANKR",
-            "KRW-AERGO", "KRW-ATOM", "KRW-TT", "KRW-CRE", "KRW-MBL",
-            "KRW-WAXP", "KRW-HBAR", "KRW-MED", "KRW-MLK", "KRW-STPT",
-            "KRW-ORBS", "KRW-CHZ", "KRW-STMX", "KRW-DKA", "KRW-HIVE",
-            "KRW-KAVA", "KRW-AHT", "KRW-XTZ", "KRW-BORA", "KRW-JST",
-            "KRW-TON", "KRW-SXP", "KRW-HUNT", "KRW-PLA", "KRW-SRM",
-            "KRW-MVL", "KRW-STRAX", "KRW-AQT", "KRW-BCHA", " KRW-GLM",
-            "KRW-SSX", "KRW-META", "KRW-FCT2", "KRW-HUM", "KRW-STRK",
-            "KRW-PUNDIX", "KRW-STX",
+            "KRW-GLM", "KRW-WAX", "KRW-STR", "KRW-STM", "KRW-STE", "KRW-ARD", "KRW-MVL", "KRW-ORB", "KRW-HIV", "KRW-STR",
+            "KRW-POL", "KRW-IQ ", "KRW-ELF", "KRW-DKA", "KRW-JST", "KRW-MTL", "KRW-QKC", "KRW-BOR", "KRW-SSX", "KRW-POW",
+            "KRW-CRE", "KRW-TT ", "KRW-SBD", "KRW-GRS", "KRW-STP", "KRW-RFR", "KRW-HUM", "KRW-AER", "KRW-MBL", "KRW-MOC",
+            "KRW-HUN", "KRW-AHT", "KRW-FCT", "KRW-TON", "KRW-CBK", "KRW-PLA", "KRW-BTG", "KRW-SC ", "KRW-ICX", "KRW-ANK",
+            "KRW-IOS", "KRW-LSK", "KRW-KNC", "KRW-PUN", "KRW-STO"
     };
 
     public CoinEvaluationFragment() {
@@ -108,7 +97,6 @@ public class CoinEvaluationFragment extends Fragment {
         mDayCandleMapInfo = new HashMap<>();
         mWeekCandleMapInfo = new HashMap<>();
         mMonthCandleMapInfo = new HashMap<>();
-        mCoinKeyList = new ArrayList<>();
         mDeadMarketList = new ArrayList(Arrays.asList(deadMarket));
         mTradeMapInfo = new HashMap<>();
         mMonitorKeyList = new ArrayList<>();
@@ -130,7 +118,6 @@ public class CoinEvaluationFragment extends Fragment {
             mDayCandleMapInfo = (HashMap<String, DayCandle>) savedInstanceState.getSerializable("dayCandleInfo");
             mWeekCandleMapInfo = (HashMap<String, WeekCandle>) savedInstanceState.getSerializable("weekCandleInfo");
             mMonthCandleMapInfo = (HashMap<String, MonthCandle>) savedInstanceState.getSerializable("monthCandleInfo");
-            mCoinKeyList = (List<String>) savedInstanceState.getStringArrayList("coinKeyList");
             mDeadMarketList = (ArrayList) savedInstanceState.getStringArrayList("deadMarketList");
             mTradeMapInfo = (HashMap<String, TradeInfo>) savedInstanceState.getSerializable("tradeMapInfo");
             mMonitorKeyList = (List<String>) savedInstanceState.getStringArrayList("monitorKeyList");
@@ -147,7 +134,6 @@ public class CoinEvaluationFragment extends Fragment {
         outState.putSerializable("dayCandleInfo", (Serializable) mDayCandleMapInfo);
         outState.putSerializable("weekCandleInfo", (Serializable) mWeekCandleMapInfo);
         outState.putSerializable("monthCandleInfo", (Serializable) mMonthCandleMapInfo);
-        outState.putStringArrayList("coinKeyList", (ArrayList<String>) mCoinKeyList);
         outState.putStringArrayList("deadMarketList", mDeadMarketList);
         outState.putSerializable("tradeMapInfo", (Serializable) mTradeMapInfo);
         outState.putStringArrayList("monitorKeyList", (ArrayList<String>) mMonitorKeyList);
@@ -197,17 +183,15 @@ public class CoinEvaluationFragment extends Fragment {
                     getViewLifecycleOwner(),
                     marketsInfo -> {
                         mMarketsMapInfo.clear();
-                        mCoinKeyList.clear();
                         Iterator<MarketInfo> iterator = marketsInfo.iterator();
                         while (iterator.hasNext()) {
                             MarketInfo marketInfo = iterator.next();
-                            if (marketInfo.getMarket().contains(MARKET_NAME+"-")
+                            if (marketInfo.getMarketId().contains(MARKET_NAME+"-")
                                     && !marketInfo.getMarket_warning().contains(MARKET_WARNING)) {
-                                if (mDeadMarketList.contains(marketInfo.getMarket())) {
+                                if (mDeadMarketList.contains(marketInfo.getMarketId())) {
                                     continue;
                                 }
-                                mMarketsMapInfo.put(marketInfo.getMarket(), marketInfo);
-                                mCoinKeyList.add(marketInfo.getMarket());
+                                mMarketsMapInfo.put(marketInfo.getMarketId(), marketInfo);
                             }
                         }
                         registerPeriodicUpdate(mMarketsMapInfo.keySet());
@@ -218,6 +202,7 @@ public class CoinEvaluationFragment extends Fragment {
                     getViewLifecycleOwner(),
                     ticker -> {
                         Iterator<Ticker> iterator = ticker.iterator();
+                        Number sumPrice = 0;
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
                             mTickerMapInfo.put(tick.getMarketId(), tick);
@@ -459,6 +444,7 @@ public class CoinEvaluationFragment extends Fragment {
         public TextView mCoinName;
         public TextView mCurrentPrice;
         public TextView mRatePerMin;
+        public TextView mRate;
         public TextView mTickAmount;
         public TextView mAmountPerMin;
         public TextView mChangeRate;
@@ -470,13 +456,14 @@ public class CoinEvaluationFragment extends Fragment {
             if (isMonitor) {
                 mCoinName = itemView.findViewById(R.id.coin_name);
                 mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
-                mRatePerMin = itemView.findViewById(R.id.coin_change_rate);
+                mRate = itemView.findViewById(R.id.coin_change_rate);
+                mRatePerMin = itemView.findViewById(R.id.coin_1min_change_rate);
                 mTickAmount = itemView.findViewById(R.id.buying_price);
                 mAmountPerMin = itemView.findViewById(R.id.buy_time);
             } else {
                 mCoinName = itemView.findViewById(R.id.coin_name);
                 mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
-                mChangeRate = itemView.findViewById(R.id.coin_change_rate);
+                mChangeRate = itemView.findViewById(R.id.coin_1min_change_rate);
                 mBuyingPrice = itemView.findViewById(R.id.buying_price);
                 mBuyingTime = itemView.findViewById(R.id.buy_time);
             }
@@ -535,8 +522,8 @@ public class CoinEvaluationFragment extends Fragment {
                 Ticker ticker = mTickerMapInfo.get(key);
                 if (ticker != null) {
                     holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().intValue()));
-                    holder.mTickAmount.setText(mFormat.format(ticker.getTradeVolume().doubleValue()
-                            * ticker.getTradePrice().doubleValue() / 1000000));
+                    holder.mRate.setText(mPercentFormat.format(ticker.getSignedChangeRate()));
+                    holder.mTickAmount.setText(mFormat.format(ticker.getAccTradePrice24h().doubleValue() / 10000000));
                 }
 
                 Candle candle = mMinCandleMapInfo.get(key);

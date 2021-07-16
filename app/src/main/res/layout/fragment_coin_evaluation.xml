@@ -173,7 +173,7 @@
                         android:gravity="right|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
-                        android:text="분당상승률"/>
+                        android:text="전일대비"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -188,7 +188,7 @@
                         android:gravity="right|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
-                        android:text="틱거래액\n(백만)"/>
+                        android:text="분당상승"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -203,7 +203,22 @@
                         android:gravity="right|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
-                        android:text="분당거래액\n(백만)"/>
+                        android:text="24h누적\n(천만)"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="분당거래\n(백만)"/>
                 </LinearLayout>
             </LinearLayout>
             <androidx.recyclerview.widget.RecyclerView

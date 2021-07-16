@@ -17,7 +17,7 @@ public class MarketInfo implements Serializable {
     @SerializedName("market_warning")
     private String marketWarning;
 
-    public String getMarket() {
+    public String getMarketId() {
         return market;
     }
 
