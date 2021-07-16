@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModelStoreOwner;
 
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
+import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
@@ -67,6 +68,10 @@ public class BackgroundProcessor {
             String cursor = msg.getData().getString(BUNDLE_KEY_CURSOR + msg.what);
             int daysAgo = msg.getData().getInt(BUNDLE_KEY_DAYS_AGO + msg.what);
 
+            if (msg != null) {
+                mPauseProcessor = true;
+                Log.d(TAG, "[DEBUG] handleMessage: "+msg.what);
+            }
             switch (msg.what) {
                 case PERIODIC_UPDATE_ACCOUNTS_INFO:
                     mAccountsViewModel.searchAccountsInfo(false);
@@ -110,16 +115,31 @@ public class BackgroundProcessor {
 
     public BackgroundProcessor(ViewModelStoreOwner owner) {
         mAccountsViewModel = new ViewModelProvider(owner).get(AccountsViewModel.class);
+        mAccountsViewModel.setOnPauseProcessorListener(new UpBitViewModel.RestartProcessorListener() {
+            @Override
+            public void restartProcessor() {
+                Log.d(TAG, "[DEBUG] mAccountsViewModel restartProcessor: ");
+                mPauseProcessor = false;
+            }
+        });
+
         mCoinEvaluationViewModel = new ViewModelProvider(owner).get(CoinEvaluationViewModel.class);
+        mCoinEvaluationViewModel.setOnPauseProcessorListener(new UpBitViewModel.RestartProcessorListener() {
+            @Override
+            public void restartProcessor() {
+                Log.d(TAG, "[DEBUG] mCoinEvaluationViewModel restartProcessor: ");
+                mPauseProcessor = false;
+            }
+        });
 
         mProcesses = new LinkedList<>();
         mUpdateProcesses = new ArrayList<Item>();
         mProcessor = new Thread(() -> {
-            while (!mPauseProcessor) {
+            while (true) {
                 try {
                     process();
                     update();
-`                    Thread.sleep(mPeriodicTimer);
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -132,6 +152,7 @@ public class BackgroundProcessor {
             return;
         }
         try {
+            Log.d(TAG, "[DEBUG] process restart: ");
             Item item = mProcesses.poll();
             Bundle bundle = new Bundle();
             bundle.putString(BUNDLE_KEY_MARKET_ID + item.type, item.key);
@@ -186,6 +207,11 @@ public class BackgroundProcessor {
 
         }
         try {
+            while (mPauseProcessor) {
+                Log.d(TAG, "[DEBUG] update wait: ");
+                Thread.sleep(10);
+            }
+            Log.d(TAG, "[DEBUG] update: ");
             Iterator<Item> iterator = processes.iterator();
             while (iterator.hasNext()) {
                 Item item = iterator.next();
@@ -201,7 +227,7 @@ public class BackgroundProcessor {
                 message.what = item.type;
                 message.setData(bundle);
                 mHandler.sendMessage(message);
-                Thread.sleep(mPeriodicTimer);
+                Thread.sleep(1);
             }
         } catch (ConcurrentModificationException e) {
             Log.w(TAG, "update: Error ConcurrentModificationException");
@@ -295,17 +321,11 @@ public class BackgroundProcessor {
     }
 
     public void startBackgroundProcessor() {
-        mPauseProcessor = false;
         mProcessor.start();
     }
 
     public void stopBackgroundProcessor() {
-        mPauseProcessor = true;
         mProcessor.interrupt();
-    }
-
-    public void pauseBackgroundProcessor() {
-        mPauseProcessor = true;
     }
 
     public void setPeriodicTimer(long timer) {

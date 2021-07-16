@@ -10,7 +10,6 @@ import androidx.lifecycle.Transformations;
 import com.example.upbitautotrade.api.UpBitFetcher;
 import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.DayCandle;
-import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.MonthCandle;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.model.TradeInfo;
@@ -105,6 +104,14 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
     @Override
     protected void initFetcher(Context context) {
         mUpBitFetcher = new UpBitFetcher(null);
+        mUpBitFetcher.setOnResponseListener(new UpBitFetcher.ReceivedResponse() {
+            @Override
+            public void onReceivedResponse() {
+                if (mPauseProcessorListener != null) {
+                    mPauseProcessorListener.restartProcessor();
+                }
+            }
+        });
     }
 
     public LiveData<List<Ticker>> getResultTickerInfo() {

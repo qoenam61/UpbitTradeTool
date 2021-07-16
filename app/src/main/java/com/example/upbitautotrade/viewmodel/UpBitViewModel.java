@@ -42,6 +42,12 @@ public class UpBitViewModel extends AndroidViewModel {
         void onLoginState(boolean isLogin);
     }
 
+    protected RestartProcessorListener mPauseProcessorListener;
+    public interface RestartProcessorListener {
+        void restartProcessor();
+    }
+
+
     public UpBitViewModel(Application application) {
         super(application);
 
@@ -75,6 +81,10 @@ public class UpBitViewModel extends AndroidViewModel {
 
     public void setOnListener(LoginState listener) {
         mListener = listener;
+    }
+
+    public void setOnPauseProcessorListener(RestartProcessorListener listener) {
+        mPauseProcessorListener = listener;
     }
 
     public void searchAccountsInfo(boolean isLogIn) {
