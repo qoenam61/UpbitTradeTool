@@ -50,13 +50,10 @@ public class BackgroundProcessor {
     private AccountsViewModel mAccountsViewModel;
     private CoinEvaluationViewModel mCoinEvaluationViewModel;
 
-
-    private long mPeriodicTimer = 30;
     private final Queue<Item> mProcesses;
     private final ArrayList<Item> mUpdateProcesses;
 
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
-
         @Override
         public void handleMessage(@NonNull Message msg) {
             super.handleMessage(msg);
@@ -70,7 +67,6 @@ public class BackgroundProcessor {
 
             if (msg != null) {
                 mPauseProcessor = true;
-                Log.d(TAG, "[DEBUG] handleMessage: "+msg.what);
             }
             switch (msg.what) {
                 case PERIODIC_UPDATE_ACCOUNTS_INFO:
@@ -118,7 +114,6 @@ public class BackgroundProcessor {
         mAccountsViewModel.setOnPauseProcessorListener(new UpBitViewModel.RestartProcessorListener() {
             @Override
             public void restartProcessor() {
-                Log.d(TAG, "[DEBUG] mAccountsViewModel restartProcessor: ");
                 mPauseProcessor = false;
             }
         });
@@ -127,7 +122,6 @@ public class BackgroundProcessor {
         mCoinEvaluationViewModel.setOnPauseProcessorListener(new UpBitViewModel.RestartProcessorListener() {
             @Override
             public void restartProcessor() {
-                Log.d(TAG, "[DEBUG] mCoinEvaluationViewModel restartProcessor: ");
                 mPauseProcessor = false;
             }
         });
@@ -136,13 +130,8 @@ public class BackgroundProcessor {
         mUpdateProcesses = new ArrayList<Item>();
         mProcessor = new Thread(() -> {
             while (true) {
-                try {
-                    process();
-                    update();
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+                process();
+                update();
             }
         });
     }
@@ -152,7 +141,6 @@ public class BackgroundProcessor {
             return;
         }
         try {
-            Log.d(TAG, "[DEBUG] process restart: ");
             Item item = mProcesses.poll();
             Bundle bundle = new Bundle();
             bundle.putString(BUNDLE_KEY_MARKET_ID + item.type, item.key);
@@ -166,7 +154,10 @@ public class BackgroundProcessor {
             message.what = item.type;
             message.setData(bundle);
             mHandler.sendMessage(message);
-            Thread.sleep(mPeriodicTimer);
+            Thread.sleep(1);
+            while (mPauseProcessor) {
+                Thread.sleep(10);
+            }
         } catch (InterruptedException e) {
             Log.w(TAG, "process: Error InterruptedException");
         }
@@ -207,11 +198,6 @@ public class BackgroundProcessor {
 
         }
         try {
-            while (mPauseProcessor) {
-                Log.d(TAG, "[DEBUG] update wait: ");
-                Thread.sleep(10);
-            }
-            Log.d(TAG, "[DEBUG] update: ");
             Iterator<Item> iterator = processes.iterator();
             while (iterator.hasNext()) {
                 Item item = iterator.next();
@@ -228,6 +214,9 @@ public class BackgroundProcessor {
                 message.setData(bundle);
                 mHandler.sendMessage(message);
                 Thread.sleep(1);
+                while (mPauseProcessor) {
+                    Thread.sleep(10);
+                }
             }
         } catch (ConcurrentModificationException e) {
             Log.w(TAG, "update: Error ConcurrentModificationException");
@@ -326,10 +315,6 @@ public class BackgroundProcessor {
 
     public void stopBackgroundProcessor() {
         mProcessor.interrupt();
-    }
-
-    public void setPeriodicTimer(long timer) {
-        mPeriodicTimer = timer;
     }
 
     public AccountsViewModel getAccountsViewModel() {

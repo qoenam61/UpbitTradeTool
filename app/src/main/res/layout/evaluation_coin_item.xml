@@ -76,7 +76,7 @@
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/buying_amount"
+                android:id="@+id/buy_time"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"

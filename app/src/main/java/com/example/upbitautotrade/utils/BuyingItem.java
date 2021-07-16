@@ -7,7 +7,7 @@ public class BuyingItem implements Serializable {
     int tradePrice;
     float profitRate;
     int buyingPrice;
-    int buyingAmount;
+    long buyingTime;
 
     public String getMarketId() {
         return marketId;
@@ -17,8 +17,8 @@ public class BuyingItem implements Serializable {
         return buyingPrice;
     }
 
-    public int getBuyingAmount() {
-        return buyingAmount;
+    public long getBuyingTime() {
+        return buyingTime;
     }
 
     public void setMarketId(String marketId) {
@@ -29,7 +29,7 @@ public class BuyingItem implements Serializable {
         this.buyingPrice = buyingPrice;
     }
 
-    public void setBuyingAmount(int buyingAmount) {
-        this.buyingAmount = buyingAmount;
+    public void setBuyingTime(long buyingTime) {
+        this.buyingTime = buyingTime;
     }
 }

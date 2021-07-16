@@ -18,7 +18,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
-import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
@@ -38,11 +37,12 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION;
@@ -58,7 +58,7 @@ public class CoinEvaluationFragment extends Fragment {
     private final int MONITOR_TICK_COUNTS = 60;
     private final double MONITOR_START_RATE = 0.0001;
     private final double MONITOR_PERIOD_TIME = 30;
-    private final double MONITOR_RISING_COUNT = 6;
+    private final double MONITOR_RISING_COUNT = 1;
 
     private View mView;
 
@@ -178,6 +178,7 @@ public class CoinEvaluationFragment extends Fragment {
             mIsStarting = true;
             startButton.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
         });
+
         Button endButton = mView.findViewById(R.id.stop_button);
         endButton.setBackgroundTintList(ColorStateList.valueOf(Color.LTGRAY));
         endButton.setOnClickListener(l -> {
@@ -254,6 +255,53 @@ public class CoinEvaluationFragment extends Fragment {
         }
     }
 
+    private void updateMonitorKey(List<Candle> minCandlesInfo) {
+        if (minCandlesInfo == null || minCandlesInfo.isEmpty()) {
+            return;
+        }
+        float[] tradePrice = new float[2];
+        int i = 0;
+        String key = null;
+        Iterator<Candle> iterator = minCandlesInfo.iterator();
+        while (iterator.hasNext()) {
+            Candle candle = iterator.next();
+            key = candle.getMarketId();
+            if (i == 0) {
+                mMinCandleMapInfo.put(key, candle);
+            }
+            tradePrice[i] = candle.getTradePrice().intValue();
+            i++;
+        }
+
+        float changedPrice = tradePrice[0] - tradePrice[1];
+        float prevPrice = tradePrice[1];
+
+        mMinCandleMapInfo.get(key).setChangedPrice((int) changedPrice);
+        mMinCandleMapInfo.get(key).setChangedRate(prevPrice != 0 ? (changedPrice / prevPrice) : 0);
+
+        if (prevPrice != 0 && (changedPrice / prevPrice) > MONITOR_START_RATE) {
+            if (!mMonitorKeyList.contains(key)) {
+                removeMonitoringPeriodicUpdate();
+                mMonitorKeyList.add(key);
+                registerPeriodicUpdate(mMonitorKeyList);
+                mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
+                mCoinListAdapter.notifyDataSetChanged();
+                Log.d(TAG, "[DEBUG] updateMonitorKey - add key : "+key);
+            }
+        } else if (prevPrice != 0 && changedPrice / prevPrice < MONITOR_START_RATE * -2) {
+            if (mMonitorKeyList.contains(key)) {
+                removeMonitoringPeriodicUpdate();
+                mMonitorKeyList.remove(key);
+                registerPeriodicUpdate(mMonitorKeyList);
+                mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
+                mCoinListAdapter.notifyDataSetChanged();
+                mTickerMapInfo.remove(key);
+                mTradeMapInfo.remove(key);
+                Log.d(TAG, "[DEBUG] updateMonitorKey - remove key : "+key);
+            }
+        }
+    }
+
     private void mappingTradeMapInfo(List<TradeInfo> tradesInfo) {
         if (tradesInfo == null || tradesInfo.isEmpty()) {
             return;
@@ -286,7 +334,7 @@ public class CoinEvaluationFragment extends Fragment {
                     if (rate >= MONITOR_START_RATE) {
                         newTradeInfo.setRisingCount(1);
                     } else if (rate < MONITOR_START_RATE) {
-                        newTradeInfo.setRisingCount(-1);
+                        newTradeInfo.setRisingCount(0);
                     }
                 }
             } else {
@@ -297,7 +345,7 @@ public class CoinEvaluationFragment extends Fragment {
                     newTradeInfo = tradeInfo;
                     newTradeInfo.setMonitoringStartTime(prevTradeInfo.getMonitoringStartTime());
                     newTradeInfo.setEndTime(tradeInfo.getTimestamp());
-                    newTradeInfo.setStartTime(-1);
+                    newTradeInfo.setStartTime(0);
                     newTradeInfo.setTickCount(prevTradeInfo.getTickCount());
                     newTradeInfo.setRisingCount(prevTradeInfo.getRisingCount());
                 }
@@ -311,28 +359,28 @@ public class CoinEvaluationFragment extends Fragment {
                         float prevPrice = prevTradeInfo.getTradePrice().floatValue();
                         float rate = changedPrice / prevPrice;
                         if (rate >= MONITOR_START_RATE) {
-                            if (newTradeInfo.getRisingCount() == 0) {
-                                newTradeInfo.setMonitoringStartTime(tradeInfo.getTimestamp());
-                            }
+                            newTradeInfo.setMonitoringStartTime(tradeInfo.getTimestamp());
                             newTradeInfo.setRisingCount(prevTradeInfo.getRisingCount() + 1);
-                        } else if (rate < MONITOR_START_RATE) {
+                        } else if (rate < 0) {
                             newTradeInfo.setRisingCount(prevTradeInfo.getRisingCount() - 1);
                             if (newTradeInfo.getRisingCount() < 0) {
+                                newTradeInfo.setRisingCount(0);
                                 newTradeInfo.setMonitoringStartTime(0);
                             }
-                        } else {
-                            newTradeInfo.setRisingCount(0);
-                            newTradeInfo.setMonitoringStartTime(0);
                         }
+                    } else {
+                        newTradeInfo.setRisingCount(0);
+                        newTradeInfo.setMonitoringStartTime(0);
                     }
-                    if (newTradeInfo.getRisingCount() > MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getMonitoringStartTime() < MONITOR_PERIOD_TIME * 2 * 1000) {
+
+                    if (newTradeInfo.getRisingCount() >= MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getMonitoringStartTime() < MONITOR_PERIOD_TIME * 2 * 1000) {
                         //Buy
                         if (!mBuyingItemKeyList.contains(key)) {
                             mBuyingItemKeyList.add(key);
                             BuyingItem item = new BuyingItem();
                             item.setMarketId(key);
                             item.setBuyingPrice(newTradeInfo.getTradePrice().intValue());
-                            item.setBuyingAmount(5000000);
+                            item.setBuyingTime(newTradeInfo.getEndTime());
                             mBuyingItemMapInfo.put(key, item);
                             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                             mBuyingListAdapter.notifyDataSetChanged();
@@ -343,68 +391,27 @@ public class CoinEvaluationFragment extends Fragment {
                         newTradeInfo.setMonitoringStartTime(0);
                     }
                 }
+                if ( newTradeInfo != null) {
+                    DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+                    format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+                    Log.d(TAG, "[DEBUG] getEvaluationTradeInfo - "
+                            + " getMarketId: " + newTradeInfo.getMarketId()
+                            + " getSequentialId: " + newTradeInfo.getSequentialId()
+                            + " time: " + format.format(newTradeInfo.getTimestamp())
+                            + " getRisingCount: " + newTradeInfo.getRisingCount()
+                            + " tickCount: " + newTradeInfo.getTickCount()
+                            + " getStartTime: " + format.format(newTradeInfo.getStartTime())
+                            + " getEndTime: " + format.format(newTradeInfo.getEndTime())
+                            + " getMonitoringStartTime: " + format.format(newTradeInfo.getMonitoringStartTime())
+                    );
+                }
             }
             i++;
         }
         mTradeMapInfo.put(key, newTradeInfo);
 
-        DateFormat format = new SimpleDateFormat("HH:mm:ss");
-        Log.d(TAG, "[DEBUG] getEvaluationTradeInfo - "
-                + " getMarketId: " + mTradeMapInfo.get(key).getMarketId()
-                + " getSequentialId: " + mTradeMapInfo.get(key).getSequentialId()
-                + " time: "+format.format(mTradeMapInfo.get(key).getTimestamp())
-                +" getRisingCount: "+mTradeMapInfo.get(key).getRisingCount()
-                +" tickCount: "+mTradeMapInfo.get(key).getTickCount()
-                +" getStartTime: "+format.format(mTradeMapInfo.get(key).getStartTime())
-                +" getEndTime: "+format.format(mTradeMapInfo.get(key).getEndTime())
-                +" getMonitoringStartTime: "+format.format(mTradeMapInfo.get(key).getMonitoringStartTime())
-        );
 
-    }
 
-    private void updateMonitorKey(List<Candle> minCandlesInfo) {
-        if (minCandlesInfo == null || minCandlesInfo.isEmpty()) {
-            return;
-        }
-        float[] tradePrice = new float[2];
-        int i = 0;
-        String key = null;
-        Iterator<Candle> iterator = minCandlesInfo.iterator();
-        while (iterator.hasNext()) {
-            Candle candle = iterator.next();
-            key = candle.getMarketId();
-            if (i == 0) {
-                mMinCandleMapInfo.put(key, candle);
-            }
-            tradePrice[i] = candle.getTradePrice().intValue();
-            i++;
-        }
-
-        float changedPrice = tradePrice[0] - tradePrice[1];
-        float prevPrice = tradePrice[1];
-
-        mMinCandleMapInfo.get(key).setChangedPrice((int) changedPrice);
-        mMinCandleMapInfo.get(key).setChangedRate(prevPrice != 0 ? (changedPrice / prevPrice) : 0);
-
-        if (prevPrice != 0 && (changedPrice / prevPrice) > MONITOR_START_RATE) {
-            if (!mMonitorKeyList.contains(key)) {
-                removeMonitoringPeriodicUpdate();
-                mMonitorKeyList.add(key);
-                registerPeriodicUpdate(mMonitorKeyList);
-                mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
-                mCoinListAdapter.notifyDataSetChanged();
-            }
-        } else if (prevPrice != 0 && changedPrice / prevPrice < MONITOR_START_RATE * -2) {
-            if (mMonitorKeyList.contains(key)) {
-                removeMonitoringPeriodicUpdate();
-                mMonitorKeyList.remove(key);
-                registerPeriodicUpdate(mMonitorKeyList);
-                mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
-                mCoinListAdapter.notifyDataSetChanged();
-                mTickerMapInfo.remove(key);
-                mTradeMapInfo.remove(key);
-            }
-        }
     }
 
     @Override
@@ -456,7 +463,7 @@ public class CoinEvaluationFragment extends Fragment {
         public TextView mAmountPerMin;
         public TextView mChangeRate;
         public TextView mBuyingPrice;
-        public TextView mBuyingAmount;
+        public TextView mBuyingTime;
 
         public CoinHolder(@NonNull @NotNull View itemView, boolean isMonitor) {
             super(itemView);
@@ -465,13 +472,13 @@ public class CoinEvaluationFragment extends Fragment {
                 mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
                 mRatePerMin = itemView.findViewById(R.id.coin_change_rate);
                 mTickAmount = itemView.findViewById(R.id.buying_price);
-                mAmountPerMin = itemView.findViewById(R.id.buying_amount);
+                mAmountPerMin = itemView.findViewById(R.id.buy_time);
             } else {
                 mCoinName = itemView.findViewById(R.id.coin_name);
                 mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
                 mChangeRate = itemView.findViewById(R.id.coin_change_rate);
                 mBuyingPrice = itemView.findViewById(R.id.buying_price);
-                mBuyingAmount = itemView.findViewById(R.id.buying_amount);
+                mBuyingTime = itemView.findViewById(R.id.buy_time);
             }
         }
     }
@@ -480,6 +487,7 @@ public class CoinEvaluationFragment extends Fragment {
         private DecimalFormat mFormat;
         private DecimalFormat mNonZeroFormat;
         private DecimalFormat mPercentFormat;
+        private SimpleDateFormat mTimeFormat;
         private List<String> mCoinListInfo;
         private List<String> mBuyingListInfo;
         private boolean mIsMonitor;
@@ -489,6 +497,8 @@ public class CoinEvaluationFragment extends Fragment {
             mFormat = new DecimalFormat("###,###,###,###.#");
             mNonZeroFormat = new DecimalFormat("###,###,###,###");
             mPercentFormat = new DecimalFormat("###.##" + "%");
+            mTimeFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+            mTimeFormat.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
         }
 
         public void setMonitoringItems(List<String> coinList) {
@@ -557,7 +567,7 @@ public class CoinEvaluationFragment extends Fragment {
                     int prevPrice = buyingItem.getBuyingPrice();
                     float rate = prevPrice != 0 ? (changedPrice / (float)prevPrice) : 0;
                     holder.mChangeRate.setText(mPercentFormat.format(rate));
-                    holder.mBuyingAmount.setText(mNonZeroFormat.format(buyingItem.getBuyingAmount() * rate));
+                    holder.mBuyingTime.setText(mTimeFormat.format(buyingItem.getBuyingTime()));
                 }
             }
         }
