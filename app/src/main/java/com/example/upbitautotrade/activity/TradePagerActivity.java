@@ -83,6 +83,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     @Override
     protected void onPause() {
         super.onPause();
+        Log.d(TAG, "[DEBUG] onPause: ");
     }
 
     @Override
@@ -93,6 +94,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        Log.d(TAG, "[DEBUG] onDestroy: ");
         mBackgroundProcessor.stopBackgroundProcessor();
     }
 

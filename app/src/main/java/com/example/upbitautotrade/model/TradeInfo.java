@@ -2,7 +2,9 @@ package com.example.upbitautotrade.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class TradeInfo {
+import java.io.Serializable;
+
+public class TradeInfo implements Serializable {
     @SerializedName("market")
     String	market;
 

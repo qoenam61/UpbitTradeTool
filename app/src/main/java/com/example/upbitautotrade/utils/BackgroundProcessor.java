@@ -50,7 +50,7 @@ public class BackgroundProcessor {
     private CoinEvaluationViewModel mCoinEvaluationViewModel;
 
 
-    private long mPeriodicTimer = 80;
+    private long mPeriodicTimer = 30;
     private final Queue<Item> mProcesses;
     private final ArrayList<Item> mUpdateProcesses;
 
@@ -119,7 +119,7 @@ public class BackgroundProcessor {
                 try {
                     process();
                     update();
-                    Thread.sleep(mPeriodicTimer);
+`                    Thread.sleep(mPeriodicTimer);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }

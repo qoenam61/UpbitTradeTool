@@ -1,6 +1,8 @@
 package com.example.upbitautotrade.utils;
 
-public class BuyingItem {
+import java.io.Serializable;
+
+public class BuyingItem implements Serializable {
     String marketId;
     int tradePrice;
     float profitRate;

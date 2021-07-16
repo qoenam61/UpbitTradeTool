@@ -1,10 +1,13 @@
 package com.example.upbitautotrade.fragment;
 
+import android.content.res.ColorStateList;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -15,6 +18,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
+import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
@@ -27,12 +31,14 @@ import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -48,12 +54,11 @@ public class CoinEvaluationFragment extends Fragment {
 
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
-    private final ArrayList mDeadMarketList;
-    private final int MONITOR_TICK_COUNTS = 60;
-    private final double MONITOR_START_RATE = 0.001;
-    private final double MONITOR_PERIOD_TIME = 30;
-    private final double MONITOR_RISING_COUNT = 1;
 
+    private final int MONITOR_TICK_COUNTS = 60;
+    private final double MONITOR_START_RATE = 0.0001;
+    private final double MONITOR_PERIOD_TIME = 30;
+    private final double MONITOR_RISING_COUNT = 6;
 
     private View mView;
 
@@ -65,14 +70,17 @@ public class CoinEvaluationFragment extends Fragment {
     private List<String> mCoinKeyList;
     private List<String> mMonitorKeyList;
     private List<String> mBuyingItemKeyList;
-    private final Map<String, MarketInfo> mMarketsMapInfo;
-    private final Map<String, Ticker> mTickerMapInfo;
-    private final Map<String, Candle> mMinCandleMapInfo;
-    private final Map<String, DayCandle> mDayCandleMapInfo;
-    private final Map<String, WeekCandle> mWeekCandleMapInfo;
-    private final Map<String, MonthCandle> mMonthCandleMapInfo;
-    private final Map<String, TradeInfo> mTradeMapInfo;
-    private final Map<String, BuyingItem> mBuyingItemMapInfo;
+    private ArrayList mDeadMarketList;
+    private Map<String, MarketInfo> mMarketsMapInfo;
+    private Map<String, Ticker> mTickerMapInfo;
+    private Map<String, Candle> mMinCandleMapInfo;
+    private Map<String, DayCandle> mDayCandleMapInfo;
+    private Map<String, WeekCandle> mWeekCandleMapInfo;
+    private Map<String, MonthCandle> mMonthCandleMapInfo;
+    private Map<String, TradeInfo> mTradeMapInfo;
+    private Map<String, BuyingItem> mBuyingItemMapInfo;
+
+    boolean mIsStarting = false;
 
     private String[] deadMarket = {
             "KRW-NEO", "KRW-MTL", "KRW-OMG", "KRW-SNT", "KRW-WAVES",
@@ -114,6 +122,38 @@ public class CoinEvaluationFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mActivity = (UpBitTradeActivity)getActivity();
         mViewModel =  mActivity.getCoinEvaluationViewModel();
+
+        if (savedInstanceState != null) {
+            mMarketsMapInfo = (HashMap<String, MarketInfo>) savedInstanceState.getSerializable("marketMapInfo");
+            mTickerMapInfo = (HashMap<String, Ticker>) savedInstanceState.getSerializable("tickerMapInfo");
+            mMinCandleMapInfo = (HashMap<String, Candle>) savedInstanceState.getSerializable("minCandleInfo");
+            mDayCandleMapInfo = (HashMap<String, DayCandle>) savedInstanceState.getSerializable("dayCandleInfo");
+            mWeekCandleMapInfo = (HashMap<String, WeekCandle>) savedInstanceState.getSerializable("weekCandleInfo");
+            mMonthCandleMapInfo = (HashMap<String, MonthCandle>) savedInstanceState.getSerializable("monthCandleInfo");
+            mCoinKeyList = (List<String>) savedInstanceState.getStringArrayList("coinKeyList");
+            mDeadMarketList = (ArrayList) savedInstanceState.getStringArrayList("deadMarketList");
+            mTradeMapInfo = (HashMap<String, TradeInfo>) savedInstanceState.getSerializable("tradeMapInfo");
+            mMonitorKeyList = (List<String>) savedInstanceState.getStringArrayList("monitorKeyList");
+            mBuyingItemMapInfo = (HashMap<String, BuyingItem>) savedInstanceState.getSerializable("buyingItemMapInfo");
+            mBuyingItemKeyList = (List<String>) savedInstanceState.getStringArrayList("buyingItemKeyList");
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull @NotNull Bundle outState) {
+        outState.putSerializable("marketMapInfo", (Serializable) mMarketsMapInfo);
+        outState.putSerializable("tickerMapInfo", (Serializable) mTickerMapInfo);
+        outState.putSerializable("minCandleInfo", (Serializable) mMinCandleMapInfo);
+        outState.putSerializable("dayCandleInfo", (Serializable) mDayCandleMapInfo);
+        outState.putSerializable("weekCandleInfo", (Serializable) mWeekCandleMapInfo);
+        outState.putSerializable("monthCandleInfo", (Serializable) mMonthCandleMapInfo);
+        outState.putStringArrayList("coinKeyList", (ArrayList<String>) mCoinKeyList);
+        outState.putStringArrayList("deadMarketList", mDeadMarketList);
+        outState.putSerializable("tradeMapInfo", (Serializable) mTradeMapInfo);
+        outState.putStringArrayList("monitorKeyList", (ArrayList<String>) mMonitorKeyList);
+        outState.putSerializable("buyingItemMapInfo", (Serializable) mBuyingItemMapInfo);
+        outState.putStringArrayList("buyingItemKeyList", (ArrayList<String>) mBuyingItemKeyList);
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -131,6 +171,19 @@ public class CoinEvaluationFragment extends Fragment {
         buyingList.setLayoutManager(layoutBuyManager);
         mBuyingListAdapter = new CoinListAdapter(false);
         buyingList.setAdapter(mBuyingListAdapter);
+
+        Button startButton = mView.findViewById(R.id.start_button);
+        startButton.setBackgroundTintList(ColorStateList.valueOf(Color.LTGRAY));
+        startButton.setOnClickListener(l -> {
+            mIsStarting = true;
+            startButton.setBackgroundTintList(ColorStateList.valueOf(Color.GRAY));
+        });
+        Button endButton = mView.findViewById(R.id.stop_button);
+        endButton.setBackgroundTintList(ColorStateList.valueOf(Color.LTGRAY));
+        endButton.setOnClickListener(l -> {
+            mIsStarting = false;
+            startButton.setBackgroundTintList(ColorStateList.valueOf(Color.LTGRAY));
+        });
         return mView;
     }
 
@@ -222,13 +275,14 @@ public class CoinEvaluationFragment extends Fragment {
                     newTradeInfo.setTickCount(0);
                     newTradeInfo.setRisingCount(0);
                 }
+                newTradeInfo.setStartTime(tradeInfo.getTimestamp());
                 newTradeInfo.setTickCount(newTradeInfo.getTickCount() + 1);
                 if (newTradeInfo.getTickCount() == MONITOR_TICK_COUNTS) {
                     newTradeInfo.setTickCount(0);
                     newTradeInfo.setStartTime(tradeInfo.getTimestamp());
-                    double changedPrice = newTradeInfo.getTradePrice().doubleValue() - tradeInfo.getTradePrice().doubleValue();
-                    double prevPrice = tradeInfo.getTradePrice().doubleValue();;
-                    float rate = (float) (changedPrice / prevPrice);
+                    float changedPrice = newTradeInfo.getTradePrice().floatValue() - tradeInfo.getTradePrice().floatValue();
+                    float prevPrice = tradeInfo.getTradePrice().floatValue();;
+                    float rate = changedPrice / prevPrice;
                     if (rate >= MONITOR_START_RATE) {
                         newTradeInfo.setRisingCount(1);
                     } else if (rate < MONITOR_START_RATE) {
@@ -243,21 +297,19 @@ public class CoinEvaluationFragment extends Fragment {
                     newTradeInfo = tradeInfo;
                     newTradeInfo.setMonitoringStartTime(prevTradeInfo.getMonitoringStartTime());
                     newTradeInfo.setEndTime(tradeInfo.getTimestamp());
+                    newTradeInfo.setStartTime(-1);
                     newTradeInfo.setTickCount(prevTradeInfo.getTickCount());
                     newTradeInfo.setRisingCount(prevTradeInfo.getRisingCount());
                 }
                 newTradeInfo.setTickCount(newTradeInfo.getTickCount() + 1);
 
-
-
                 if (newTradeInfo.getTickCount() == MONITOR_TICK_COUNTS) {
                     newTradeInfo.setTickCount(0);
                     newTradeInfo.setStartTime(tradeInfo.getTimestamp());
                     if (newTradeInfo.getEndTime() - newTradeInfo.getStartTime() < MONITOR_PERIOD_TIME * 1000) {
-                        double changedPrice = newTradeInfo.getTradePrice().doubleValue() - prevTradeInfo.getTradePrice().doubleValue();
-                        double prevPrice = prevTradeInfo.getTradePrice().doubleValue();
-
-                        float rate = (float) (changedPrice / prevPrice);
+                        float changedPrice = newTradeInfo.getTradePrice().floatValue() - prevTradeInfo.getTradePrice().floatValue();
+                        float prevPrice = prevTradeInfo.getTradePrice().floatValue();
+                        float rate = changedPrice / prevPrice;
                         if (rate >= MONITOR_START_RATE) {
                             if (newTradeInfo.getRisingCount() == 0) {
                                 newTradeInfo.setMonitoringStartTime(tradeInfo.getTimestamp());
@@ -273,7 +325,7 @@ public class CoinEvaluationFragment extends Fragment {
                             newTradeInfo.setMonitoringStartTime(0);
                         }
                     }
-                    if (newTradeInfo.getRisingCount() > MONITOR_RISING_COUNT && newTradeInfo.getMonitoringStartTime() - newTradeInfo.getEndTime() < MONITOR_PERIOD_TIME * 2 * 1000) {
+                    if (newTradeInfo.getRisingCount() > MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getMonitoringStartTime() < MONITOR_PERIOD_TIME * 2 * 1000) {
                         //Buy
                         if (!mBuyingItemKeyList.contains(key)) {
                             mBuyingItemKeyList.add(key);
@@ -286,9 +338,7 @@ public class CoinEvaluationFragment extends Fragment {
                             mBuyingListAdapter.notifyDataSetChanged();
                         }
                         Log.d(TAG, "[DEBUG] BUY - market: "+newTradeInfo.getMarketId()+" BuyPrice: "+newTradeInfo.getTradePrice());
-                    } else if (newTradeInfo.getRisingCount() <= 0
-                            && (newTradeInfo.getMonitoringStartTime() == 0
-                            || newTradeInfo.getMonitoringStartTime() - newTradeInfo.getEndTime() > MONITOR_PERIOD_TIME * 2 * 1000)) {
+                    } else if (newTradeInfo.getEndTime() - newTradeInfo.getMonitoringStartTime() > MONITOR_PERIOD_TIME * 2 * 1000) {
                         newTradeInfo.setRisingCount(0);
                         newTradeInfo.setMonitoringStartTime(0);
                     }
@@ -360,7 +410,9 @@ public class CoinEvaluationFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
+        if (!mIsStarting) {
+            mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
+        }
     }
 
     @Override
@@ -390,8 +442,10 @@ public class CoinEvaluationFragment extends Fragment {
     }
 
     private void removeMonitoringPeriodicUpdate() {
-        mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
-        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO_FOR_COIN_EVALUATION);
+        if (!mIsStarting) {
+            mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO_FOR_COIN_EVALUATION);
+        }
     }
 
     private class CoinHolder extends RecyclerView.ViewHolder {

@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -19,11 +20,16 @@ import com.example.upbitautotrade.viewmodel.AccountsViewModel;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.Accounts;
 
+import org.jetbrains.annotations.NotNull;
+
+import java.io.Serializable;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_ACCOUNTS_INFO;
@@ -38,10 +44,9 @@ public class MyCoinsAssetsFragment extends Fragment {
 
     private View mView;
     private UpBitTradeActivity mActivity;
-    private final HashMap<String, MarketInfo> mMarketsMapInfo;
-    private final HashMap<String, Accounts> mAccountsMapInfo;
-    private final HashMap<String, Ticker> mTickerMapInfo;
-    private final HashMap<String, Ticker> mTickerTempMapInfo;
+    private HashMap<String, MarketInfo> mMarketsMapInfo;
+    private HashMap<String, Accounts> mAccountsMapInfo;
+    private HashMap<String, Ticker> mTickerMapInfo;
     private Set<String> mKeySet;
     private CoinListAdapter mCoinListAdapter;
 
@@ -51,7 +56,6 @@ public class MyCoinsAssetsFragment extends Fragment {
         mMarketsMapInfo = new HashMap<>();
         mAccountsMapInfo = new HashMap<>();
         mTickerMapInfo = new HashMap<>();
-        mTickerTempMapInfo = new HashMap<>();
         mKeySet = new HashSet<>();
     }
 
@@ -60,6 +64,22 @@ public class MyCoinsAssetsFragment extends Fragment {
         super.onCreate(savedInstanceState);
         mActivity = (UpBitTradeActivity)getActivity();
         mViewModel =  mActivity.getAccountsViewModel();
+
+        if (savedInstanceState != null) {
+            mMarketsMapInfo = (HashMap<String, MarketInfo>) savedInstanceState.getSerializable("marketMapInfo");
+            mAccountsMapInfo = (HashMap<String, Accounts>) savedInstanceState.getSerializable("accountsMapInfo");
+            mTickerMapInfo = (HashMap<String, Ticker>) savedInstanceState.getSerializable("tickerMapInfo");
+            mKeySet = new HashSet<String>(savedInstanceState.getStringArrayList("keySet"));
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull @NotNull Bundle outState) {
+        outState.putSerializable("marketMapInfo", mMarketsMapInfo);
+        outState.putSerializable("accountsMapInfo", mAccountsMapInfo);
+        outState.putSerializable("tickerMapInfo", mTickerMapInfo);
+        outState.putStringArrayList("keySet", new ArrayList<String>(mKeySet));
+        super.onSaveInstanceState(outState);
     }
 
     @Override
@@ -194,9 +214,16 @@ public class MyCoinsAssetsFragment extends Fragment {
     }
 
     private int getTotalCurrentBalance() {
+        if (mAccountsMapInfo == null) {
+            return 0;
+        }
+        Accounts accounts = mAccountsMapInfo.get(MARKET_NAME);
+        if (accounts == null) {
+            return 0;
+        }
         int balance = 0;
-        balance += mAccountsMapInfo.get(MARKET_NAME).getBalance().intValue();
-        balance += mAccountsMapInfo.get(MARKET_NAME).getLocked().intValue();
+        balance += accounts.getBalance().intValue();
+        balance += accounts.getLocked().intValue();
         return balance;
     }
 

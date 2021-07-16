@@ -3,213 +3,242 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="@dimen/large_text_size"
-        android:text="매수 리스트 (시뮬레이션)"/>
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
+        android:layout_height="0dp"
+        android:layout_weight="9"
         android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="@dimen/large_text_size"
+            android:text="매수 리스트 (시뮬레이션)"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/default_margin"
-            android:orientation="horizontal">
+            android:orientation="vertical">
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.2"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.2"
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="left|center_vertical"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="한글명"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="left|center_vertical"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:textStyle="bold"
-                    android:text="한글명"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:text="현재가"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="right|center_vertical"
-                    android:textStyle="bold"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:text="현재가"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="수익률"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="right|center_vertical"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:textStyle="bold"
-                    android:text="수익률"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="매수가"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="right|center_vertical"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:textStyle="bold"
-                    android:text="매수가"/>
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="평가금액\n(백만)"/>
+                </LinearLayout>
             </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="right|center_vertical"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:textStyle="bold"
-                    android:text="평가금액\n(백만)"/>
-            </LinearLayout>
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/coin_buying_list"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/default_margin"
+                android:layout_marginEnd="@dimen/default_margin">
+            </androidx.recyclerview.widget.RecyclerView>
         </LinearLayout>
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/coin_buying_list"
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/default_margin"/>
+
+        <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/default_margin"
-            android:layout_marginEnd="@dimen/default_margin">
-        </androidx.recyclerview.widget.RecyclerView>
-    </LinearLayout>
+            android:textStyle="bold"
+            android:textSize="@dimen/large_text_size"
+            android:text="모니터링 리스트"/>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/default_margin"/>
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textStyle="bold"
-        android:textSize="@dimen/large_text_size"
-        android:text="모니터링 리스트"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/default_margin"
-        android:orientation="vertical">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/default_margin"
-            android:orientation="horizontal">
+            android:orientation="vertical">
             <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1.2"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/default_margin"
+                android:orientation="horizontal">
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.2"
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="left|center_vertical"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="한글명"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="left|center_vertical"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:textStyle="bold"
-                    android:text="한글명"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:textStyle="bold"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:text="현재가"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="right|center_vertical"
-                    android:textStyle="bold"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:text="현재가"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="분당상승률"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="right|center_vertical"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:textStyle="bold"
-                    android:text="분당상승률"/>
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="틱거래액\n(백만)"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
                     android:layout_weight="1"
-                    android:gravity="right|center_vertical"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:textStyle="bold"
-                    android:text="틱거래액\n(백만)"/>
+                    android:layout_margin="@dimen/coin_list_item_margin"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="0dp"
+                        android:layout_weight="1"
+                        android:gravity="right|center_vertical"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="분당거래액\n(백만)"/>
+                </LinearLayout>
             </LinearLayout>
-            <LinearLayout
-                android:layout_width="0dp"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/coin_evaluation_list"
+                android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:layout_margin="@dimen/coin_list_item_margin"
-                android:orientation="vertical">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="0dp"
-                    android:layout_weight="1"
-                    android:gravity="right|center_vertical"
-                    android:textSize="@dimen/coin_list_text_size"
-                    android:textStyle="bold"
-                    android:text="분당거래액\n(백만)"/>
-            </LinearLayout>
+                android:layout_marginStart="@dimen/default_margin"
+                android:layout_marginEnd="@dimen/default_margin">
+            </androidx.recyclerview.widget.RecyclerView>
         </LinearLayout>
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/coin_evaluation_list"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginStart="@dimen/default_margin"
-            android:layout_marginEnd="@dimen/default_margin">
-        </androidx.recyclerview.widget.RecyclerView>
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.8"
+        android:layout_margin="@dimen/default_margin"
+        android:gravity="bottom"
+        android:orientation="horizontal">
+        <Button
+            android:id="@+id/start_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/default_margin"
+            android:text="START"/>
+        <Button
+            android:id="@+id/stop_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_gravity="center"
+            android:layout_margin="@dimen/default_margin"
+            android:text="STOP"/>
+    </LinearLayout>
 
 </LinearLayout>
