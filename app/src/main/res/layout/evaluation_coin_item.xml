@@ -6,7 +6,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="@dimen/evaluation_coin_list_height"
+        android:layout_height="wrap_content"
         android:layout_margin="@dimen/default_margin"
         android:orientation="horizontal">
         <LinearLayout
@@ -15,17 +15,6 @@
             android:layout_weight="1.2"
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="left|center_vertical"
-                android:textSize="@dimen/coin_list_text_size"
-                android:textStyle="bold"
-                android:text="한글명"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/coin_list_item_margin"/>
             <TextView
                 android:id="@+id/coin_name"
                 android:layout_width="match_parent"
@@ -42,17 +31,6 @@
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="right|center_vertical"
-                android:textStyle="bold"
-                android:textSize="@dimen/coin_list_text_size"
-                android:text="현재가"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/coin_list_item_margin"/>
-            <TextView
                 android:id="@+id/coin_current_price"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -67,17 +45,6 @@
             android:layout_weight="1"
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="right|center_vertical"
-                android:textSize="@dimen/coin_list_text_size"
-                android:textStyle="bold"
-                android:text="분당상승률"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/coin_list_item_margin"/>
             <TextView
                 android:id="@+id/coin_change_rate"
                 android:layout_width="match_parent"
@@ -94,17 +61,6 @@
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
             <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="right|center_vertical"
-                android:textSize="@dimen/coin_list_text_size"
-                android:textStyle="bold"
-                android:text="틱거래액\n(천만)"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/coin_list_item_margin"/>
-            <TextView
                 android:id="@+id/buying_price"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -119,17 +75,6 @@
             android:layout_weight="1"
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="right|center_vertical"
-                android:textSize="@dimen/coin_list_text_size"
-                android:textStyle="bold"
-                android:text="분당거래액\n(천만)"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/coin_list_item_margin"/>
             <TextView
                 android:id="@+id/buying_amount"
                 android:layout_width="match_parent"

@@ -11,14 +11,6 @@ public class BuyingItem {
         return marketId;
     }
 
-    public int getTradePrice() {
-        return tradePrice;
-    }
-
-    public float getProfitRate() {
-        return profitRate;
-    }
-
     public int getBuyingPrice() {
         return buyingPrice;
     }
@@ -29,14 +21,6 @@ public class BuyingItem {
 
     public void setMarketId(String marketId) {
         this.marketId = marketId;
-    }
-
-    public void setTradePrice(int tradePrice) {
-        this.tradePrice = tradePrice;
-    }
-
-    public void setProfitRate(float profitRate) {
-        this.profitRate = profitRate;
     }
 
     public void setBuyingPrice(int buyingPrice) {
