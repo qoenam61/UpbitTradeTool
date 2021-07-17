@@ -4,11 +4,11 @@ public class Item {
     String key;
     int type;
     int unit;
-    String to;
-    int count;
+    String to = null;
+    int count = 0;
     String priceUnit;
-    String cursor;
-    int daysAgo;
+    String cursor = null;
+    int daysAgo = -1;
 
     public Item(String key, int type) {
         this.key = key;

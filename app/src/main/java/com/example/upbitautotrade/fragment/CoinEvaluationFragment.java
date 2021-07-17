@@ -57,8 +57,9 @@ public class CoinEvaluationFragment extends Fragment {
 
     private final int MONITOR_TICK_COUNTS = 60;
     private final double MONITOR_START_RATE = 0.01;
-    private final double MONITOR_PERIOD_TIME = 30;
-    private final double MONITOR_RISING_COUNT = 6;
+    private final double MONITOR_TICK_RATE = 0.001;
+    private final double MONITOR_PERIOD_TIME = 20;
+    private final double MONITOR_RISING_COUNT = 10;
 
     private View mView;
 
@@ -343,7 +344,7 @@ public class CoinEvaluationFragment extends Fragment {
                         float changedPrice = newTradeInfo.getTradePrice().floatValue() - prevTradeInfo.getTradePrice().floatValue();
                         float prevPrice = prevTradeInfo.getTradePrice().floatValue();
                         float rate = changedPrice / prevPrice;
-                        if (rate >= MONITOR_START_RATE) {
+                        if (rate >= 0) {
                             newTradeInfo.setMonitoringStartTime(tradeInfo.getTimestamp());
                             newTradeInfo.setRisingCount(prevTradeInfo.getRisingCount() + 1);
                         } else if (rate < 0) {
@@ -358,7 +359,7 @@ public class CoinEvaluationFragment extends Fragment {
                         newTradeInfo.setMonitoringStartTime(0);
                     }
 
-                    if (newTradeInfo.getRisingCount() >= MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getMonitoringStartTime() < MONITOR_PERIOD_TIME * 2 * 1000) {
+                    if (newTradeInfo.getRisingCount() >= MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getMonitoringStartTime() < MONITOR_PERIOD_TIME * 3 * 1000) {
                         //Buy
                         if (!mBuyingItemKeyList.contains(key)) {
                             mBuyingItemKeyList.add(key);

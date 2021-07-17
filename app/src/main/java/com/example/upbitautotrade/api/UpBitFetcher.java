@@ -300,10 +300,10 @@ public class UpBitFetcher {
     public LiveData<List<TradeInfo>> getTradeInfo(String marketId, String to, int count, String cursor, int daysAgo) {
         MutableLiveData<List<TradeInfo>> result = new MutableLiveData<>();
         Call<List<TradeInfo>> call;
-        if (to != null && daysAgo < 0) {
+        if (to != null && daysAgo > 0) {
             call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, to, count, daysAgo);
 //            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, to, count, cursor, daysAgo);
-        } else if (to != null && daysAgo > 0) {
+        } else if (to != null && daysAgo < 0) {
             call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, to, count);
 //            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, to, count, cursor);
         } else if (to == null && daysAgo > 0) {
