@@ -10,6 +10,10 @@ import okhttp3.Request;
 public class TickerRetrofit extends DefaultRetrofit {
     private String TAG = "TickerRetrofit";
 
+    public TickerRetrofit(String accessKey, String secretKey) {
+        super(accessKey, secretKey);
+    }
+
     @Override
     String getAuthToken() {
         return null;
@@ -24,6 +28,5 @@ public class TickerRetrofit extends DefaultRetrofit {
 
     @Override
     public void setParam(String param1, String param2, String param3) {
-
     }
 }

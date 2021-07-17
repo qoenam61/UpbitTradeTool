@@ -45,18 +45,23 @@ public class UpBitFetcher {
         void onReceivedResponse();
     }
 
-    private final AccountsRetrofit mAccountsRetrofit;
-    private final ChanceRetrofit mChanceRetrofit;
-    private final TickerRetrofit mTickerRetrofit;
-    private final MutableLiveData<Throwable> mErrorLiveData;
+    private AccountsRetrofit mAccountsRetrofit;
+    private ChanceRetrofit mChanceRetrofit;
+    private TickerRetrofit mTickerRetrofit;
+    private MutableLiveData<Throwable> mErrorLiveData;
 
     public UpBitFetcher(ConnectionState listener) {
         mListener = listener;
-        mAccountsRetrofit = new AccountsRetrofit();
-        mChanceRetrofit = new ChanceRetrofit();
-        mTickerRetrofit = new TickerRetrofit();
-
         mErrorLiveData = new MutableLiveData<>();
+    }
+
+    public void makeRetrofit(String accessKey, String secretKey) {
+        mAccountsRetrofit = new AccountsRetrofit(accessKey, secretKey);
+        mAccountsRetrofit.makeUpBitApi();
+        mChanceRetrofit = new ChanceRetrofit(accessKey, secretKey);
+        mChanceRetrofit.makeUpBitApi();
+        mTickerRetrofit = new TickerRetrofit(accessKey, secretKey);
+        mTickerRetrofit.makeUpBitApi();
     }
 
     public void setOnResponseListener(ReceivedResponse listener) {
@@ -69,8 +74,8 @@ public class UpBitFetcher {
 
     public LiveData<List<Accounts>> getAccounts(boolean isLogIn) {
         MutableLiveData<List<Accounts>> result = new MutableLiveData<>();
-        if (isLogIn) {
-            mAccountsRetrofit.setParam(mAccessKey, mSecretKey, null);
+        if (mAccountsRetrofit == null) {
+            return null;
         }
         Call<List<Accounts>> call = mAccountsRetrofit.getUpBitApi().getAccounts();
         call.enqueue(new Callback<List<Accounts>>() {
@@ -107,6 +112,9 @@ public class UpBitFetcher {
     }
 
     public LiveData<List<Ticker>> getTicker(String marketId) {
+        if (mTickerRetrofit == null) {
+            return null;
+        }
         MutableLiveData<List<Ticker>> result = new MutableLiveData<>();
         Call<List<Ticker>> call = mTickerRetrofit.getUpBitApi().getTicker(marketId);
         call.enqueue(new Callback<List<Ticker>>() {
@@ -133,6 +141,9 @@ public class UpBitFetcher {
     }
 
     public LiveData<Chance> getOrdersChance(String marketId) {
+        if (mChanceRetrofit == null) {
+            return null;
+        }
         mChanceRetrofit.setParam(marketId, null, null);
         MutableLiveData<Chance> result = new MutableLiveData<>();
         Call<Chance> call = mChanceRetrofit.getUpBitApi().getOrdersChance(marketId);
@@ -160,6 +171,9 @@ public class UpBitFetcher {
     }
 
     public LiveData<List<MarketInfo>> getMarketInfo(boolean isDetails) {
+        if (mTickerRetrofit == null) {
+            return null;
+        }
         MutableLiveData<List<MarketInfo>> result = new MutableLiveData<>();
         Call<List<MarketInfo>> call = mTickerRetrofit.getUpBitApi().getMarketInfo(isDetails);
         call.enqueue(new Callback<List<MarketInfo>>() {
@@ -186,6 +200,9 @@ public class UpBitFetcher {
     }
 
     public LiveData<List<Candle>> getMinCandleInfo(int unit, String marketId, String to, int count) {
+        if (mTickerRetrofit == null) {
+            return null;
+        }
         MutableLiveData<List<Candle>> result = new MutableLiveData<>();
         Call<List<Candle>> call = to != null ?
                 mTickerRetrofit.getUpBitApi().get1MinCandleInfo(marketId, to, count)
@@ -214,6 +231,9 @@ public class UpBitFetcher {
     }
 
     public LiveData<List<DayCandle>> getDayCandleInfo(String marketId, String to, int count, String convertingPriceUnit) {
+        if (mTickerRetrofit == null) {
+            return null;
+        }
         MutableLiveData<List<DayCandle>> result = new MutableLiveData<>();
         Call<List<DayCandle>> call = to != null ?
                 mTickerRetrofit.getUpBitApi().getDayCandleInfo(marketId, to, count, convertingPriceUnit)
@@ -242,6 +262,9 @@ public class UpBitFetcher {
     }
 
     public LiveData<List<WeekCandle>> getWeekCandleInfo(String marketId, String to, int count) {
+        if (mTickerRetrofit == null) {
+            return null;
+        }
         MutableLiveData<List<WeekCandle>> result = new MutableLiveData<>();
         Call<List<WeekCandle>> call = to != null ?
                 mTickerRetrofit.getUpBitApi().getWeekCandleInfo(marketId, to, count)
@@ -270,6 +293,9 @@ public class UpBitFetcher {
     }
 
     public LiveData<List<MonthCandle>> getMonthCandleInfo(String marketId, String to, int count) {
+        if (mTickerRetrofit == null) {
+            return null;
+        }
         MutableLiveData<List<MonthCandle>> result = new MutableLiveData<>();
         Call<List<MonthCandle>> call = to != null ?
                 mTickerRetrofit.getUpBitApi().getMonthsCandleInfo(marketId, to, count)
@@ -298,6 +324,9 @@ public class UpBitFetcher {
     }
 
     public LiveData<List<TradeInfo>> getTradeInfo(String marketId, String to, int count, String cursor, int daysAgo) {
+        if (mTickerRetrofit == null) {
+            return null;
+        }
         MutableLiveData<List<TradeInfo>> result = new MutableLiveData<>();
         Call<List<TradeInfo>> call;
         if (to != null && daysAgo > 0) {
@@ -335,10 +364,5 @@ public class UpBitFetcher {
             }
         });
         return result;
-    }
-
-    public void setKey(String accessKey, String secretKey) {
-        mAccessKey = accessKey;
-        mSecretKey = secretKey;
     }
 }

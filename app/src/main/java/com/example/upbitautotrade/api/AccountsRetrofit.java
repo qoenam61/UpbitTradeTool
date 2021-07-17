@@ -24,6 +24,10 @@ import retrofit2.converter.scalars.ScalarsConverterFactory;
 public class AccountsRetrofit extends DefaultRetrofit{
     private String TAG = "AccountsRetrofit";
 
+    public AccountsRetrofit(String accessKey, String secretKey) {
+        super(accessKey, secretKey);
+    }
+
     @Override
     protected String getAuthToken() {
         if (mAccessKey == null || mSecretKey == null) {
@@ -41,7 +45,5 @@ public class AccountsRetrofit extends DefaultRetrofit{
 
     @Override
     public void setParam(String param1, String param2, String param3) {
-        mAccessKey = param1;
-        mSecretKey = param2;
     }
 }

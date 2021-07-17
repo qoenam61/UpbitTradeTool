@@ -79,6 +79,14 @@ public class UpBitViewModel extends AndroidViewModel {
         });
     }
 
+    public void setKey(String accessKey, String secretKey) {
+        if (mUpBitFetcher != null) {
+            mUpBitFetcher.makeRetrofit(accessKey, secretKey);
+        }
+        mAccessKey = accessKey;
+        mSecretKey = secretKey;
+    }
+
     public void setOnListener(LoginState listener) {
         mListener = listener;
     }
@@ -105,14 +113,5 @@ public class UpBitViewModel extends AndroidViewModel {
 
     public LiveData<Throwable> getErrorLiveData() {
         return mErrorLiveData;
-    }
-
-    public void setKey(String accessKey, String secretKey) {
-        if (mUpBitFetcher == null) {
-            return;
-        }
-        mAccessKey = accessKey;
-        mSecretKey = secretKey;
-        mUpBitFetcher.setKey(accessKey, secretKey);
     }
 }

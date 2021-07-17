@@ -109,8 +109,9 @@ public class BackgroundProcessor {
     };
     private boolean mPauseProcessor = false;
 
-    public BackgroundProcessor(ViewModelStoreOwner owner) {
+    public BackgroundProcessor(ViewModelStoreOwner owner, String accessKey, String secretKey) {
         mAccountsViewModel = new ViewModelProvider(owner).get(AccountsViewModel.class);
+        mAccountsViewModel.setKey(accessKey, secretKey);
         mAccountsViewModel.setOnPauseProcessorListener(new UpBitViewModel.RestartProcessorListener() {
             @Override
             public void restartProcessor() {
@@ -119,6 +120,7 @@ public class BackgroundProcessor {
         });
 
         mCoinEvaluationViewModel = new ViewModelProvider(owner).get(CoinEvaluationViewModel.class);
+        mCoinEvaluationViewModel.setKey(accessKey, secretKey);
         mCoinEvaluationViewModel.setOnPauseProcessorListener(new UpBitViewModel.RestartProcessorListener() {
             @Override
             public void restartProcessor() {

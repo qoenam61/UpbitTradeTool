@@ -114,6 +114,12 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
         });
     }
 
+    public void setKey(String accessKey, String secretKey) {
+        if (mUpBitFetcher != null) {
+            mUpBitFetcher.makeRetrofit(accessKey, secretKey);
+        }
+    }
+
     public LiveData<List<Ticker>> getResultTickerInfo() {
         return mResultTickerInfo;
     }

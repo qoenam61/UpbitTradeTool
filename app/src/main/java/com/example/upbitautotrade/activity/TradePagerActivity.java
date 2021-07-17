@@ -51,7 +51,11 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trade_pager);
-        mBackgroundProcessor = new BackgroundProcessor(this);
+
+        String accessKey = getIntent().getStringExtra("ACCESS_KEY");
+        String secretKey = getIntent().getStringExtra("SECRET_KEY");
+
+        mBackgroundProcessor = new BackgroundProcessor(this, accessKey, secretKey);
 
         // Instantiate a ViewPager2 and a PagerAdapter.
         mViewPager = findViewById(R.id.pager);

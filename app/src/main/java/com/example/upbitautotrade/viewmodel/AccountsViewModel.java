@@ -38,6 +38,11 @@ public class AccountsViewModel extends UpBitViewModel{
         );
     }
 
+    public void setKey(String accessKey, String secretKey) {
+        if (mUpBitFetcher != null) {
+            mUpBitFetcher.makeRetrofit(accessKey, secretKey);
+        }
+    }
 
     @Override
     protected void initFetcher(Context context) {

@@ -19,6 +19,10 @@ public class ChanceRetrofit extends DefaultRetrofit{
 
     private ArrayList<String> mQueryElements;
 
+    public ChanceRetrofit(String accessKey, String secretKey) {
+        super(accessKey, secretKey);
+    }
+
     @Override
     protected String getAuthToken() {
         if (mAccessKey == null || mSecretKey == null) {

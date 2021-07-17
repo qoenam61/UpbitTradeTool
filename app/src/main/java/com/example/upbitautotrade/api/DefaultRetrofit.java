@@ -21,12 +21,14 @@ public abstract class DefaultRetrofit {
 
     protected String mAccessKey;
     protected String mSecretKey;
-    private final UpBitApi mUpBitApi;
+    private UpBitApi mUpBitApi;
 
-    public DefaultRetrofit() {
-        mAccessKey = UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY);
-        mSecretKey = UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY);
+    public DefaultRetrofit(String accessKey, String secretKey) {
+        mAccessKey = accessKey;
+        mSecretKey = secretKey;
+    }
 
+    public void makeUpBitApi() {
         Gson gson = new GsonBuilder()
                 .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
                 .create();

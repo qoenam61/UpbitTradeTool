@@ -2,6 +2,7 @@ package com.example.upbitautotrade.fragment;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -26,6 +27,8 @@ public class UpBitLoginFragment extends Fragment {
     private View mView;
     private UpBitViewModel mUpBitViewModel;
 
+    private String mAccessKey;
+    private String mSecretKey;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,6 +71,8 @@ public class UpBitLoginFragment extends Fragment {
                 public void onLoginState(boolean isLogin) {
                     if (isLogin) {
                         Intent intent = new Intent(getActivity(), TradePagerActivity.class);
+                        intent.putExtra("ACCESS_KEY", mAccessKey);
+                        intent.putExtra("SECRET_KEY", mSecretKey);
                         startActivity(intent);
                     }
                 }
@@ -79,10 +84,10 @@ public class UpBitLoginFragment extends Fragment {
     private void onLoginButton() {
         EditText access = mView.findViewById(R.id.edit_access_key);
         EditText secret = mView.findViewById(R.id.edit_secret_key);
-        String accessKey = access.getText().toString();
-        String secretKey = secret.getText().toString();
+        mAccessKey = access.getText().toString();
+        mSecretKey = secret.getText().toString();
         if (mUpBitViewModel != null) {
-            mUpBitViewModel.setKey(accessKey, secretKey);
+            mUpBitViewModel.setKey(mAccessKey, mSecretKey);
             mUpBitViewModel.searchAccountsInfo(true);
         }
         InputMethodManager mInputMethodManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
