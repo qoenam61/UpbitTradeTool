@@ -2,6 +2,7 @@ package com.example.upbitautotrade;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import androidx.security.crypto.EncryptedSharedPreferences;
@@ -16,41 +17,19 @@ public final class UpBitLogInPreferences {
     public final static String ACCESS_KEY = "access_key";
     public final static String SECRET_KEY = "secret_key";
 
-    private static SharedPreferences mSharedPreferences = null;
-
-    public static void create(Context context) {
-        String masterKeyAlias = null;
-        try {
-            masterKeyAlias = MasterKeys.getOrCreate(MasterKeys.AES256_GCM_SPEC);
-            mSharedPreferences = EncryptedSharedPreferences.create(
-                    "upbit_login_info",
-                    masterKeyAlias,
-                    context,
-                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            );
-        } catch (GeneralSecurityException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    public UpBitLogInPreferences() {
+        throw new IllegalStateException("인스턴스 생성 금지");
     }
 
     public static void setStoredKey(Context context, String key, String data) {
-        SharedPreferences pref = mSharedPreferences;
-        if (pref == null) {
-            return;
-        }
-        SharedPreferences.Editor editor = pref.edit();
-        // use the shared preferences and editor as you normally would
-        editor.putString(key, data).apply();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        pref.edit()
+                .putString(key, data)
+                .apply();
     }
 
-    public static String getStoredKey(String key) {
-        SharedPreferences pref = mSharedPreferences;
-        if (pref == null) {
-            return null;
-        }
-        return pref.getString(key, "null");
+    public static String getStoredKey(Context context, String key) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        return pref.getString(key, "");
     }
 }

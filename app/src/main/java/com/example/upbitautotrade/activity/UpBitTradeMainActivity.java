@@ -31,7 +31,6 @@ public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTr
         setContentView(R.layout.activity_upbit_auto_trade_main);
 
         boolean isFragmentContainer = savedInstanceState == null;
-        UpBitLogInPreferences.create(this);
 
         if (isFragmentContainer) {
             UpBitLoginFragment upbitLoginFragment = new UpBitLoginFragment();

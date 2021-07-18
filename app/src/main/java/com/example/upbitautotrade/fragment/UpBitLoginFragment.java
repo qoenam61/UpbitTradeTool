@@ -58,8 +58,8 @@ public class UpBitLoginFragment extends Fragment {
 
         EditText access = mView.findViewById(R.id.edit_access_key);
         EditText secret = mView.findViewById(R.id.edit_secret_key);
-        String accessKey = UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.ACCESS_KEY);
-        String secretKey = UpBitLogInPreferences.getStoredKey(UpBitLogInPreferences.SECRET_KEY);
+        String accessKey = UpBitLogInPreferences.getStoredKey(getContext(), UpBitLogInPreferences.ACCESS_KEY);
+        String secretKey = UpBitLogInPreferences.getStoredKey(getContext(), UpBitLogInPreferences.SECRET_KEY);
 
         if (accessKey != null && secretKey != null) {
             access.setText(accessKey);
