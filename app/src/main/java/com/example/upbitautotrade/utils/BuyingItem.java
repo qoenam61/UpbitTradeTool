@@ -4,16 +4,16 @@ import java.io.Serializable;
 
 public class BuyingItem implements Serializable {
     String marketId;
-    int tradePrice;
+    double tradePrice;
     float profitRate;
-    int buyingPrice;
+    double buyingPrice;
     long buyingTime;
 
     public String getMarketId() {
         return marketId;
     }
 
-    public int getBuyingPrice() {
+    public double getBuyingPrice() {
         return buyingPrice;
     }
 
@@ -25,7 +25,7 @@ public class BuyingItem implements Serializable {
         this.marketId = marketId;
     }
 
-    public void setBuyingPrice(int buyingPrice) {
+    public void setBuyingPrice(double buyingPrice) {
         this.buyingPrice = buyingPrice;
     }
 

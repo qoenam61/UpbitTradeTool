@@ -35,7 +35,11 @@ public class TradeInfo implements Serializable {
     @SerializedName("sequential_id")
     long sequentialId;
 
-    long monitoringStartTime;
+    long evaluationStartTime;
+
+    long evaluationStartTimeFirst;
+
+    double minPrice;
 
     long startTime;
 
@@ -43,7 +47,7 @@ public class TradeInfo implements Serializable {
 
     int tickCount = 0;
 
-    int risingCount = 0;
+    int risingPoint = 0;
 
     public String getMarketId() {
         return market;
@@ -125,12 +129,29 @@ public class TradeInfo implements Serializable {
         this.sequentialId = sequentialId;
     }
 
-    public void setMonitoringStartTime(long monitoringStartTime) {
-        this.monitoringStartTime = monitoringStartTime;
+    public void setEvaluationStartTime(long monitoringStartTime) {
+        this.evaluationStartTime = monitoringStartTime;
     }
 
-    public long getMonitoringStartTime() {
-        return monitoringStartTime;
+    public long getEvaluationStartTime() {
+        return evaluationStartTime;
+    }
+
+
+    public long getEvaluationStartTimeFirst() {
+        return evaluationStartTimeFirst;
+    }
+
+    public void setEvaluationStartTimeFirst(long evaluationStartTimeFirst) {
+        this.evaluationStartTimeFirst = evaluationStartTimeFirst;
+    }
+
+    public double getMinPrice() {
+        return minPrice;
+    }
+
+    public void setMinPrice(double minPrice) {
+        this.minPrice = minPrice;
     }
 
     public void setStartTime(long startTime) {
@@ -157,11 +178,11 @@ public class TradeInfo implements Serializable {
         this.tickCount = tickCount;
     }
 
-    public int getRisingCount() {
-        return risingCount;
+    public int getRisingPoint() {
+        return risingPoint;
     }
 
-    public void setRisingCount(int tickCount) {
-        this.risingCount = tickCount;
+    public void setRisingPoint(int tickCount) {
+        this.risingPoint = tickCount;
     }
 }
