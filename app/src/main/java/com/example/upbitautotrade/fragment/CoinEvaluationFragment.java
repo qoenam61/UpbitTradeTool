@@ -467,6 +467,7 @@ public class CoinEvaluationFragment extends Fragment {
         BuyingItem item = mCandidateItemMapInfo.get(key);
         if (item != null && item.getBuyingPrice() >= ticker.getTradePrice().intValue()) {
             if (!mBuyingItemKeyList.contains(key)) {
+                item.setBuyingTime(ticker.getTimestamp());
                 mBuyingItemKeyList.add(key);
                 mBuyingItemMapInfo.put(key, item);
                 mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
