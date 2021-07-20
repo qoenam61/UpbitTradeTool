@@ -61,7 +61,7 @@ public class CoinEvaluationFragment extends Fragment {
     private final double MONITOR_RISING_COUNT = 20;
     private final int MONITOR_MIN_CANDLE_COUNT = 5;
     private final double EVALUATION_TIME = 20;
-    private long EVALUATION_OFFSET_TIME = 10;
+    private long EVALUATION_OFFSET_TIME = 60;
 
     private View mView;
 
@@ -279,7 +279,7 @@ public class CoinEvaluationFragment extends Fragment {
                 mCoinListAdapter.notifyDataSetChanged();
                 Log.d(TAG, "[DEBUG] updateMonitorKey - add key : "+key);
             }
-        } else if (prevPrice != 0 && changedPrice / prevPrice < MONITORING_START_RATE * -2) {
+        } else if (prevPrice != 0 && changedPrice / prevPrice < MONITORING_START_RATE) {
             if (mMonitorKeyList.contains(key)) {
                 removeMonitoringPeriodicUpdate();
                 mMonitorKeyList.remove(key);
@@ -343,7 +343,7 @@ public class CoinEvaluationFragment extends Fragment {
                             newTradeInfo.setRisingPoint(point);
                         } else if (rate < 0) {
                             newTradeInfo.setRisingPoint(point);
-                            if (newTradeInfo.getRisingPoint() < 0) {
+                            if (newTradeInfo.getRisingPoint() <= 0) {
                                 newTradeInfo.setRisingPoint(0);
                                 newTradeInfo.setEvaluationStartTime(0);
                                 newTradeInfo.setEvaluationStartTimeFirst(0);
@@ -396,7 +396,7 @@ public class CoinEvaluationFragment extends Fragment {
                             newTradeInfo.setRisingPoint(prevPoint + point);
                         } else if (rate < 0) {
                             newTradeInfo.setRisingPoint(prevTradeInfo.getRisingPoint() + point);
-                            if (newTradeInfo.getRisingPoint() < 0) {
+                            if (newTradeInfo.getRisingPoint() <= 0) {
                                 newTradeInfo.setRisingPoint(0);
                                 newTradeInfo.setEvaluationStartTime(0);
                                 newTradeInfo.setEvaluationStartTimeFirst(0);
@@ -434,11 +434,11 @@ public class CoinEvaluationFragment extends Fragment {
     private void evaluationToBuy(String key, TradeInfo newTradeInfo) {
 
         if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTime() < EVALUATION_TIME * 3 * 1000) {
-            double changed = newTradeInfo.getTradePrice().doubleValue() - newTradeInfo.getMinPrice();
+            double changed = Math.abs(newTradeInfo.getTradePrice().doubleValue() - newTradeInfo.getMinPrice());
             long evalTime = (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst()) / 1000;
             double offsetPrice = (changed - (changed * (evalTime - EVALUATION_OFFSET_TIME) / (evalTime + EVALUATION_OFFSET_TIME)));
 
-            double tradePrice = newTradeInfo.getTradePrice().doubleValue() - (offsetPrice > 0 ? offsetPrice : 0);
+            double tradePrice = newTradeInfo.getTradePrice().doubleValue() - offsetPrice;
 
             DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
             format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
@@ -476,6 +476,7 @@ public class CoinEvaluationFragment extends Fragment {
                 mBuyingItemMapInfo.put(key, item);
                 mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                 mBuyingListAdapter.notifyDataSetChanged();
+                mCandidateItemMapInfo.remove(key);
             }
         }
     }
