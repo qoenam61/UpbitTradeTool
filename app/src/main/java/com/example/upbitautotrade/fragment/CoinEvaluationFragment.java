@@ -55,12 +55,13 @@ public class CoinEvaluationFragment extends Fragment {
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
 
-    private final double MONITORING_START_RATE = 0.01;
+    private final double MONITORING_START_RATE = 0.03;
 
     private final int TICK_COUNTS = 60;
-    private final double EVALUATION_TIME = 20;
     private final double MONITOR_RISING_COUNT = 20;
     private final int MONITOR_MIN_CANDLE_COUNT = 5;
+    private final double EVALUATION_TIME = 20;
+    private long EVALUATION_OFFSET_TIME = 10;
 
     private View mView;
 
@@ -338,7 +339,7 @@ public class CoinEvaluationFragment extends Fragment {
 
                         if (rate >= 0) {
                             newTradeInfo.setEvaluationStartTime(tradeInfo.getTimestamp());
-                            newTradeInfo.setEvaluationStartTime(tradeInfo.getTimestamp());
+                            newTradeInfo.setEvaluationStartTimeFirst(tradeInfo.getTimestamp());
                             newTradeInfo.setRisingPoint(point);
                         } else if (rate < 0) {
                             newTradeInfo.setRisingPoint(point);
@@ -435,19 +436,20 @@ public class CoinEvaluationFragment extends Fragment {
         if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTime() < EVALUATION_TIME * 3 * 1000) {
             double changed = newTradeInfo.getTradePrice().doubleValue() - newTradeInfo.getMinPrice();
             long evalTime = (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst()) / 1000;
-            double rate = (changed / evalTime) / evalTime;
+            double offsetPrice = (changed - (changed * (evalTime - EVALUATION_OFFSET_TIME) / (evalTime + EVALUATION_OFFSET_TIME)));
 
-            double tradePrice = newTradeInfo.getTradePrice().doubleValue() * (1 - rate);
+            double tradePrice = newTradeInfo.getTradePrice().doubleValue() - (offsetPrice > 0 ? offsetPrice : 0);
 
             DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
             format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
             Log.d(TAG, "[DEBUG] BUY - market: " + newTradeInfo.getMarketId()
-                    + " BuyPrice: " + tradePrice
-                    + " changed: " + changed
-                    + " getEndTime: " + format.format(newTradeInfo.getEndTime())
-                    + " getEvaluationStartTimeFirst: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
-                    + " evalTime: " + evalTime
-                    + " rate: " + rate);
+                            + " BuyPrice: " + tradePrice
+                            + " changed: " + changed
+                            + " evalTime: " + evalTime
+                            + " getEndTime: " + format.format(newTradeInfo.getEndTime())
+                            + " getEvaluationStartTimeFirst: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
+                            + " offsetPrice: " + offsetPrice
+                    );
 
 
             BuyingItem item = new BuyingItem();
@@ -467,6 +469,8 @@ public class CoinEvaluationFragment extends Fragment {
         BuyingItem item = mCandidateItemMapInfo.get(key);
         if (item != null && item.getBuyingPrice() >= ticker.getTradePrice().intValue()) {
             if (!mBuyingItemKeyList.contains(key)) {
+                Log.d(TAG, "[DEBUG] BUY - !!!! : " +key);
+
                 item.setBuyingTime(ticker.getTimestamp());
                 mBuyingItemKeyList.add(key);
                 mBuyingItemMapInfo.put(key, item);
