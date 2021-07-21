@@ -36,12 +36,15 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 import java.util.TimeZone;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION;
@@ -80,9 +83,11 @@ public class CoinEvaluationFragment extends Fragment {
     private Map<String, DayCandle> mDayCandleMapInfo;
     private Map<String, WeekCandle> mWeekCandleMapInfo;
     private Map<String, MonthCandle> mMonthCandleMapInfo;
-    private Map<String, TradeInfo> mTradeMapInfo;
+//    private Map<String, TradeInfo> mTradeMapInfo;
     private Map<String, BuyingItem> mBuyingItemMapInfo;
     private Map<String, BuyingItem> mCandidateItemMapInfo;
+
+    private Deque<TradeInfo> mTradeInfoTickQueue;
 
     boolean mIsStarting = false;
 
@@ -102,11 +107,13 @@ public class CoinEvaluationFragment extends Fragment {
         mWeekCandleMapInfo = new HashMap<>();
         mMonthCandleMapInfo = new HashMap<>();
         mDeadMarketList = new ArrayList(Arrays.asList(deadMarket));
-        mTradeMapInfo = new HashMap<>();
+//        mTradeMapInfo = new HashMap<>();
         mMonitorKeyList = new ArrayList<>();
         mBuyingItemMapInfo = new HashMap<>();
         mBuyingItemKeyList = new ArrayList<>();
         mCandidateItemMapInfo = new HashMap<>();
+
+        mTradeInfoTickQueue = new LinkedList<>();
     }
 
 
@@ -124,7 +131,7 @@ public class CoinEvaluationFragment extends Fragment {
             mWeekCandleMapInfo = (HashMap<String, WeekCandle>) savedInstanceState.getSerializable("weekCandleInfo");
             mMonthCandleMapInfo = (HashMap<String, MonthCandle>) savedInstanceState.getSerializable("monthCandleInfo");
             mDeadMarketList = (ArrayList) savedInstanceState.getStringArrayList("deadMarketList");
-            mTradeMapInfo = (HashMap<String, TradeInfo>) savedInstanceState.getSerializable("tradeMapInfo");
+//            mTradeMapInfo = (HashMap<String, TradeInfo>) savedInstanceState.getSerializable("tradeMapInfo");
             mMonitorKeyList = (List<String>) savedInstanceState.getStringArrayList("monitorKeyList");
             mBuyingItemMapInfo = (HashMap<String, BuyingItem>) savedInstanceState.getSerializable("buyingItemMapInfo");
             mBuyingItemKeyList = (List<String>) savedInstanceState.getStringArrayList("buyingItemKeyList");
@@ -140,7 +147,7 @@ public class CoinEvaluationFragment extends Fragment {
         outState.putSerializable("weekCandleInfo", (Serializable) mWeekCandleMapInfo);
         outState.putSerializable("monthCandleInfo", (Serializable) mMonthCandleMapInfo);
         outState.putStringArrayList("deadMarketList", mDeadMarketList);
-        outState.putSerializable("tradeMapInfo", (Serializable) mTradeMapInfo);
+//        outState.putSerializable("tradeMapInfo", (Serializable) mTradeMapInfo);
         outState.putStringArrayList("monitorKeyList", (ArrayList<String>) mMonitorKeyList);
         outState.putSerializable("buyingItemMapInfo", (Serializable) mBuyingItemMapInfo);
         outState.putStringArrayList("buyingItemKeyList", (ArrayList<String>) mBuyingItemKeyList);
@@ -240,7 +247,7 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getTradeInfo().observe(
                     getViewLifecycleOwner(),
                     tradesInfo -> {
-                        mappingTradeMapInfo(tradesInfo);
+//                        mappingTradeMapInfo(tradesInfo);
                     }
             );
         }
@@ -287,13 +294,13 @@ public class CoinEvaluationFragment extends Fragment {
                 mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                 mCoinListAdapter.notifyDataSetChanged();
                 mTickerMapInfo.remove(key);
-                mTradeMapInfo.remove(key);
+//                mTradeMapInfo.remove(key);
                 Log.d(TAG, "[DEBUG] updateMonitorKey - remove key : "+key);
             }
         }
     }
 
-    private void mappingTradeMapInfo(List<TradeInfo> tradesInfo) {
+ /*   private void mappingTradeMapInfo(List<TradeInfo> tradesInfo) {
         if (tradesInfo == null || tradesInfo.isEmpty()) {
             return;
         }
@@ -429,6 +436,107 @@ public class CoinEvaluationFragment extends Fragment {
             i++;
         }
         mTradeMapInfo.put(key, newTradeInfo);
+    }
+*/
+    private void makeTradeMapInfo(List<TradeInfo> tradesInfo) {
+        if (tradesInfo == null || tradesInfo.isEmpty()) {
+            return;
+        }
+
+        String key = null;
+        Stack<TradeInfo> tradeInfoStack = new Stack<>();
+
+
+
+        TradeInfo prevTradeInfo = mTradeInfoTickQueue.peekLast();
+        int prevTradeInfoListSize = mTradeInfoTickQueue.size();
+        int tickCount = prevTradeInfo != null ? prevTradeInfo.getTickCount() : 0;
+        double minPrice = prevTradeInfo != null ? prevTradeInfo.getMinPrice() : 0;
+        double tradePrice = prevTradeInfo != null ? prevTradeInfo.getTradePrice().doubleValue() : 0;
+        long startTime = prevTradeInfo != null ? prevTradeInfo.getStartTime() : 0;
+        long endTime = prevTradeInfo != null ? prevTradeInfo.getEndTime() : 0;
+        long startTimeFirst = prevTradeInfo != null ? prevTradeInfo.getEvaluationStartTimeFirst() : 0;
+        int risingPoint = prevTradeInfo != null ? prevTradeInfo.getRisingPoint() : 0;
+
+        Iterator<TradeInfo> iterator = tradesInfo.iterator();
+        while (iterator.hasNext()) {
+            TradeInfo tradeInfo = iterator.next();
+            key = tradeInfo.getMarketId();
+            if (tradeInfo.getSequentialId() > prevTradeInfo.getSequentialId()) {
+                tradeInfoStack.push(tradeInfo);
+            }
+        }
+
+        while (!tradeInfoStack.isEmpty()) {
+            TradeInfo pop = tradeInfoStack.pop();
+            tickCount++;
+
+            long time = pop.getTimestamp();
+            if (tickCount == 1) {
+                startTime = time;
+            }
+            endTime = time;
+
+
+            double currentPrice = pop.getTradePrice().doubleValue();
+            if (minPrice == 0 || currentPrice <= minPrice) {
+                minPrice = currentPrice;
+            }
+
+            double changedPrice = currentPrice - tradePrice;
+            double rate = changedPrice / tradePrice;
+            int point = (int) (rate / 0.001);
+            tradePrice = pop.getTradePrice().doubleValue();
+
+            if (rate >= 0) {
+                if (risingPoint == 0) {
+                    startTimeFirst = time;
+                }
+            } else {
+                if (risingPoint + point < 0) {
+                    risingPoint = 0;
+                    startTimeFirst = 0;
+                }
+            }
+
+            pop.setTickCount(tickCount);
+            pop.setMinPrice(minPrice);
+            pop.setStartTime(startTime);
+            pop.setEndTime(endTime);
+            pop.setEvaluationStartTimeFirst(startTimeFirst);
+            pop.setRisingPoint(risingPoint + point);
+
+            mTradeInfoTickQueue.offer(pop);
+        }
+
+        TradeInfo newTradeInfo = null;
+        if (mTradeInfoTickQueue.size() >= TICK_COUNTS) {
+            int i = 0;
+            DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+
+            while (i < TICK_COUNTS) {
+                newTradeInfo = mTradeInfoTickQueue.poll();
+
+                Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
+                        + " getMarketId: " + newTradeInfo.getMarketId()
+                        + " getSequentialId: " + newTradeInfo.getSequentialId()
+                        + " getMinPrice: " + newTradeInfo.getMinPrice()
+                        + " time: " + format.format(newTradeInfo.getTimestamp())
+                        + " getRisingCount: " + newTradeInfo.getRisingPoint()
+                        + " tickCount: " + newTradeInfo.getTickCount()
+                        + " getStartTime: " + format.format(newTradeInfo.getStartTime())
+                        + " getEndTime: " + format.format(newTradeInfo.getEndTime())
+                        + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTime())
+                );
+
+                i++;
+            }
+            if (endTime - startTime < EVALUATION_TIME * 1000) {
+                evaluationToBuy(key, newTradeInfo);
+            }
+        }
+
+
     }
 
     private void evaluationToBuy(String key, TradeInfo newTradeInfo) {

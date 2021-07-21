@@ -35,6 +35,8 @@ public class TradeInfo implements Serializable {
     @SerializedName("sequential_id")
     long sequentialId;
 
+    //Custom Param.
+
     long evaluationStartTime;
 
     long evaluationStartTimeFirst;
