@@ -83,11 +83,10 @@ public class CoinEvaluationFragment extends Fragment {
     private Map<String, DayCandle> mDayCandleMapInfo;
     private Map<String, WeekCandle> mWeekCandleMapInfo;
     private Map<String, MonthCandle> mMonthCandleMapInfo;
-//    private Map<String, TradeInfo> mTradeMapInfo;
     private Map<String, BuyingItem> mBuyingItemMapInfo;
     private Map<String, BuyingItem> mCandidateItemMapInfo;
 
-    private Deque<TradeInfo> mTradeInfoTickQueue;
+    private Map<String, Deque<TradeInfo>> mTradeMapInfo;
 
     boolean mIsStarting = false;
 
@@ -107,13 +106,12 @@ public class CoinEvaluationFragment extends Fragment {
         mWeekCandleMapInfo = new HashMap<>();
         mMonthCandleMapInfo = new HashMap<>();
         mDeadMarketList = new ArrayList(Arrays.asList(deadMarket));
-//        mTradeMapInfo = new HashMap<>();
         mMonitorKeyList = new ArrayList<>();
         mBuyingItemMapInfo = new HashMap<>();
         mBuyingItemKeyList = new ArrayList<>();
         mCandidateItemMapInfo = new HashMap<>();
 
-        mTradeInfoTickQueue = new LinkedList<>();
+        mTradeMapInfo = new HashMap<>();
     }
 
 
@@ -248,6 +246,7 @@ public class CoinEvaluationFragment extends Fragment {
                     getViewLifecycleOwner(),
                     tradesInfo -> {
 //                        mappingTradeMapInfo(tradesInfo);
+                        makeTradeMapInfo(tradesInfo);
                     }
             );
         }
@@ -443,11 +442,15 @@ public class CoinEvaluationFragment extends Fragment {
             return;
         }
 
-        String key = null;
+        String key = tradesInfo.get(0).getMarketId();
         Stack<TradeInfo> tradeInfoStack = new Stack<>();
 
-        TradeInfo prevTradeInfo = mTradeInfoTickQueue.peekLast();
-        int prevTradeInfoListSize = mTradeInfoTickQueue.size();
+//        TradeInfo prevTradeInfo = mTradeInfoTickQueue.peekLast();
+
+        Deque<TradeInfo> dequeTradeInfo = mTradeMapInfo.get(key);
+        TradeInfo prevTradeInfo = dequeTradeInfo != null ? dequeTradeInfo.peekLast() : null;
+        int prevTradeInfoListSize = dequeTradeInfo != null ? dequeTradeInfo.size() : 0;
+
         int tickCount = prevTradeInfo != null ? prevTradeInfo.getTickCount() : 0;
         double minPrice = prevTradeInfo != null ? prevTradeInfo.getMinPrice() : 0;
         double tradePrice = prevTradeInfo != null ? prevTradeInfo.getTradePrice().doubleValue() : 0;
@@ -460,7 +463,9 @@ public class CoinEvaluationFragment extends Fragment {
         while (iterator.hasNext()) {
             TradeInfo tradeInfo = iterator.next();
             key = tradeInfo.getMarketId();
-            if (tradeInfo.getSequentialId() > prevTradeInfo.getSequentialId()) {
+            if (prevTradeInfo == null) {
+                tradeInfoStack.push(tradeInfo);
+            } else if (tradeInfo.getSequentialId() > prevTradeInfo.getSequentialId()) {
                 tradeInfoStack.push(tradeInfo);
             }
         }
@@ -484,7 +489,14 @@ public class CoinEvaluationFragment extends Fragment {
             double changedPrice = currentPrice - tradePrice;
             double rate = changedPrice / tradePrice;
             int point = (int) (rate / 0.001);
-            tradePrice = pop.getTradePrice().doubleValue();
+
+            Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
+                    + " currentPrice: " + currentPrice
+                    + " tradePrice: " + tradePrice
+                    + " changedPrice: " + changedPrice
+                    + " rate: " + rate
+            );
+            tradePrice = currentPrice;
 
             if (rate >= 0) {
                 if (risingPoint == 0) {
@@ -504,16 +516,21 @@ public class CoinEvaluationFragment extends Fragment {
             pop.setEvaluationStartTimeFirst(startTimeFirst);
             pop.setRisingPoint(risingPoint + point);
 
-            mTradeInfoTickQueue.offer(pop);
+            if (dequeTradeInfo == null) {
+                dequeTradeInfo = new LinkedList<>();
+
+            }
+            dequeTradeInfo.offer(pop);
+            mTradeMapInfo.put(key, dequeTradeInfo);
         }
 
         TradeInfo newTradeInfo = null;
-        if (mTradeInfoTickQueue.size() >= TICK_COUNTS) {
+        if (dequeTradeInfo.size() >= TICK_COUNTS) {
             int i = 0;
             DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
 
             while (i < TICK_COUNTS) {
-                newTradeInfo = mTradeInfoTickQueue.poll();
+                newTradeInfo = dequeTradeInfo.poll();
 
                 Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
                         + " getMarketId: " + newTradeInfo.getMarketId()
