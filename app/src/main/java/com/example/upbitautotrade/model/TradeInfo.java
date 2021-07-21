@@ -131,15 +131,9 @@ public class TradeInfo implements Serializable {
         this.sequentialId = sequentialId;
     }
 
-    public void setEvaluationStartTime(long monitoringStartTime) {
-        this.evaluationStartTime = monitoringStartTime;
-    }
+    //CUSTOM
 
-    public long getEvaluationStartTime() {
-        return evaluationStartTime;
-    }
-
-
+    
     public long getEvaluationStartTimeFirst() {
         return evaluationStartTimeFirst;
     }

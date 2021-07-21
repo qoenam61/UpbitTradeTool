@@ -58,10 +58,10 @@ public class CoinEvaluationFragment extends Fragment {
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
 
-    private final double MONITORING_START_RATE = 0.03;
+    private final double MONITORING_START_RATE = 0.001;
 
     private final int TICK_COUNTS = 60;
-    private final double MONITOR_RISING_COUNT = 20;
+    private final double MONITOR_RISING_COUNT = 5;
     private final int MONITOR_MIN_CANDLE_COUNT = 5;
     private final double EVALUATION_TIME = 20;
     private long EVALUATION_OFFSET_TIME = 60;
@@ -446,8 +446,6 @@ public class CoinEvaluationFragment extends Fragment {
         String key = null;
         Stack<TradeInfo> tradeInfoStack = new Stack<>();
 
-
-
         TradeInfo prevTradeInfo = mTradeInfoTickQueue.peekLast();
         int prevTradeInfoListSize = mTradeInfoTickQueue.size();
         int tickCount = prevTradeInfo != null ? prevTradeInfo.getTickCount() : 0;
@@ -526,7 +524,7 @@ public class CoinEvaluationFragment extends Fragment {
                         + " tickCount: " + newTradeInfo.getTickCount()
                         + " getStartTime: " + format.format(newTradeInfo.getStartTime())
                         + " getEndTime: " + format.format(newTradeInfo.getEndTime())
-                        + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTime())
+                        + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
                 );
 
                 i++;
@@ -535,13 +533,11 @@ public class CoinEvaluationFragment extends Fragment {
                 evaluationToBuy(key, newTradeInfo);
             }
         }
-
-
     }
 
     private void evaluationToBuy(String key, TradeInfo newTradeInfo) {
 
-        if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTime() < EVALUATION_TIME * 3 * 1000) {
+        if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst() < EVALUATION_TIME * 3 * 1000) {
             double changed = Math.abs(newTradeInfo.getTradePrice().doubleValue() - newTradeInfo.getMinPrice());
             long evalTime = (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst()) / 1000;
             double offsetPrice = (changed - (changed * (evalTime - EVALUATION_OFFSET_TIME) / (evalTime + EVALUATION_OFFSET_TIME)));
@@ -566,9 +562,8 @@ public class CoinEvaluationFragment extends Fragment {
             item.setBuyingTime(newTradeInfo.getEndTime());
 
             mCandidateItemMapInfo.put(key, item);
-        } else if (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTime() > EVALUATION_TIME * 2 * 1000) {
+        } else if (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst() > EVALUATION_TIME * 2 * 1000) {
             newTradeInfo.setRisingPoint(0);
-            newTradeInfo.setEvaluationStartTime(0);
             newTradeInfo.setEvaluationStartTimeFirst(0);
         }
     }
