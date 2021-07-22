@@ -286,7 +286,7 @@ public class CoinEvaluationFragment extends Fragment {
                 Log.d(TAG, "[DEBUG] updateMonitorKey - add key : "+key);
             }
         } else if (prevPrice != 0 && changedPrice / prevPrice < MONITORING_START_RATE) {
-            if (mMonitorKeyList.contains(key)) {
+            if (!mBuyingItemKeyList.contains(key) && mMonitorKeyList.contains(key)) {
                 removeMonitoringPeriodicUpdate();
                 mMonitorKeyList.remove(key);
                 registerPeriodicUpdate(mMonitorKeyList);
@@ -411,22 +411,27 @@ public class CoinEvaluationFragment extends Fragment {
             }
         }
 
-        if (newTradeInfo != null && newTradeInfo.getTickCount() == TICK_COUNTS) {
-            if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_POINT
-                    && newTradeInfo.getTickTurn() >= TICK_TURNS
-                    && endTime - startTime <= EVALUATION_TIME) {
-                evaluationToBuy(key, newTradeInfo);
-            } else if (endTime - startTime > EVALUATION_TIME){
-                newTradeInfo.setEvaluationStartTimeFirst(0);
-                newTradeInfo.setMinPrice(0);
-                newTradeInfo.setStartTime(0);
-                newTradeInfo.setEndTime(0);
-                newTradeInfo.setTickCount(0);
-                newTradeInfo.setTickTurn(0);
-                newTradeInfo.setRisingPoint(0);
+        if (!mBuyingItemKeyList.contains(key)) {
+            if (newTradeInfo != null && newTradeInfo.getTickCount() == TICK_COUNTS) {
+                if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_POINT
+                        && newTradeInfo.getTickTurn() >= TICK_TURNS
+                        && endTime - startTime <= EVALUATION_TIME) {
+                    evaluationToBuy(key, newTradeInfo);
+                } else if (endTime - startTime > EVALUATION_TIME) {
+                    newTradeInfo.setEvaluationStartTimeFirst(0);
+                    newTradeInfo.setMinPrice(0);
+                    newTradeInfo.setStartTime(0);
+                    newTradeInfo.setEndTime(0);
+                    newTradeInfo.setTickCount(0);
+                    newTradeInfo.setTickTurn(0);
+                    newTradeInfo.setRisingPoint(0);
+                }
             }
-        }
+        } else {
+            double buyPrice = mBuyingItemMapInfo.get(key).getBuyingPrice();
+            double currPrice = newTradeInfo.getTradePrice().doubleValue();
 
+        }
         if (newTradeInfo != null) {
             mTradeMapInfo.put(key, newTradeInfo);
         }
