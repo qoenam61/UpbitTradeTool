@@ -35,22 +35,6 @@ public class TradeInfo implements Serializable {
     @SerializedName("sequential_id")
     long sequentialId;
 
-    //Custom Param.
-
-    long evaluationStartTime;
-
-    long evaluationStartTimeFirst;
-
-    double minPrice;
-
-    long startTime;
-
-    long endTime;
-
-    int tickCount = 0;
-
-    int risingPoint = 0;
-
     public String getMarketId() {
         return market;
     }
@@ -131,8 +115,20 @@ public class TradeInfo implements Serializable {
         this.sequentialId = sequentialId;
     }
 
-    //CUSTOM
 
+    //Custom Param.
+
+    long evaluationStartTimeFirst;
+
+    double minPrice;
+
+    long startTime;
+
+    long endTime;
+
+    int tickCount = 0;
+
+    int risingPoint = 0;
     
     public long getEvaluationStartTimeFirst() {
         return evaluationStartTimeFirst;

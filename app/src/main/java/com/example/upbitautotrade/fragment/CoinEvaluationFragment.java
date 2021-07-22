@@ -58,10 +58,11 @@ public class CoinEvaluationFragment extends Fragment {
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
 
-    private final double MONITORING_START_RATE = 0.001;
+    private final double MONITORING_START_RATE = 0.01;
 
     private final int TICK_COUNTS = 60;
-    private final double MONITOR_RISING_COUNT = 5;
+    private final double MONITOR_RISING_POINT = 30;
+    private final double MONITOR_POINT_RATE = 0.001;
     private final int MONITOR_MIN_CANDLE_COUNT = 5;
     private final double EVALUATION_TIME = 20;
     private long EVALUATION_OFFSET_TIME = 60;
@@ -85,8 +86,7 @@ public class CoinEvaluationFragment extends Fragment {
     private Map<String, MonthCandle> mMonthCandleMapInfo;
     private Map<String, BuyingItem> mBuyingItemMapInfo;
     private Map<String, BuyingItem> mCandidateItemMapInfo;
-
-    private Map<String, Deque<TradeInfo>> mTradeMapInfo;
+    private Map<String, TradeInfo> mTradeMapInfo;
 
     boolean mIsStarting = false;
 
@@ -129,7 +129,7 @@ public class CoinEvaluationFragment extends Fragment {
             mWeekCandleMapInfo = (HashMap<String, WeekCandle>) savedInstanceState.getSerializable("weekCandleInfo");
             mMonthCandleMapInfo = (HashMap<String, MonthCandle>) savedInstanceState.getSerializable("monthCandleInfo");
             mDeadMarketList = (ArrayList) savedInstanceState.getStringArrayList("deadMarketList");
-//            mTradeMapInfo = (HashMap<String, TradeInfo>) savedInstanceState.getSerializable("tradeMapInfo");
+            mTradeMapInfo = (HashMap<String, TradeInfo>) savedInstanceState.getSerializable("tradeMapInfo");
             mMonitorKeyList = (List<String>) savedInstanceState.getStringArrayList("monitorKeyList");
             mBuyingItemMapInfo = (HashMap<String, BuyingItem>) savedInstanceState.getSerializable("buyingItemMapInfo");
             mBuyingItemKeyList = (List<String>) savedInstanceState.getStringArrayList("buyingItemKeyList");
@@ -145,7 +145,7 @@ public class CoinEvaluationFragment extends Fragment {
         outState.putSerializable("weekCandleInfo", (Serializable) mWeekCandleMapInfo);
         outState.putSerializable("monthCandleInfo", (Serializable) mMonthCandleMapInfo);
         outState.putStringArrayList("deadMarketList", mDeadMarketList);
-//        outState.putSerializable("tradeMapInfo", (Serializable) mTradeMapInfo);
+        outState.putSerializable("tradeMapInfo", (Serializable) mTradeMapInfo);
         outState.putStringArrayList("monitorKeyList", (ArrayList<String>) mMonitorKeyList);
         outState.putSerializable("buyingItemMapInfo", (Serializable) mBuyingItemMapInfo);
         outState.putStringArrayList("buyingItemKeyList", (ArrayList<String>) mBuyingItemKeyList);
@@ -245,7 +245,6 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getTradeInfo().observe(
                     getViewLifecycleOwner(),
                     tradesInfo -> {
-//                        mappingTradeMapInfo(tradesInfo);
                         makeTradeMapInfo(tradesInfo);
                     }
             );
@@ -293,150 +292,12 @@ public class CoinEvaluationFragment extends Fragment {
                 mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                 mCoinListAdapter.notifyDataSetChanged();
                 mTickerMapInfo.remove(key);
-//                mTradeMapInfo.remove(key);
+                mTradeMapInfo.remove(key);
                 Log.d(TAG, "[DEBUG] updateMonitorKey - remove key : "+key);
             }
         }
     }
 
- /*   private void mappingTradeMapInfo(List<TradeInfo> tradesInfo) {
-        if (tradesInfo == null || tradesInfo.isEmpty()) {
-            return;
-        }
-        Iterator<TradeInfo> iterator = tradesInfo.iterator();
-        TradeInfo newTradeInfo = null;
-        TradeInfo prevTradeInfo = null;
-        String key = null;
-        int i = 0;
-        double minPrice = 0;
-        while (iterator.hasNext()) {
-            TradeInfo tradeInfo = iterator.next();
-            key = tradeInfo.getMarketId();
-            prevTradeInfo = mTradeMapInfo.get(key);
-            if (prevTradeInfo == null) {
-                if (i == 0) {
-                    newTradeInfo = tradeInfo;
-                    newTradeInfo.setEndTime(tradeInfo.getTimestamp());
-                    newTradeInfo.setEvaluationStartTime(0);
-                    minPrice = tradeInfo.getTradePrice().intValue();
-                    newTradeInfo.setTickCount(0);
-                    newTradeInfo.setRisingPoint(0);
-                }
-
-                if (minPrice == 0) {
-                    newTradeInfo.setMinPrice(tradeInfo.getTradePrice().intValue());
-                } else if (minPrice >= tradeInfo.getTradePrice().intValue()) {
-                    newTradeInfo.setMinPrice(tradeInfo.getTradePrice().intValue());
-                }
-
-                newTradeInfo.setStartTime(tradeInfo.getTimestamp());
-                newTradeInfo.setTickCount(newTradeInfo.getTickCount() + 1);
-
-                if (newTradeInfo.getTickCount() == TICK_COUNTS) {
-                    newTradeInfo.setTickCount(0);
-                    newTradeInfo.setStartTime(tradeInfo.getTimestamp());
-                    if (newTradeInfo.getEndTime() - newTradeInfo.getStartTime() < EVALUATION_TIME * 1000) {
-
-                        float changedPrice = newTradeInfo.getTradePrice().floatValue() - tradeInfo.getTradePrice().floatValue();
-                        float prevPrice = tradeInfo.getTradePrice().floatValue();
-
-                        float rate = changedPrice / prevPrice;
-                        int point = (int) (rate / 0.001);
-
-                        if (rate >= 0) {
-                            newTradeInfo.setEvaluationStartTime(tradeInfo.getTimestamp());
-                            newTradeInfo.setEvaluationStartTimeFirst(tradeInfo.getTimestamp());
-                            newTradeInfo.setRisingPoint(point);
-                        } else if (rate < 0) {
-                            newTradeInfo.setRisingPoint(point);
-                            if (newTradeInfo.getRisingPoint() <= 0) {
-                                newTradeInfo.setRisingPoint(0);
-                                newTradeInfo.setEvaluationStartTime(0);
-                                newTradeInfo.setEvaluationStartTimeFirst(0);
-                            }
-                        }
-                    } else {
-                        newTradeInfo.setRisingPoint(0);
-                        newTradeInfo.setEvaluationStartTime(0);
-                        newTradeInfo.setEvaluationStartTimeFirst(0);
-                    }
-                    evaluationToBuy(key, newTradeInfo);
-                }
-            } else {
-                if (tradeInfo.getSequentialId() < prevTradeInfo.getSequentialId()) {
-                    continue;
-                }
-                if (i == 0) {
-                    newTradeInfo = tradeInfo;
-                    newTradeInfo.setEvaluationStartTime(prevTradeInfo.getEvaluationStartTime());
-                    newTradeInfo.setEvaluationStartTimeFirst(prevTradeInfo.getEvaluationStartTimeFirst());
-                    minPrice = prevTradeInfo.getMinPrice();
-                    newTradeInfo.setEndTime(tradeInfo.getTimestamp());
-                    newTradeInfo.setStartTime(0);
-                    newTradeInfo.setTickCount(prevTradeInfo.getTickCount());
-                    newTradeInfo.setRisingPoint(prevTradeInfo.getRisingPoint());
-                }
-
-                if (minPrice == 0) {
-                    newTradeInfo.setMinPrice(tradeInfo.getTradePrice().doubleValue());
-                } else if (minPrice >= tradeInfo.getTradePrice().intValue()) {
-                    newTradeInfo.setMinPrice(tradeInfo.getTradePrice().doubleValue());
-                }
-
-                newTradeInfo.setTickCount(newTradeInfo.getTickCount() + 1);
-
-                if (newTradeInfo.getTickCount() == TICK_COUNTS) {
-                    newTradeInfo.setTickCount(0);
-                    newTradeInfo.setStartTime(tradeInfo.getTimestamp());
-                    if (newTradeInfo.getEndTime() - newTradeInfo.getStartTime() < EVALUATION_TIME * 1000) {
-                        float changedPrice = newTradeInfo.getTradePrice().floatValue() - prevTradeInfo.getTradePrice().floatValue();
-                        float prevPrice = prevTradeInfo.getTradePrice().floatValue();
-                        float rate = changedPrice / prevPrice;
-                        int point = (int) (rate / 0.001);
-                        if (rate >= 0) {
-                            int prevPoint = prevTradeInfo.getRisingPoint();
-                            if (prevPoint == 0) {
-                                newTradeInfo.setEvaluationStartTimeFirst(tradeInfo.getTimestamp());
-                            }
-                            newTradeInfo.setEvaluationStartTime(tradeInfo.getTimestamp());
-                            newTradeInfo.setRisingPoint(prevPoint + point);
-                        } else if (rate < 0) {
-                            newTradeInfo.setRisingPoint(prevTradeInfo.getRisingPoint() + point);
-                            if (newTradeInfo.getRisingPoint() <= 0) {
-                                newTradeInfo.setRisingPoint(0);
-                                newTradeInfo.setEvaluationStartTime(0);
-                                newTradeInfo.setEvaluationStartTimeFirst(0);
-                            }
-                        }
-                    } else {
-                        newTradeInfo.setRisingPoint(0);
-                        newTradeInfo.setEvaluationStartTime(0);
-                        newTradeInfo.setEvaluationStartTimeFirst(0);
-                    }
-                    evaluationToBuy(key, newTradeInfo);
-                }
-            }
-
-            if ( newTradeInfo != null) {
-                DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
-                format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-                Log.d(TAG, "[DEBUG] getEvaluationTradeInfo - "
-                        + " getMarketId: " + newTradeInfo.getMarketId()
-                        + " getSequentialId: " + newTradeInfo.getSequentialId()
-                        + " getMinPrice: " + newTradeInfo.getMinPrice()
-                        + " time: " + format.format(newTradeInfo.getTimestamp())
-                        + " getRisingCount: " + newTradeInfo.getRisingPoint()
-                        + " tickCount: " + newTradeInfo.getTickCount()
-                        + " getStartTime: " + format.format(newTradeInfo.getStartTime())
-                        + " getEndTime: " + format.format(newTradeInfo.getEndTime())
-                        + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTime())
-                );
-            }
-            i++;
-        }
-        mTradeMapInfo.put(key, newTradeInfo);
-    }
-*/
     private void makeTradeMapInfo(List<TradeInfo> tradesInfo) {
         if (tradesInfo == null || tradesInfo.isEmpty()) {
             return;
@@ -445,12 +306,8 @@ public class CoinEvaluationFragment extends Fragment {
         String key = tradesInfo.get(0).getMarketId();
         Stack<TradeInfo> tradeInfoStack = new Stack<>();
 
-//        TradeInfo prevTradeInfo = mTradeInfoTickQueue.peekLast();
-
-        Deque<TradeInfo> dequeTradeInfo = mTradeMapInfo.get(key);
-        TradeInfo prevTradeInfo = dequeTradeInfo != null ? dequeTradeInfo.peekLast() : null;
-        int prevTradeInfoListSize = dequeTradeInfo != null ? dequeTradeInfo.size() : 0;
-
+        TradeInfo prevTradeInfo = mTradeMapInfo.get(key);
+        long prevTradeInfoSeqId = prevTradeInfo != null ? prevTradeInfo.getSequentialId() : 0;
         int tickCount = prevTradeInfo != null ? prevTradeInfo.getTickCount() : 0;
         double minPrice = prevTradeInfo != null ? prevTradeInfo.getMinPrice() : 0;
         double tradePrice = prevTradeInfo != null ? prevTradeInfo.getTradePrice().doubleValue() : 0;
@@ -463,13 +320,14 @@ public class CoinEvaluationFragment extends Fragment {
         while (iterator.hasNext()) {
             TradeInfo tradeInfo = iterator.next();
             key = tradeInfo.getMarketId();
-            if (prevTradeInfo == null) {
+            if (prevTradeInfoSeqId == 0) {
                 tradeInfoStack.push(tradeInfo);
-            } else if (tradeInfo.getSequentialId() > prevTradeInfo.getSequentialId()) {
+            } else if (tradeInfo.getSequentialId() > prevTradeInfoSeqId) {
                 tradeInfoStack.push(tradeInfo);
             }
         }
 
+        Deque<TradeInfo> dequeTradeInfo = new LinkedList<>();
         while (!tradeInfoStack.isEmpty()) {
             TradeInfo pop = tradeInfoStack.pop();
             tickCount++;
@@ -487,16 +345,19 @@ public class CoinEvaluationFragment extends Fragment {
             }
 
             double changedPrice = currentPrice - tradePrice;
-            double rate = changedPrice / tradePrice;
-            int point = (int) (rate / 0.001);
+            double rate = tradePrice != 0 ? changedPrice / tradePrice : 0;
+            int point = (int) (rate / MONITOR_POINT_RATE);
 
-            Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
-                    + " currentPrice: " + currentPrice
-                    + " tradePrice: " + tradePrice
-                    + " changedPrice: " + changedPrice
-                    + " rate: " + rate
-            );
+//            Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
+//                    + " currentPrice: " + currentPrice
+//                    + " tradePrice: " + tradePrice
+//                    + " changedPrice: " + changedPrice
+//                    + " rate: " + rate
+//                    + " point: " + point
+//            );
             tradePrice = currentPrice;
+
+            risingPoint = risingPoint + point;
 
             if (rate >= 0) {
                 if (risingPoint == 0) {
@@ -514,24 +375,19 @@ public class CoinEvaluationFragment extends Fragment {
             pop.setStartTime(startTime);
             pop.setEndTime(endTime);
             pop.setEvaluationStartTimeFirst(startTimeFirst);
-            pop.setRisingPoint(risingPoint + point);
+            pop.setRisingPoint(risingPoint);
 
-            if (dequeTradeInfo == null) {
-                dequeTradeInfo = new LinkedList<>();
-
-            }
             dequeTradeInfo.offer(pop);
-            mTradeMapInfo.put(key, dequeTradeInfo);
         }
 
         TradeInfo newTradeInfo = null;
-        if (dequeTradeInfo.size() >= TICK_COUNTS) {
-            int i = 0;
+        if (dequeTradeInfo != null) {
             DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
-
-            while (i < TICK_COUNTS) {
+            while (!dequeTradeInfo.isEmpty() && dequeTradeInfo.peek().getTickCount() <= TICK_COUNTS) {
                 newTradeInfo = dequeTradeInfo.poll();
-
+                if (newTradeInfo.getTickCount() == TICK_COUNTS) {
+                    newTradeInfo.setTickCount(0);
+                }
                 Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
                         + " getMarketId: " + newTradeInfo.getMarketId()
                         + " getSequentialId: " + newTradeInfo.getSequentialId()
@@ -543,18 +399,30 @@ public class CoinEvaluationFragment extends Fragment {
                         + " getEndTime: " + format.format(newTradeInfo.getEndTime())
                         + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
                 );
+            }
+        }
 
-                i++;
-            }
-            if (endTime - startTime < EVALUATION_TIME * 1000) {
+        if (newTradeInfo != null && newTradeInfo.getTickCount() == TICK_COUNTS) {
+            if (endTime - startTime <= EVALUATION_TIME * 1000) {
                 evaluationToBuy(key, newTradeInfo);
+            } else {
+                newTradeInfo.setEvaluationStartTimeFirst(0);
+                newTradeInfo.setMinPrice(0);
+                newTradeInfo.setStartTime(0);
+                newTradeInfo.setEndTime(0);
+                newTradeInfo.setTickCount(0);
+                newTradeInfo.setRisingPoint(0);
             }
+        }
+
+        if (newTradeInfo != null) {
+            mTradeMapInfo.put(key, newTradeInfo);
         }
     }
 
     private void evaluationToBuy(String key, TradeInfo newTradeInfo) {
 
-        if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_COUNT && newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst() < EVALUATION_TIME * 3 * 1000) {
+        if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_POINT && newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst() < EVALUATION_TIME * 3 * 1000) {
             double changed = Math.abs(newTradeInfo.getTradePrice().doubleValue() - newTradeInfo.getMinPrice());
             long evalTime = (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst()) / 1000;
             double offsetPrice = (changed - (changed * (evalTime - EVALUATION_OFFSET_TIME) / (evalTime + EVALUATION_OFFSET_TIME)));
