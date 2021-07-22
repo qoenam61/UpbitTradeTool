@@ -275,7 +275,6 @@ public class BackgroundProcessor {
             return;
 
         }
-        mHandler.removeMessages(type);
         Iterator<Item> iterator = mUpdateProcesses.iterator();
         while (iterator.hasNext()) {
             Item item = iterator.next();
@@ -283,6 +282,7 @@ public class BackgroundProcessor {
                 iterator.remove();
             }
         }
+        mHandler.removeMessages(type);
     }
 
     public void removePeriodicUpdate(String key) {

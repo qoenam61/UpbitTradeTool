@@ -128,6 +128,8 @@ public class TradeInfo implements Serializable {
 
     int tickCount = 0;
 
+    int tickTurn = 0;
+
     int risingPoint = 0;
     
     public long getEvaluationStartTimeFirst() {
@@ -176,5 +178,13 @@ public class TradeInfo implements Serializable {
 
     public void setRisingPoint(int tickCount) {
         this.risingPoint = tickCount;
+    }
+
+    public int getTickTurn() {
+        return tickTurn;
+    }
+
+    public void setTickTurn(int tickTurn) {
+        this.tickTurn = tickTurn;
     }
 }
