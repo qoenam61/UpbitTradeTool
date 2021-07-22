@@ -357,18 +357,20 @@ public class CoinEvaluationFragment extends Fragment {
 //            );
             tradePrice = currentPrice;
 
-            risingPoint = risingPoint + point;
-
             if (rate >= 0) {
                 if (risingPoint == 0) {
                     startTimeFirst = time;
                 }
+                risingPoint = risingPoint + point;
             } else {
                 if (risingPoint + point < 0) {
                     risingPoint = 0;
                     startTimeFirst = 0;
+                } else {
+                    risingPoint = risingPoint + point;
                 }
             }
+
 
             pop.setTickCount(tickCount);
             pop.setMinPrice(minPrice);
