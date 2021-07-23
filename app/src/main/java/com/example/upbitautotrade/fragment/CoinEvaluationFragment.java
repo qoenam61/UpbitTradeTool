@@ -65,7 +65,7 @@ public class CoinEvaluationFragment extends Fragment {
     private final double MONITOR_RISING_POINT = 1;
     private final double MONITOR_POINT_RATE = 0.001;
     private final int MONITOR_MIN_CANDLE_COUNT = 5;
-    private final double EVALUATION_TIME = 120  * 1000;
+    private final double EVALUATION_TIME = 360  * 1000;
     private long EVALUATION_OFFSET_TIME = 60;
 
     private View mView;
@@ -368,10 +368,6 @@ public class CoinEvaluationFragment extends Fragment {
                 if (risingPoint + point < 0) {
                     risingPoint = 0;
                     startTimeFirst = 0;
-//                    startTime = 0;
-//                    minPrice = 0;
-//                    tickCount = 0;
-//                    tickTurn = 0;
                 } else {
                     risingPoint = risingPoint + point;
                 }
@@ -400,25 +396,49 @@ public class CoinEvaluationFragment extends Fragment {
                     newTradeInfo.setTickCount(0);
                     newTradeInfo.setTickTurn(tickTurn + 1);
                 }
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
-                        + " getMarketId: " + newTradeInfo.getMarketId()
-                        + " getSequentialId: " + newTradeInfo.getSequentialId()
-                        + " getMinPrice: " + newTradeInfo.getMinPrice()
-                        + " time: " + format.format(newTradeInfo.getTimestamp())
-                        + " getRisingPoint: " + newTradeInfo.getRisingPoint()
-                        + " tickCount: " + newTradeInfo.getTickCount()
-                        + " TickTurn: " + newTradeInfo.getTickTurn()
-                        + " getStartTime: " + format.format(newTradeInfo.getStartTime())
-                        + " getEndTime: " + format.format(newTradeInfo.getEndTime())
-                        + " (EndTime -StartTime): " + (newTradeInfo.getEndTime() - newTradeInfo.getStartTime())
-                        + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
-                );
+//                Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
+//                        + " getMarketId: " + newTradeInfo.getMarketId()
+//                        + " getSequentialId: " + newTradeInfo.getSequentialId()
+//                        + " getMinPrice: " + newTradeInfo.getMinPrice()
+//                        + " time: " + format.format(newTradeInfo.getTimestamp())
+//                        + " getRisingPoint: " + newTradeInfo.getRisingPoint()
+//                        + " tickCount: " + newTradeInfo.getTickCount()
+//                        + " TickTurn: " + newTradeInfo.getTickTurn()
+//                        + " getStartTime: " + format.format(newTradeInfo.getStartTime())
+//                        + " getEndTime: " + format.format(newTradeInfo.getEndTime())
+//                        + " (EndTime -StartTime): " + (newTradeInfo.getEndTime() - newTradeInfo.getStartTime())
+//                        + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
+//                );
             }
         }
 
+
         if (newTradeInfo != null) {
-            if (newTradeInfo.getEndTime() - newTradeInfo.getStartTime() > EVALUATION_TIME
-                    || newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst() > EVALUATION_TIME * 5) {
+            long endToStart = newTradeInfo.getEndTime() - newTradeInfo.getStartTime();
+            long endToStartFirst = newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst();
+            long tickNumber = newTradeInfo.getTickCount();
+            long tickTurnCounts = newTradeInfo.getTickTurn();
+            long risePoint = newTradeInfo.getRisingPoint();
+
+            if (tickNumber == 0) {
+                DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+                format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+                Log.d(TAG, "[DEBUG] makeTradeMapInfo - checking to evaluationToBuy "
+                        + " getMarketId: " + newTradeInfo.getMarketId()
+                        + " endToStart: " + endToStart
+                        + " endToStartFirst: " + endToStartFirst
+                        + " tickNumber: " + tickNumber
+                        + " tickTurnCounts: " + tickTurnCounts
+                        + " risePoint: " + risePoint
+                        + " getStartTime: " + format.format(newTradeInfo.getStartTime())
+                        + " getEndTime: " + format.format(newTradeInfo.getEndTime())
+                        + " getEvaluationStartTimeFirst: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
+                        + " mBuyingItemKeyList.contains(key): " + mBuyingItemKeyList.contains(key)
+                        + " mCandidateItemMapInfo.get(key): " + mCandidateItemMapInfo.get(key)
+                );
+            }
+            if (endToStart > EVALUATION_TIME
+                    || endToStartFirst > EVALUATION_TIME * 5) {
                 Log.d(TAG, "[DEBUG] makeTradeMapInfo: clear TradeInfo");
                 newTradeInfo.setEvaluationStartTimeFirst(0);
                 newTradeInfo.setMinPrice(0);
@@ -427,23 +447,11 @@ public class CoinEvaluationFragment extends Fragment {
                 newTradeInfo.setTickCount(0);
                 newTradeInfo.setTickTurn(0);
                 newTradeInfo.setRisingPoint(0);
-            } else if (newTradeInfo.getTickCount() == 0) {
-                DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
-                format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo - checking to evaluationToBuy "
-                        + " getMarketId: " + newTradeInfo.getMarketId()
-                        + " time: " + format.format(newTradeInfo.getTimestamp())
-                        + " getRisingPoint: " + newTradeInfo.getRisingPoint()
-                        + " tickCount: " + newTradeInfo.getTickCount()
-                        + " TickTurn: " + newTradeInfo.getTickTurn()
-                        + " getStartTime: " + format.format(newTradeInfo.getStartTime())
-                        + " getEndTime: " + format.format(newTradeInfo.getEndTime())
-                        + " (EndTime -StartTime): " + (newTradeInfo.getEndTime() - newTradeInfo.getStartTime())
-                );
-                if (!mBuyingItemKeyList.contains(key) && mCandidateItemMapInfo.get(key) != null) {
-                    if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_POINT
-                            && newTradeInfo.getTickTurn() >= TICK_TURNS
-                            && newTradeInfo.getEndTime() - newTradeInfo.getStartTime() <= EVALUATION_TIME) {
+            } else if (tickNumber == 0) {
+                if (!mBuyingItemKeyList.contains(key) && mCandidateItemMapInfo.get(key) == null) {
+                    if (endToStart <= EVALUATION_TIME
+                            && tickTurnCounts >= TICK_TURNS
+                            && risePoint >= MONITOR_RISING_POINT) {
                         Log.d(TAG, "[DEBUG] makeTradeMapInfo: add TradeInfo at Candidate");
                         evaluationToBuy(key, newTradeInfo);
                     }
