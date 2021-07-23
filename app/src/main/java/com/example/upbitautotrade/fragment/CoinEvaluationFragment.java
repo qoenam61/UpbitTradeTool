@@ -428,6 +428,18 @@ public class CoinEvaluationFragment extends Fragment {
                 newTradeInfo.setTickTurn(0);
                 newTradeInfo.setRisingPoint(0);
             } else if (newTradeInfo.getTickCount() == TICK_COUNTS) {
+                DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
+                format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+                Log.d(TAG, "[DEBUG] makeTradeMapInfo - checking to evaluationToBuy "
+                        + " getMarketId: " + newTradeInfo.getMarketId()
+                        + " time: " + format.format(newTradeInfo.getTimestamp())
+                        + " getRisingPoint: " + newTradeInfo.getRisingPoint()
+                        + " tickCount: " + newTradeInfo.getTickCount()
+                        + " TickTurn: " + newTradeInfo.getTickTurn()
+                        + " getStartTime: " + format.format(newTradeInfo.getStartTime())
+                        + " getEndTime: " + format.format(newTradeInfo.getEndTime())
+                        + " (EndTime -StartTime): " + (newTradeInfo.getEndTime() - newTradeInfo.getStartTime())
+                );
                 if (!mBuyingItemKeyList.contains(key) && mCandidateItemMapInfo.get(key) != null) {
                     if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_POINT
                             && newTradeInfo.getTickTurn() >= TICK_TURNS
