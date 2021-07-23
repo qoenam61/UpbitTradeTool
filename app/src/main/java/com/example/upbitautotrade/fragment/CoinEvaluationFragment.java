@@ -448,8 +448,8 @@ public class CoinEvaluationFragment extends Fragment {
                         evaluationToBuy(key, newTradeInfo);
                     }
                 } else {
-                    double buyPrice = mBuyingItemMapInfo.get(key).getBuyingPrice();
-                    double currPrice = newTradeInfo.getTradePrice().doubleValue();
+//                    double buyPrice = mBuyingItemMapInfo.get(key).getBuyingPrice();
+//                    double currPrice = newTradeInfo.getTradePrice().doubleValue();
                 }
             }
         }
