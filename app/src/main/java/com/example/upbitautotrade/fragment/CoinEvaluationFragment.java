@@ -427,7 +427,7 @@ public class CoinEvaluationFragment extends Fragment {
                 newTradeInfo.setTickCount(0);
                 newTradeInfo.setTickTurn(0);
                 newTradeInfo.setRisingPoint(0);
-            } else if (newTradeInfo.getTickCount() == TICK_COUNTS) {
+            } else if (newTradeInfo.getTickCount() == 0) {
                 DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
                 format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
                 Log.d(TAG, "[DEBUG] makeTradeMapInfo - checking to evaluationToBuy "
