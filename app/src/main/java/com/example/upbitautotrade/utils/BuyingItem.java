@@ -9,6 +9,10 @@ public class BuyingItem implements Serializable {
     double buyingPrice;
     long buyingTime;
 
+    long endTime;
+
+    long startTimeFirst;
+
     public String getMarketId() {
         return marketId;
     }
@@ -31,5 +35,21 @@ public class BuyingItem implements Serializable {
 
     public void setBuyingTime(long buyingTime) {
         this.buyingTime = buyingTime;
+    }
+
+    public long getEndTime() {
+        return endTime;
+    }
+
+    public long getStartTimeFirst() {
+        return startTimeFirst;
+    }
+
+    public void setEndTime(long endTime) {
+        this.endTime = endTime;
+    }
+
+    public void setStartTimeFirst(long startTimeFirst) {
+        this.startTimeFirst = startTimeFirst;
     }
 }

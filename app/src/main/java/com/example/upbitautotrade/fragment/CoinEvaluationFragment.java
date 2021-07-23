@@ -58,14 +58,14 @@ public class CoinEvaluationFragment extends Fragment {
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
 
-    private final double MONITORING_START_RATE = 0.01;
+    private final double MONITORING_START_RATE = 0.003;
 
     private final int TICK_COUNTS = 60;
-    private final int TICK_TURNS = 10;
-    private final double MONITOR_RISING_POINT = 30;
+    private final int TICK_TURNS = 1;
+    private final double MONITOR_RISING_POINT = 1;
     private final double MONITOR_POINT_RATE = 0.001;
     private final int MONITOR_MIN_CANDLE_COUNT = 5;
-    private final double EVALUATION_TIME = 60  * 1000;
+    private final double EVALUATION_TIME = 120  * 1000;
     private long EVALUATION_OFFSET_TIME = 60;
 
     private View mView;
@@ -368,6 +368,10 @@ public class CoinEvaluationFragment extends Fragment {
                 if (risingPoint + point < 0) {
                     risingPoint = 0;
                     startTimeFirst = 0;
+//                    startTime = 0;
+//                    minPrice = 0;
+//                    tickCount = 0;
+//                    tickTurn = 0;
                 } else {
                     risingPoint = risingPoint + point;
                 }
@@ -406,32 +410,38 @@ public class CoinEvaluationFragment extends Fragment {
                         + " TickTurn: " + newTradeInfo.getTickTurn()
                         + " getStartTime: " + format.format(newTradeInfo.getStartTime())
                         + " getEndTime: " + format.format(newTradeInfo.getEndTime())
+                        + " (EndTime -StartTime): " + (newTradeInfo.getEndTime() - newTradeInfo.getStartTime())
                         + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
                 );
             }
         }
 
-        if (!mBuyingItemKeyList.contains(key)) {
-            if (newTradeInfo != null && newTradeInfo.getTickCount() == TICK_COUNTS) {
-                if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_POINT
-                        && newTradeInfo.getTickTurn() >= TICK_TURNS
-                        && endTime - startTime <= EVALUATION_TIME) {
-                    evaluationToBuy(key, newTradeInfo);
-                } else if (endTime - startTime > EVALUATION_TIME) {
-                    newTradeInfo.setEvaluationStartTimeFirst(0);
-                    newTradeInfo.setMinPrice(0);
-                    newTradeInfo.setStartTime(0);
-                    newTradeInfo.setEndTime(0);
-                    newTradeInfo.setTickCount(0);
-                    newTradeInfo.setTickTurn(0);
-                    newTradeInfo.setRisingPoint(0);
+        if (newTradeInfo != null) {
+            if (newTradeInfo.getEndTime() - newTradeInfo.getStartTime() > EVALUATION_TIME
+                    || newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst() > EVALUATION_TIME * 5) {
+                Log.d(TAG, "[DEBUG] makeTradeMapInfo: clear TradeInfo");
+                newTradeInfo.setEvaluationStartTimeFirst(0);
+                newTradeInfo.setMinPrice(0);
+                newTradeInfo.setStartTime(0);
+                newTradeInfo.setEndTime(0);
+                newTradeInfo.setTickCount(0);
+                newTradeInfo.setTickTurn(0);
+                newTradeInfo.setRisingPoint(0);
+            } else if (newTradeInfo.getTickCount() == TICK_COUNTS) {
+                if (!mBuyingItemKeyList.contains(key) && mCandidateItemMapInfo.get(key) != null) {
+                    if (newTradeInfo.getRisingPoint() >= MONITOR_RISING_POINT
+                            && newTradeInfo.getTickTurn() >= TICK_TURNS
+                            && newTradeInfo.getEndTime() - newTradeInfo.getStartTime() <= EVALUATION_TIME) {
+                        Log.d(TAG, "[DEBUG] makeTradeMapInfo: add TradeInfo at Candidate");
+                        evaluationToBuy(key, newTradeInfo);
+                    }
+                } else {
+                    double buyPrice = mBuyingItemMapInfo.get(key).getBuyingPrice();
+                    double currPrice = newTradeInfo.getTradePrice().doubleValue();
                 }
             }
-        } else {
-            double buyPrice = mBuyingItemMapInfo.get(key).getBuyingPrice();
-            double currPrice = newTradeInfo.getTradePrice().doubleValue();
-
         }
+
         if (newTradeInfo != null) {
             mTradeMapInfo.put(key, newTradeInfo);
         }
@@ -439,52 +449,52 @@ public class CoinEvaluationFragment extends Fragment {
 
     private void evaluationToBuy(String key, TradeInfo newTradeInfo) {
 
-        if (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst() < EVALUATION_TIME * 5) {
-            double changed = Math.abs(newTradeInfo.getTradePrice().doubleValue() - newTradeInfo.getMinPrice());
-            long evalTime = (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst()) / 1000;
-            double offsetPrice = (changed - (changed * (evalTime - EVALUATION_OFFSET_TIME) / (evalTime + EVALUATION_OFFSET_TIME)));
+        double changed = Math.abs(newTradeInfo.getTradePrice().doubleValue() - newTradeInfo.getMinPrice());
+        long evalTime = (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst()) / 1000;
+        double offsetPrice = (changed - (changed * (evalTime - EVALUATION_OFFSET_TIME) / (evalTime + EVALUATION_OFFSET_TIME)));
 
-            double tradePrice = newTradeInfo.getTradePrice().doubleValue() - offsetPrice;
+        double tradePrice = newTradeInfo.getTradePrice().doubleValue() - offsetPrice;
 
-            DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
-            format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-            Log.d(TAG, "[DEBUG] BUY - market: " + newTradeInfo.getMarketId()
-                            + " BuyPrice: " + tradePrice
-                            + " changed: " + changed
-                            + " evalTime: " + evalTime
-                            + " getEndTime: " + format.format(newTradeInfo.getEndTime())
-                            + " getEvaluationStartTimeFirst: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
-                            + " offsetPrice: " + offsetPrice
-                    );
+        DateFormat format = new SimpleDateFormat("HH:mm:ss.sss", Locale.KOREA);
+        format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+        Log.d(TAG, "[DEBUG] Candidate to BUY - market: " + newTradeInfo.getMarketId()
+                + " BuyPrice: " + tradePrice
+                + " changed: " + changed
+                + " evalTime: " + evalTime
+                + " getEndTime: " + format.format(newTradeInfo.getEndTime())
+                + " getEvaluationStartTimeFirst: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
+                + " offsetPrice: " + offsetPrice
+        );
 
 
-            BuyingItem item = new BuyingItem();
-            item.setMarketId(key);
-            item.setBuyingPrice(tradePrice);
-            item.setBuyingTime(newTradeInfo.getEndTime());
+        BuyingItem item = new BuyingItem();
+        item.setMarketId(key);
+        item.setBuyingPrice(tradePrice);
+        item.setEndTime(newTradeInfo.getEndTime());
+        item.setStartTimeFirst(newTradeInfo.getEvaluationStartTimeFirst());
 
-            mCandidateItemMapInfo.put(key, item);
-        } else if (newTradeInfo.getEndTime() - newTradeInfo.getEvaluationStartTimeFirst() > EVALUATION_TIME * 5 * 1000) {
-            newTradeInfo.setRisingPoint(0);
-            newTradeInfo.setTickCount(0);
-            newTradeInfo.setTickTurn(0);
-            newTradeInfo.setEvaluationStartTimeFirst(0);
-            mCandidateItemMapInfo.remove(key);
-        }
+        mCandidateItemMapInfo.put(key, item);
     }
 
     private void buyingSimulation(String key, Ticker ticker) {
         BuyingItem item = mCandidateItemMapInfo.get(key);
-        if (item != null && item.getBuyingPrice() >= ticker.getTradePrice().intValue()) {
+        if (item != null) {
+            Log.d(TAG, "[DEBUG] Check Price - key : " + key + " buyPrice: " +item.getBuyingPrice()+" curr Price: "+ticker.getTradePrice().doubleValue());
+        }
+        if (item != null && item.getBuyingPrice() >= ticker.getTradePrice().doubleValue()) {
             if (!mBuyingItemKeyList.contains(key)) {
                 Log.d(TAG, "[DEBUG] BUY - !!!! : " +key);
+                if (item.getEndTime() - item.getStartTimeFirst() < EVALUATION_TIME * 5) {
+                    item.setBuyingTime(ticker.getTimestamp());
+                    mBuyingItemKeyList.add(key);
+                    mBuyingItemMapInfo.put(key, item);
+                    mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+                    mBuyingListAdapter.notifyDataSetChanged();
+                    mCandidateItemMapInfo.remove(key);
+                } else if (item.getEndTime() - item.getStartTimeFirst() > EVALUATION_TIME * 5 * 1000) {
+                    mCandidateItemMapInfo.remove(key);
+                }
 
-                item.setBuyingTime(ticker.getTimestamp());
-                mBuyingItemKeyList.add(key);
-                mBuyingItemMapInfo.put(key, item);
-                mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
-                mBuyingListAdapter.notifyDataSetChanged();
-                mCandidateItemMapInfo.remove(key);
             }
         }
     }
