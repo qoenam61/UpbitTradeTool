@@ -42,12 +42,6 @@ public class UpBitViewModel extends AndroidViewModel {
         void onLoginState(boolean isLogin);
     }
 
-    protected RestartProcessorListener mPauseProcessorListener;
-    public interface RestartProcessorListener {
-        void restartProcessor();
-    }
-
-
     public UpBitViewModel(Application application) {
         super(application);
 
@@ -91,10 +85,6 @@ public class UpBitViewModel extends AndroidViewModel {
         mListener = listener;
     }
 
-    public void setOnPauseProcessorListener(RestartProcessorListener listener) {
-        mPauseProcessorListener = listener;
-    }
-
     public void searchAccountsInfo(boolean isLogIn) {
         mSearchAccountsInfo.setValue(isLogIn);
     }
@@ -103,8 +93,8 @@ public class UpBitViewModel extends AndroidViewModel {
         return mResultAccountsInfo;
     }
 
-    public void searchMarketsInfo(boolean isLogIn) {
-        mSearchMarketsInfo.setValue(isLogIn);
+    public void searchMarketsInfo(boolean isDetails) {
+        mSearchMarketsInfo.setValue(isDetails);
     }
 
     public LiveData<List<MarketInfo>> getMarketsInfo() {

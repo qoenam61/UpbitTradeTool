@@ -1,6 +1,7 @@
 package com.example.upbitautotrade.fragment;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,10 +31,10 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_ACCOUNTS_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_CHANCE_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_ACCOUNTS;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_ACCOUNTS_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_CHANCE_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
 
 public class MyCoinsAssetsFragment extends Fragment {
     private static final String TAG = "MyCoinsAssetsFragment";
@@ -94,7 +95,6 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onStart() {
         super.onStart();
-        mActivity.getProcessor().registerProcess(null, UPDATE_MARKETS_INFO_FOR_ACCOUNTS);
         if (mViewModel != null) {
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
@@ -151,15 +151,18 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_ACCOUNTS_INFO);
-        mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_CHANCE_INFO);
-        mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS);
+        mActivity.getProcessor().stopBackgroundProcessor();
+        mActivity.getProcessor().removePeriodicUpdate(UPDATE_ACCOUNTS_INFO);
+        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        mActivity.getProcessor().registerPeriodicUpdate(null, PERIODIC_UPDATE_ACCOUNTS_INFO);
+        mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
+        mActivity.getProcessor().startBackgroundProcessor(UPDATE_MARKETS_INFO);
+        mActivity.getProcessor().registerPeriodicUpdate(UPDATE_ACCOUNTS_INFO, null);
+        mActivity.getProcessor().startBackgroundProcessor(UPDATE_ACCOUNTS_INFO);
     }
 
     private void updateKeySets(Set<String> keySet) {
@@ -186,8 +189,8 @@ public class MyCoinsAssetsFragment extends Fragment {
         Iterator<String> iterator = keySet.iterator();
         while (iterator.hasNext()) {
             String key = iterator.next();
-            mActivity.getProcessor().removePeriodicUpdate(MARKET_NAME + "-" + key);
-            mActivity.getProcessor().removePeriodicUpdate(MARKET_NAME + "-" + key);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_ACCOUNTS_INFO, MARKET_NAME + "-" + key);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO, MARKET_NAME + "-" + key);
         }
     }
 
@@ -195,11 +198,14 @@ public class MyCoinsAssetsFragment extends Fragment {
         Iterator<String> regIterator = keySet.iterator();
         while (regIterator.hasNext()) {
             String key = regIterator.next();
-            mActivity.getProcessor().registerPeriodicUpdate(MARKET_NAME + "-" + key, PERIODIC_UPDATE_ACCOUNTS_INFO);
+            mActivity.getProcessor().registerPeriodicUpdate(UPDATE_ACCOUNTS_INFO, MARKET_NAME + "-" + key);
             if (!key.equals("KRW-KRW")) {
-                mActivity.getProcessor().registerPeriodicUpdate(MARKET_NAME + "-" + key, PERIODIC_UPDATE_TICKER_INFO_FOR_ACCOUNTS);
+                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, MARKET_NAME + "-" + key);
             }
         }
+        mActivity.getProcessor().startBackgroundProcessor(UPDATE_ACCOUNTS_INFO);
+        mActivity.getProcessor().startBackgroundProcessor(UPDATE_TICKER_INFO);
+
     }
 
     private void updateAccountInfo() {

@@ -2,16 +2,10 @@ package com.example.upbitautotrade.activity;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
-import android.os.Message;
-import android.util.Log;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentActivity;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 import androidx.viewpager2.widget.ViewPager2;
@@ -38,13 +32,18 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
      */
     private ViewPager2 mViewPager;
     private BackgroundProcessor mBackgroundProcessor;
+    private AccountsViewModel mAccountsViewModel;
+    private CoinEvaluationViewModel mCoinEvaluationViewModel;
 
+    private String mAccessKey;
+    private String mSecretKey;
     /**
      * The pager adapter, which provides the pages to the view pager widget.
      */
     private FragmentStateAdapter pagerAdapter;
 
     public TradePagerActivity() {
+        mBackgroundProcessor = new BackgroundProcessor();
     }
 
     @Override
@@ -52,10 +51,8 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trade_pager);
 
-        String accessKey = getIntent().getStringExtra("ACCESS_KEY");
-        String secretKey = getIntent().getStringExtra("SECRET_KEY");
-
-        mBackgroundProcessor = new BackgroundProcessor(this, accessKey, secretKey);
+        mAccessKey = getIntent().getStringExtra("ACCESS_KEY");
+        mSecretKey = getIntent().getStringExtra("SECRET_KEY");
 
         // Instantiate a ViewPager2 and a PagerAdapter.
         mViewPager = findViewById(R.id.pager);
@@ -63,7 +60,8 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
         mViewPager.setAdapter(pagerAdapter);
         mViewPager = findViewById(R.id.pager);
         mViewPager.setPageTransformer(new ZoomOutPageTransformer());
-        mBackgroundProcessor.startBackgroundProcessor();
+        mAccountsViewModel = new ViewModelProvider(this).get(AccountsViewModel.class);
+        mCoinEvaluationViewModel = new ViewModelProvider(this).get(CoinEvaluationViewModel.class);
     }
 
     @Override
@@ -148,9 +146,11 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
             switch (position) {
                 case 0:
                     fragment = new MyCoinsAssetsFragment();
+                    mBackgroundProcessor.setViewModel(mAccountsViewModel, mAccessKey, mSecretKey);
                     break;
                 case 1:
                     fragment = new CoinEvaluationFragment();
+                    mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
                     break;
                 default:
                     fragment = null;

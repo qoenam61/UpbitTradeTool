@@ -47,10 +47,10 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.TimeZone;
 
-import static com.example.upbitautotrade.utils.BackgroundProcessor.PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO_FOR_COIN_EVALUATION;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO_FOR_COIN_EVALUATION;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
 
 public class CoinEvaluationFragment extends Fragment {
     public static final String TAG = "CoinEvaluationFragment";;
@@ -182,13 +182,14 @@ public class CoinEvaluationFragment extends Fragment {
             mIsStarting = false;
             startButton.setBackgroundTintList(ColorStateList.valueOf(Color.LTGRAY));
         });
+
+
         return mView;
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        mActivity.getProcessor().registerProcess(null, UPDATE_MARKETS_INFO_FOR_COIN_EVALUATION);
         if (mViewModel != null) {
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
@@ -396,19 +397,19 @@ public class CoinEvaluationFragment extends Fragment {
                     newTradeInfo.setTickCount(0);
                     newTradeInfo.setTickTurn(tickTurn + 1);
                 }
-//                Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
-//                        + " getMarketId: " + newTradeInfo.getMarketId()
-//                        + " getSequentialId: " + newTradeInfo.getSequentialId()
-//                        + " getMinPrice: " + newTradeInfo.getMinPrice()
-//                        + " time: " + format.format(newTradeInfo.getTimestamp())
-//                        + " getRisingPoint: " + newTradeInfo.getRisingPoint()
-//                        + " tickCount: " + newTradeInfo.getTickCount()
-//                        + " TickTurn: " + newTradeInfo.getTickTurn()
-//                        + " getStartTime: " + format.format(newTradeInfo.getStartTime())
-//                        + " getEndTime: " + format.format(newTradeInfo.getEndTime())
-//                        + " (EndTime -StartTime): " + (newTradeInfo.getEndTime() - newTradeInfo.getStartTime())
-//                        + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
-//                );
+                Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
+                        + " getMarketId: " + newTradeInfo.getMarketId()
+                        + " getSequentialId: " + newTradeInfo.getSequentialId()
+                        + " getMinPrice: " + newTradeInfo.getMinPrice()
+                        + " time: " + format.format(newTradeInfo.getTimestamp())
+                        + " getRisingPoint: " + newTradeInfo.getRisingPoint()
+                        + " tickCount: " + newTradeInfo.getTickCount()
+                        + " TickTurn: " + newTradeInfo.getTickTurn()
+                        + " getStartTime: " + format.format(newTradeInfo.getStartTime())
+                        + " getEndTime: " + format.format(newTradeInfo.getEndTime())
+                        + " (EndTime -StartTime): " + (newTradeInfo.getEndTime() - newTradeInfo.getStartTime())
+                        + " getMonitoringStartTime: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
+                );
             }
         }
 
@@ -527,13 +528,17 @@ public class CoinEvaluationFragment extends Fragment {
     public void onPause() {
         super.onPause();
         if (!mIsStarting) {
-            mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MIN_CANDLE_INFO);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO);
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
+        mActivity.getProcessor().startBackgroundProcessor(UPDATE_MARKETS_INFO);
     }
 
     private void registerPeriodicUpdate(Set<String> keySet) {
@@ -541,9 +546,10 @@ public class CoinEvaluationFragment extends Fragment {
         while (regIterator.hasNext()) {
             String key = regIterator.next();
             if (!key.equals("KRW-KRW")) {
-                mActivity.getProcessor().registerPeriodicUpdate(1, key, UPDATE_MIN_CANDLE_INFO_FOR_COIN_EVALUATION, null, MONITOR_MIN_CANDLE_COUNT);
+                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_MIN_CANDLE_INFO, key, MONITOR_MIN_CANDLE_COUNT, 1);
             }
         }
+        mActivity.getProcessor().startBackgroundProcessor(UPDATE_MIN_CANDLE_INFO);
     }
 
     private void registerPeriodicUpdate(List<String> monitorKeyList) {
@@ -551,16 +557,18 @@ public class CoinEvaluationFragment extends Fragment {
         while (monitorIterator.hasNext()) {
             String key = monitorIterator.next();
             if (!key.equals("KRW-KRW")) {
-                mActivity.getProcessor().registerPeriodicUpdate(key, PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
-                mActivity.getProcessor().registerPeriodicUpdate(key, UPDATE_TRADE_INFO_FOR_COIN_EVALUATION, null, TICK_COUNTS);
+                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
+                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TRADE_INFO, key, TICK_COUNTS);
             }
         }
+        mActivity.getProcessor().startBackgroundProcessor(UPDATE_TICKER_INFO);
+        mActivity.getProcessor().startBackgroundProcessor(UPDATE_TRADE_INFO);
     }
 
     private void removeMonitoringPeriodicUpdate() {
         if (!mIsStarting) {
-            mActivity.getProcessor().removePeriodicUpdate(PERIODIC_UPDATE_TICKER_INFO_FOR_EVALUATION);
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO_FOR_COIN_EVALUATION);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO);
         }
     }
 

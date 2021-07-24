@@ -47,14 +47,6 @@ public class AccountsViewModel extends UpBitViewModel{
     @Override
     protected void initFetcher(Context context) {
         mUpBitFetcher = new UpBitFetcher(null);
-        mUpBitFetcher.setOnResponseListener(new UpBitFetcher.ReceivedResponse() {
-            @Override
-            public void onReceivedResponse() {
-                if (mPauseProcessorListener != null) {
-                    mPauseProcessorListener.restartProcessor();
-                }
-            }
-        });
     }
 
     public LiveData<Chance> getResultChanceInfo() {

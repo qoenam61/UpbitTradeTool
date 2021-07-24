@@ -1,49 +1,28 @@
 package com.example.upbitautotrade.utils;
 
 public class Item {
-    String key;
     int type;
-    int unit;
-    String to = null;
+    String key;
     int count = 0;
-    String priceUnit;
-    String cursor = null;
+    int unit;
     int daysAgo = -1;
+    String to = null;
+    String cursor = null;
+    String priceUnit = null;
 
-    public Item(String key, int type) {
-        this.key = key;
+    public Item(int type, String key) {
         this.type = type;
+        this.key = key;
     }
 
-    public Item(String key, int type, String to, int count, String cursor, int daysAgo) {
-        this.key = key;
+    public Item(int type, String key, int count, int unit, int daysAgo, String to, String cursor, String priceUnit) {
         this.type = type;
-        this.to = to;
+        this.key = key;
         this.count = count;
-        this.cursor = cursor;
-        this.daysAgo = daysAgo;
-    }
-
-    public Item(int unit, String key, int type, String to, int count) {
-        this.key = key;
-        this.type = type;
         this.unit = unit;
+        this.daysAgo = daysAgo;
         this.to = to;
-        this.count = count;
-    }
-
-    public Item(String key, int type, String to, int count) {
-        this.key = key;
-        this.type = type;
-        this.to = to;
-        this.count = count;
-    }
-
-    public Item(String key, int type, String to, int count, String priceUnit) {
-        this.key = key;
-        this.type = type;
-        this.to = to;
-        this.count = count;
+        this.cursor = cursor;
         this.priceUnit = priceUnit;
     }
 }

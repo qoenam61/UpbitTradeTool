@@ -104,14 +104,6 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
     @Override
     protected void initFetcher(Context context) {
         mUpBitFetcher = new UpBitFetcher(null);
-        mUpBitFetcher.setOnResponseListener(new UpBitFetcher.ReceivedResponse() {
-            @Override
-            public void onReceivedResponse() {
-                if (mPauseProcessorListener != null) {
-                    mPauseProcessorListener.restartProcessor();
-                }
-            }
-        });
     }
 
     public void setKey(String accessKey, String secretKey) {

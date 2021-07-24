@@ -27,7 +27,6 @@ public class UpBitFetcher {
 
 
     private final ConnectionState mListener;
-    protected ReceivedResponse mResponseListener;
 
     private String mAccessKey;
     private String mSecretKey;
@@ -39,10 +38,6 @@ public class UpBitFetcher {
 
     public interface ConnectionState {
         void onConnection(boolean isConnect);
-    }
-
-    public interface ReceivedResponse {
-        void onReceivedResponse();
     }
 
     private AccountsRetrofit mAccountsRetrofit;
@@ -62,10 +57,6 @@ public class UpBitFetcher {
         mChanceRetrofit.makeUpBitApi();
         mTickerRetrofit = new TickerRetrofit(accessKey, secretKey);
         mTickerRetrofit.makeUpBitApi();
-    }
-
-    public void setOnResponseListener(ReceivedResponse listener) {
-        mResponseListener = listener;
     }
 
     public MutableLiveData<Throwable> getErrorLiveData() {
@@ -91,9 +82,6 @@ public class UpBitFetcher {
                         mListener.onConnection(false);
                     }
                 }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
 
             @Override
@@ -102,9 +90,6 @@ public class UpBitFetcher {
                 mErrorLiveData.setValue(t);
                 if (isLogIn) {
                     mListener.onConnection(false);
-                }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
                 }
             }
         });
@@ -123,18 +108,12 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
 
             @Override
             public void onFailure(Call<List<Ticker>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
         });
         return result;
@@ -153,18 +132,12 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
 
             @Override
             public void onFailure(Call<Chance> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
         });
         return result;
@@ -182,18 +155,12 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
 
             @Override
             public void onFailure(Call<List<MarketInfo>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
         });
         return result;
@@ -213,18 +180,12 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
 
             @Override
             public void onFailure(Call<List<Candle>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
         });
         return result;
@@ -244,18 +205,12 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
 
             @Override
             public void onFailure(Call<List<DayCandle>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
         });
         return result;
@@ -275,18 +230,12 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
 
             @Override
             public void onFailure(Call<List<WeekCandle>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
         });
         return result;
@@ -306,18 +255,12 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
 
             @Override
             public void onFailure(Call<List<MonthCandle>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
         });
         return result;
@@ -349,18 +292,12 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
 
             @Override
             public void onFailure(Call<List<TradeInfo>> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
-                if (mResponseListener != null) {
-                    mResponseListener.onReceivedResponse();
-                }
             }
         });
         return result;
