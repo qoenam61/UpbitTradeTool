@@ -3,15 +3,18 @@ package com.example.upbitautotrade.utils;
 import java.io.Serializable;
 
 public class BuyingItem implements Serializable {
+    public final String WAITING = "Waiting";
+    public final String BUY = "Buy";
+    public final String SELL = "Sell";
     String marketId;
     double tradePrice;
     float profitRate;
     double buyingPrice;
     long buyingTime;
-
     long endTime;
-
     long startTimeFirst;
+
+    private String status = "Waiting";
 
     public String getMarketId() {
         return marketId;
@@ -51,5 +54,13 @@ public class BuyingItem implements Serializable {
 
     public void setStartTimeFirst(long startTimeFirst) {
         this.startTimeFirst = startTimeFirst;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 }

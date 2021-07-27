@@ -58,14 +58,14 @@ public class CoinEvaluationFragment extends Fragment {
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
 
-    private final double MONITORING_START_RATE = 0.003;
+    private final double MONITORING_START_RATE = 0.03;
 
     private final int TICK_COUNTS = 60;
     private final int TICK_TURNS = 1;
     private final double MONITOR_RISING_POINT = 1;
     private final double MONITOR_POINT_RATE = 0.001;
     private final int MONITOR_MIN_CANDLE_COUNT = 5;
-    private final double EVALUATION_TIME = 360  * 1000;
+    private final double EVALUATION_TIME = 160  * 1000;
     private long EVALUATION_OFFSET_TIME = 60;
 
     private View mView;
@@ -435,7 +435,6 @@ public class CoinEvaluationFragment extends Fragment {
                         + " getEndTime: " + format.format(newTradeInfo.getEndTime())
                         + " getEvaluationStartTimeFirst: " + format.format(newTradeInfo.getEvaluationStartTimeFirst())
                         + " mBuyingItemKeyList.contains(key): " + mBuyingItemKeyList.contains(key)
-                        + " mCandidateItemMapInfo.get(key): " + mCandidateItemMapInfo.get(key)
                 );
             }
             if (endToStart > EVALUATION_TIME
@@ -449,7 +448,7 @@ public class CoinEvaluationFragment extends Fragment {
                 newTradeInfo.setTickTurn(0);
                 newTradeInfo.setRisingPoint(0);
             } else if (tickNumber == 0) {
-                if (!mBuyingItemKeyList.contains(key) && mCandidateItemMapInfo.get(key) == null) {
+                if (!mBuyingItemKeyList.contains(key)) {
                     if (endToStart <= EVALUATION_TIME
                             && tickTurnCounts >= TICK_TURNS
                             && risePoint >= MONITOR_RISING_POINT) {
@@ -493,27 +492,31 @@ public class CoinEvaluationFragment extends Fragment {
         item.setBuyingPrice(tradePrice);
         item.setEndTime(newTradeInfo.getEndTime());
         item.setStartTimeFirst(newTradeInfo.getEvaluationStartTimeFirst());
+        item.setStatus(item.WAITING);
 
-        mCandidateItemMapInfo.put(key, item);
+//        mCandidateItemMapInfo.put(key, item);
+        mBuyingItemKeyList.add(key);
+        mBuyingItemMapInfo.put(key, item);
+        mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+        mBuyingListAdapter.notifyDataSetChanged();
     }
 
     private void buyingSimulation(String key, Ticker ticker) {
-        BuyingItem item = mCandidateItemMapInfo.get(key);
+        BuyingItem item = mBuyingItemMapInfo.get(key);
         if (item != null) {
             Log.d(TAG, "[DEBUG] Check Price - key : " + key + " buyPrice: " +item.getBuyingPrice()+" curr Price: "+ticker.getTradePrice().doubleValue());
         }
         if (item != null && item.getBuyingPrice() >= ticker.getTradePrice().doubleValue()) {
-            if (!mBuyingItemKeyList.contains(key)) {
+
+            if (mBuyingItemKeyList.contains(key) && item.getStatus() == item.WAITING) {
                 Log.d(TAG, "[DEBUG] BUY - !!!! : " +key);
                 if (item.getEndTime() - item.getStartTimeFirst() < EVALUATION_TIME * 5) {
                     item.setBuyingTime(ticker.getTimestamp());
-                    mBuyingItemKeyList.add(key);
-                    mBuyingItemMapInfo.put(key, item);
-                    mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+                    item.setStatus(item.BUY);
                     mBuyingListAdapter.notifyDataSetChanged();
-                    mCandidateItemMapInfo.remove(key);
+//                    mCandidateItemMapInfo.remove(key);
                 } else if (item.getEndTime() - item.getStartTimeFirst() > EVALUATION_TIME * 5 * 1000) {
-                    mCandidateItemMapInfo.remove(key);
+//                    mCandidateItemMapInfo.remove(key);
                 }
 
             }
@@ -574,6 +577,7 @@ public class CoinEvaluationFragment extends Fragment {
 
     private class CoinHolder extends RecyclerView.ViewHolder {
         public TextView mCoinName;
+        public TextView mCoinStatus;
         public TextView mCurrentPrice;
         public TextView mRatePerMin;
         public TextView mRate;
@@ -594,6 +598,7 @@ public class CoinEvaluationFragment extends Fragment {
                 mAmountPerMin = itemView.findViewById(R.id.buy_time);
             } else {
                 mCoinName = itemView.findViewById(R.id.coin_name);
+                mCoinStatus = itemView.findViewById(R.id.coin_status);
                 mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
                 mChangeRate = itemView.findViewById(R.id.coin_1min_change_rate);
                 mBuyingPrice = itemView.findViewById(R.id.buying_price);
@@ -685,6 +690,7 @@ public class CoinEvaluationFragment extends Fragment {
                     double changedPrice = currentPrice - buyingItem.getBuyingPrice();
                     double prevPrice = buyingItem.getBuyingPrice();
                     double rate = prevPrice != 0 ? (changedPrice / (double) prevPrice) : 0;
+                    holder.mCoinStatus.setText(buyingItem.getStatus());
                     holder.mChangeRate.setText(mPercentFormat.format(rate));
                     holder.mBuyingTime.setText(mTimeFormat.format(buyingItem.getBuyingTime()));
                 }
