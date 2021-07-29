@@ -541,7 +541,7 @@ public class CoinEvaluationFragment extends Fragment {
     public void onResume() {
         super.onResume();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
-        mActivity.getProcessor().startBackgroundProcessor(UPDATE_MARKETS_INFO);
+        mActivity.getProcessor().startBackgroundProcessor();
     }
 
     private void registerPeriodicUpdate(Set<String> keySet) {
@@ -552,7 +552,7 @@ public class CoinEvaluationFragment extends Fragment {
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_MIN_CANDLE_INFO, key, MONITOR_MIN_CANDLE_COUNT, 1);
             }
         }
-        mActivity.getProcessor().startBackgroundProcessor(UPDATE_MIN_CANDLE_INFO);
+        mActivity.getProcessor().startBackgroundProcessor();
     }
 
     private void registerPeriodicUpdate(List<String> monitorKeyList) {
@@ -564,8 +564,7 @@ public class CoinEvaluationFragment extends Fragment {
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TRADE_INFO, key, TICK_COUNTS);
             }
         }
-        mActivity.getProcessor().startBackgroundProcessor(UPDATE_TICKER_INFO);
-        mActivity.getProcessor().startBackgroundProcessor(UPDATE_TRADE_INFO);
+        mActivity.getProcessor().startBackgroundProcessor();
     }
 
     private void removeMonitoringPeriodicUpdate() {

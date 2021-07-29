@@ -151,18 +151,14 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        mActivity.getProcessor().stopBackgroundProcessor();
-        mActivity.getProcessor().removePeriodicUpdate(UPDATE_ACCOUNTS_INFO);
-        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
     }
 
     @Override
     public void onResume() {
         super.onResume();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
-        mActivity.getProcessor().startBackgroundProcessor(UPDATE_MARKETS_INFO);
         mActivity.getProcessor().registerPeriodicUpdate(UPDATE_ACCOUNTS_INFO, null);
-        mActivity.getProcessor().startBackgroundProcessor(UPDATE_ACCOUNTS_INFO);
+        mActivity.getProcessor().startBackgroundProcessor();
     }
 
     private void updateKeySets(Set<String> keySet) {
@@ -203,9 +199,7 @@ public class MyCoinsAssetsFragment extends Fragment {
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, MARKET_NAME + "-" + key);
             }
         }
-        mActivity.getProcessor().startBackgroundProcessor(UPDATE_ACCOUNTS_INFO);
-        mActivity.getProcessor().startBackgroundProcessor(UPDATE_TICKER_INFO);
-
+        mActivity.getProcessor().startBackgroundProcessor();
     }
 
     private void updateAccountInfo() {
