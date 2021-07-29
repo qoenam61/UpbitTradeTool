@@ -34,7 +34,9 @@ import java.util.Set;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_ACCOUNTS_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_CHANCE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
 
 public class MyCoinsAssetsFragment extends Fragment {
     private static final String TAG = "MyCoinsAssetsFragment";
@@ -110,6 +112,7 @@ public class MyCoinsAssetsFragment extends Fragment {
             mViewModel.getAccountsInfo().observe(
                     getViewLifecycleOwner()
                     , accounts -> {
+                        Log.d(TAG, "[DEBUG] onStart: mAccountsMapInfo");
                         mAccountsMapInfo.clear();
                         Iterator<Accounts> iterator = accounts.iterator();
                         while (iterator.hasNext()) {
@@ -151,14 +154,20 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        Log.d(TAG, "[DEBUG] onPause: ");
+        mActivity.getProcessor().stopBackgroundProcessor();
+        mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
+        mActivity.getProcessor().removePeriodicUpdate(UPDATE_ACCOUNTS_INFO);
+        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
     }
 
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "[DEBUG] onResume: ");
+        mActivity.getProcessor().startBackgroundProcessor();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
         mActivity.getProcessor().registerPeriodicUpdate(UPDATE_ACCOUNTS_INFO, null);
-        mActivity.getProcessor().startBackgroundProcessor();
     }
 
     private void updateKeySets(Set<String> keySet) {
@@ -199,7 +208,6 @@ public class MyCoinsAssetsFragment extends Fragment {
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, MARKET_NAME + "-" + key);
             }
         }
-        mActivity.getProcessor().startBackgroundProcessor();
     }
 
     private void updateAccountInfo() {

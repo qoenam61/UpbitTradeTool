@@ -120,7 +120,7 @@ public class BackgroundProcessor {
         mProcessTaskMap = new HashMap<>();
     }
 
-    private void sendMessage(Item item) {
+    private void sendMessage(Item item, long time) {
         Bundle bundle = new Bundle();
         bundle.putString(BUNDLE_KEY_MARKET_ID + item.type, item.key);
         bundle.putInt(BUNDLE_KEY_UNIT + item.type, item.unit);
@@ -132,7 +132,7 @@ public class BackgroundProcessor {
         Message message = new Message();
         message.what = item.type;
         message.setData(bundle);
-        mHandler.sendMessage(message);
+        mHandler.sendMessageDelayed(message, time);
     }
 
     public void setViewModel(ViewModel viewModel, String accessKey, String secretKey) {
@@ -142,38 +142,73 @@ public class BackgroundProcessor {
 
     private class TaskList extends ArrayList<Item> implements Runnable {
 
+        private Thread taskThread;
+
+        public int getType() {
+            return size() != 0 ? get(0).type : -1;
+        }
+
+        public String getMarketId() {
+            return size() != 0 ? get(0).key : "No Id";
+        }
+
         public long getSleepTime() {
-            return size() != 0 ? get(0).getSleepTime() : 10;
+            return size() != 0 ? get(0).getSleepTime() : 17;
+        }
+
+        public void stop() {
+            if (taskThread != null) {
+                taskThread.interrupt();
+                taskThread = null;
+            }
+        }
+
+        public boolean isRunning() {
+            return taskThread != null && taskThread.isAlive();
         }
 
         @Override
-        public void run() {
-            Deque<Item> itemDeque = new LinkedList<>();
-            itemDeque.addAll(TaskList.this);
-
-            Iterator<Item> iterator = itemDeque.iterator();
-            while (iterator.hasNext()) {
-                Item item = iterator.next();
-                Log.d(TAG, "[DEBUG] run - type: "+item.type+" key: "+item.key);
-                switch (item.type) {
-                    case UPDATE_MARKETS_INFO:
-                        sendMessage(item);
-                        Log.d(TAG, "[DEBUG] run - remove: "+item.type+" key: "+item.key);
-                        clear();
-                        break;
-                    case UPDATE_ACCOUNTS_INFO:
-                    case UPDATE_CHANCE_INFO:
-                    case UPDATE_TICKER_INFO:
-                    case UPDATE_MIN_CANDLE_INFO:
-                    case UPDATE_DAY_CANDLE_INFO:
-                    case UPDATE_WEEK_CANDLE_INFO:
-                    case UPDATE_MONTH_CANDLE_INFO:
-                    case UPDATE_TRADE_INFO:
-                        sendMessage(item);
-                        break;
-                    default:
-                        break;
-                }
+        synchronized public void run() {
+            if (taskThread == null || !isRunning()) {
+                Log.d(TAG, "[DEBUG] run: TaskList new - type: "+getType()+" key: "+getMarketId());
+                taskThread = new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Deque<Item> itemDeque = new LinkedList<>();
+                        itemDeque.addAll(TaskList.this);
+                        while (!itemDeque.isEmpty()) {
+                            Item item = itemDeque.poll();
+                            Log.d(TAG, "[DEBUG] TaskList - type: " + item.type + " key: " + item.key);
+                            switch (item.type) {
+                                case UPDATE_MARKETS_INFO:
+                                    sendMessage(item, getSleepTime());
+                                    Log.d(TAG, "[DEBUG] TaskList - remove: " + item.type + " key: " + item.key);
+                                    clear();
+                                    break;
+                                case UPDATE_ACCOUNTS_INFO:
+                                case UPDATE_CHANCE_INFO:
+                                case UPDATE_TICKER_INFO:
+                                case UPDATE_MIN_CANDLE_INFO:
+                                case UPDATE_DAY_CANDLE_INFO:
+                                case UPDATE_WEEK_CANDLE_INFO:
+                                case UPDATE_MONTH_CANDLE_INFO:
+                                case UPDATE_TRADE_INFO:
+                                    sendMessage(item, getSleepTime());
+                                    break;
+                                default:
+                                    break;
+                            }
+                            try {
+                                Thread.sleep(getSleepTime());
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+                });
+                taskThread.start();
+            } else {
+                Log.d(TAG, "[DEBUG] run: not Null or isAlive");
             }
         }
     }
@@ -206,7 +241,7 @@ public class BackgroundProcessor {
         Item item = new Item(type, key, count, unit, daysAgo, to, cursor, priceUnit);
 
         Map<Integer, TaskList> map = mProcessTaskMap;
-        if (map.get(type) == null) {
+        if (!map.containsKey(type)) {
             TaskList taskList = new TaskList();
             taskList.add(item);
             mProcessTaskMap.put(type, taskList);
@@ -220,16 +255,20 @@ public class BackgroundProcessor {
     }
 
     public void removePeriodicUpdate(int type, String key) {
-        if (key == null) {
-            mProcessTaskMap.remove(type);
-            mHandler.removeMessages(type);
-        } else {
-            TaskList taskList = mProcessTaskMap.get(type);
-            Iterator<Item> iterator = taskList.iterator();
-            while (iterator.hasNext()) {
-                Item item = iterator.next();
-                if (item.key.equals(key)) {
-                    iterator.remove();
+        TaskList taskList = mProcessTaskMap.get(type);
+        if (mProcessTaskMap.containsKey(type) && taskList != null) {
+            if (key == null) {
+                mProcessHandler.removeCallbacks(taskList);
+                taskList.stop();
+                mProcessTaskMap.remove(type);
+                mHandler.removeMessages(type);
+            } else {
+                Iterator<Item> iterator = taskList.iterator();
+                while (iterator.hasNext()) {
+                    Item item = iterator.next();
+                    if (item.key.equals(key)) {
+                        iterator.remove();
+                    }
                 }
             }
         }
@@ -237,23 +276,32 @@ public class BackgroundProcessor {
 
     public void startBackgroundProcessor() {
         if (mProcessThread == null) {
+            Log.d(TAG, "[DEBUG] startBackgroundProcessor new");
             mProcessThread = new Thread(new Runnable() {
                 @Override
-                public void run() {
+                synchronized public void run() {
                     while (true) {
-                        Deque<TaskList> taskLists = new LinkedList<>();
-                        taskLists.addAll(mProcessTaskMap.values());
-
-                        while (!taskLists.isEmpty()) {
-                            TaskList taskList = taskLists.poll();
-                            mProcessHandler.post(taskList);
+                        List<Integer> list = new ArrayList<>();
+                        list.addAll(mProcessTaskMap.keySet());
+                        Iterator<Integer> iterator = list.iterator();
+                        while (iterator.hasNext()) {
+                            int type = iterator.next();
+                            TaskList taskList = mProcessTaskMap.get(type);
                             if (taskList != null) {
-                                try {
-                                    Thread.sleep(taskList.getSleepTime());
-                                } catch (InterruptedException e) {
-                                    e.printStackTrace();
+                                if (!taskList.isRunning()) {
+                                    Log.d(TAG, "[DEBUG] startBackgroundProcessor post - getType: " + taskList.getType() + " getSleepTime: " + taskList.getSleepTime());
+                                    mProcessHandler.post(taskList);
+                                } else {
+                                    Log.d(TAG, "[DEBUG] startBackgroundProcessor remove - getType: " + taskList.getType() + " getSleepTime: " + taskList.getSleepTime());
+                                    taskList.stop();
+                                    mProcessHandler.removeCallbacks(taskList);
                                 }
                             }
+                        }
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
                         }
                     }
                 }
@@ -264,18 +312,27 @@ public class BackgroundProcessor {
 
     public void stopBackgroundProcessor() {
         if (mProcessThread != null) {
+            Log.d(TAG, "[DEBUG] stopBackgroundProcessor");
             mProcessThread.interrupt();
-//            Iterator<TaskList> taskListIterator = mProcessTaskMap.values().iterator();
-//            while (taskListIterator.hasNext()) {
-//                TaskList taskList = taskListIterator.next();
-//                taskList.clear();
-//            }
-            clearProcess();
+            mProcessThread = null;
         }
+        clearProcess();
     }
 
     public void clearProcess() {
+        Iterator<TaskList> iterator = mProcessTaskMap.values().iterator();
+        while (iterator.hasNext()) {
+            TaskList taskList = iterator.next();
+            if (taskList != null) {
+                taskList.stop();
+                mProcessHandler.removeCallbacks(taskList);
+                iterator.remove();
+            }
+        }
         mProcessTaskMap.clear();
+
+        mProcessHandler.removeCallbacksAndMessages(null);
+        mHandler.removeCallbacksAndMessages(null);
     }
 
     public AccountsViewModel getAccountsViewModel() {

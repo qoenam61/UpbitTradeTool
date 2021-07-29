@@ -48,6 +48,7 @@ import java.util.Stack;
 import java.util.TimeZone;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MONTH_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
@@ -194,6 +195,7 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
                     marketsInfo -> {
+                        Log.d(TAG, "[DEBUG] onStart: mMarketsMapInfo");
                         mMarketsMapInfo.clear();
                         Iterator<MarketInfo> iterator = marketsInfo.iterator();
                         while (iterator.hasNext()) {
@@ -213,6 +215,7 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getResultTickerInfo().observe(
                     getViewLifecycleOwner(),
                     ticker -> {
+                        Log.d(TAG, "[DEBUG] onStart: mTickerMapInfo");
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
@@ -229,6 +232,7 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getMinCandleInfo().observe(
                     getViewLifecycleOwner(),
                     minCandles -> {
+                        Log.d(TAG, "[DEBUG] onStart: updateMonitorKey");
                         updateMonitorKey(minCandles);
                     }
             );
@@ -247,6 +251,7 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getTradeInfo().observe(
                     getViewLifecycleOwner(),
                     tradesInfo -> {
+                        Log.d(TAG, "[DEBUG] onStart: makeTradeMapInfo");
                         makeTradeMapInfo(tradesInfo);
                     }
             );
@@ -530,9 +535,13 @@ public class CoinEvaluationFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        Log.d(TAG, "[DEBUG] onPause: ");
         if (!mIsStarting) {
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
+            mActivity.getProcessor().stopBackgroundProcessor();
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
             mActivity.getProcessor().removePeriodicUpdate(UPDATE_MIN_CANDLE_INFO);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MONTH_CANDLE_INFO);
+            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
             mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO);
         }
     }
@@ -540,8 +549,9 @@ public class CoinEvaluationFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
+        Log.d(TAG, "[DEBUG] onResume: ");
         mActivity.getProcessor().startBackgroundProcessor();
+        mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
     }
 
     private void registerPeriodicUpdate(Set<String> keySet) {
@@ -552,7 +562,6 @@ public class CoinEvaluationFragment extends Fragment {
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_MIN_CANDLE_INFO, key, MONITOR_MIN_CANDLE_COUNT, 1);
             }
         }
-        mActivity.getProcessor().startBackgroundProcessor();
     }
 
     private void registerPeriodicUpdate(List<String> monitorKeyList) {
@@ -564,7 +573,6 @@ public class CoinEvaluationFragment extends Fragment {
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TRADE_INFO, key, TICK_COUNTS);
             }
         }
-        mActivity.getProcessor().startBackgroundProcessor();
     }
 
     private void removeMonitoringPeriodicUpdate() {

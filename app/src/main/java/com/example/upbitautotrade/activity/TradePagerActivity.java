@@ -85,7 +85,6 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     @Override
     protected void onPause() {
         super.onPause();
-        mBackgroundProcessor.stopBackgroundProcessor();
     }
 
     @Override
@@ -143,7 +142,6 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
 
         @Override
         public Fragment createFragment(int position) {
-            mBackgroundProcessor.clearProcess();
             Fragment fragment = null;
             switch (position) {
                 case 0:

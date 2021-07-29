@@ -46,17 +46,22 @@ public class Item {
     }
 
     public long getSleepTime() {
+        long sleepTime = 0;
         switch (type) {
             case UPDATE_MARKETS_INFO:
-            case UPDATE_ACCOUNTS_INFO:
+                sleepTime = PERIODIC_TIME_10;
+                break;
             case UPDATE_CHANCE_INFO:
             case UPDATE_TICKER_INFO:
+            case UPDATE_TRADE_INFO:
+                sleepTime = PERIODIC_TIME_50;
+                break;
+            case UPDATE_ACCOUNTS_INFO:
             case UPDATE_MIN_CANDLE_INFO:
             case UPDATE_DAY_CANDLE_INFO:
             case UPDATE_WEEK_CANDLE_INFO:
             case UPDATE_MONTH_CANDLE_INFO:
-            case UPDATE_TRADE_INFO:
-                return PERIODIC_TIME_50;
+                return PERIODIC_TIME_500;
             default:
                 break;
         }
