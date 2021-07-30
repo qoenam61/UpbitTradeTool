@@ -91,6 +91,7 @@ public class CoinEvaluationFragment extends Fragment {
     private Map<String, TradeInfo> mTradeMapInfo;
 
     boolean mIsStarting = false;
+    boolean mIsActive = false;
 
     private String[] deadMarket = {
             "KRW-GLM", "KRW-WAX", "KRW-STR", "KRW-STM", "KRW-STE", "KRW-ARD", "KRW-MVL", "KRW-ORB", "KRW-HIV", "KRW-STR",
@@ -195,6 +196,9 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
                     marketsInfo -> {
+                        if (!mIsActive) {
+                            return;
+                        }
                         Log.d(TAG, "[DEBUG] onStart: mMarketsMapInfo");
                         mMarketsMapInfo.clear();
                         Iterator<MarketInfo> iterator = marketsInfo.iterator();
@@ -215,6 +219,9 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getResultTickerInfo().observe(
                     getViewLifecycleOwner(),
                     ticker -> {
+                        if (!mIsActive) {
+                            return;
+                        }
                         Log.d(TAG, "[DEBUG] onStart: mTickerMapInfo");
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
@@ -232,6 +239,9 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getMinCandleInfo().observe(
                     getViewLifecycleOwner(),
                     minCandles -> {
+                        if (!mIsActive) {
+                            return;
+                        }
                         Log.d(TAG, "[DEBUG] onStart: updateMonitorKey");
                         updateMonitorKey(minCandles);
                     }
@@ -240,6 +250,9 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getMonthCandleInfo().observe(
                     getViewLifecycleOwner(),
                     monthCandle -> {
+                        if (!mIsActive) {
+                            return;
+                        }
                         Iterator<MonthCandle> iterator = monthCandle.iterator();
                         while (iterator.hasNext()) {
                             MonthCandle candle = iterator.next();
@@ -251,6 +264,9 @@ public class CoinEvaluationFragment extends Fragment {
             mViewModel.getTradeInfo().observe(
                     getViewLifecycleOwner(),
                     tradesInfo -> {
+                        if (!mIsActive) {
+                            return;
+                        }
                         Log.d(TAG, "[DEBUG] onStart: makeTradeMapInfo");
                         makeTradeMapInfo(tradesInfo);
                     }
@@ -535,14 +551,15 @@ public class CoinEvaluationFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        mIsActive = false;
         Log.d(TAG, "[DEBUG] onPause: ");
         if (!mIsStarting) {
-            mActivity.getProcessor().stopBackgroundProcessor();
             mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
             mActivity.getProcessor().removePeriodicUpdate(UPDATE_MIN_CANDLE_INFO);
             mActivity.getProcessor().removePeriodicUpdate(UPDATE_MONTH_CANDLE_INFO);
             mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
             mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO);
+            mActivity.getProcessor().stopBackgroundProcessor();
         }
     }
 
@@ -550,6 +567,7 @@ public class CoinEvaluationFragment extends Fragment {
     public void onResume() {
         super.onResume();
         Log.d(TAG, "[DEBUG] onResume: ");
+        mIsActive = true;
         mActivity.getProcessor().startBackgroundProcessor();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
     }

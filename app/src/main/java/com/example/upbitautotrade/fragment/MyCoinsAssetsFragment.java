@@ -53,6 +53,8 @@ public class MyCoinsAssetsFragment extends Fragment {
 
     private AccountsViewModel mViewModel;
 
+    boolean mIsActive = false;
+
     public MyCoinsAssetsFragment() {
         mMarketsMapInfo = new HashMap<>();
         mAccountsMapInfo = new HashMap<>();
@@ -101,6 +103,9 @@ public class MyCoinsAssetsFragment extends Fragment {
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
                     marketsInfo -> {
+                        if (!mIsActive) {
+                            return;
+                        }
                         Iterator<MarketInfo> iterator = marketsInfo.iterator();
                         while (iterator.hasNext()) {
                             MarketInfo marketInfo = iterator.next();
@@ -112,6 +117,9 @@ public class MyCoinsAssetsFragment extends Fragment {
             mViewModel.getAccountsInfo().observe(
                     getViewLifecycleOwner()
                     , accounts -> {
+                        if (!mIsActive) {
+                            return;
+                        }
                         Log.d(TAG, "[DEBUG] onStart: mAccountsMapInfo");
                         mAccountsMapInfo.clear();
                         Iterator<Accounts> iterator = accounts.iterator();
@@ -132,6 +140,9 @@ public class MyCoinsAssetsFragment extends Fragment {
             mViewModel.getResultTickerInfo().observe(
                     getViewLifecycleOwner(),
                     ticker -> {
+                        if (!mIsActive) {
+                            return;
+                        }
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
@@ -144,6 +155,9 @@ public class MyCoinsAssetsFragment extends Fragment {
                     .observe(
                             getViewLifecycleOwner(),
                             t -> {
+                                if (!mIsActive) {
+                                    return;
+                                }
                                 Toast.makeText(getContext(),
                                         t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
                             }
@@ -155,16 +169,18 @@ public class MyCoinsAssetsFragment extends Fragment {
     public void onPause() {
         super.onPause();
         Log.d(TAG, "[DEBUG] onPause: ");
-        mActivity.getProcessor().stopBackgroundProcessor();
+        mIsActive = false;
         mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
         mActivity.getProcessor().removePeriodicUpdate(UPDATE_ACCOUNTS_INFO);
         mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
+        mActivity.getProcessor().stopBackgroundProcessor();
     }
 
     @Override
     public void onResume() {
         super.onResume();
         Log.d(TAG, "[DEBUG] onResume: ");
+        mIsActive = true;
         mActivity.getProcessor().startBackgroundProcessor();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
         mActivity.getProcessor().registerPeriodicUpdate(UPDATE_ACCOUNTS_INFO, null);
