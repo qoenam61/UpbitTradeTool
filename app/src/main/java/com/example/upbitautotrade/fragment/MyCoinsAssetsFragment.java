@@ -170,9 +170,9 @@ public class MyCoinsAssetsFragment extends Fragment {
         super.onPause();
         Log.d(TAG, "[DEBUG] onPause: ");
         mIsActive = false;
-        mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
-        mActivity.getProcessor().removePeriodicUpdate(UPDATE_ACCOUNTS_INFO);
-        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
+//        mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
+//        mActivity.getProcessor().removePeriodicUpdate(UPDATE_ACCOUNTS_INFO);
+//        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
         mActivity.getProcessor().stopBackgroundProcessor();
     }
 

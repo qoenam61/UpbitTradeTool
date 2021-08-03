@@ -554,11 +554,11 @@ public class CoinEvaluationFragment extends Fragment {
         mIsActive = false;
         Log.d(TAG, "[DEBUG] onPause: ");
         if (!mIsStarting) {
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MIN_CANDLE_INFO);
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MONTH_CANDLE_INFO);
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO);
+//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
+//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MIN_CANDLE_INFO);
+//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MONTH_CANDLE_INFO);
+//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
+//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO);
             mActivity.getProcessor().stopBackgroundProcessor();
         }
     }
