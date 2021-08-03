@@ -54,7 +54,7 @@ import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CA
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
 
 public class CoinEvaluationFragment extends Fragment {
-    public static final String TAG = "CoinEvaluationFragment";;
+    public static final String TAG = "CoinEvaluationFragment";
 
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
@@ -119,7 +119,7 @@ public class CoinEvaluationFragment extends Fragment {
 
 
     @Override
-    public void onCreate(@Nullable @org.jetbrains.annotations.Nullable Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mActivity = (UpBitTradeActivity)getActivity();
         mViewModel =  mActivity.getCoinEvaluationViewModel();
@@ -554,11 +554,6 @@ public class CoinEvaluationFragment extends Fragment {
         mIsActive = false;
         Log.d(TAG, "[DEBUG] onPause: ");
         if (!mIsStarting) {
-//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
-//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MIN_CANDLE_INFO);
-//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_MONTH_CANDLE_INFO);
-//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
-//            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO);
             mActivity.getProcessor().stopBackgroundProcessor();
         }
     }

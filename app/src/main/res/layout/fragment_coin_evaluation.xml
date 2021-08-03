@@ -64,7 +64,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="right|center_vertical"
+                        android:gravity="left|center_vertical"
                         android:textStyle="bold"
                         android:textSize="@dimen/coin_list_text_size"
                         android:text="현재가"/>
@@ -79,7 +79,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="right|center_vertical"
+                        android:gravity="left|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
                         android:text="수익률"/>
@@ -94,7 +94,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="right|center_vertical"
+                        android:gravity="left|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
                         android:text="매수가"/>
@@ -109,7 +109,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="right|center_vertical"
+                        android:gravity="left|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
                         android:text="평가금액\n(백만)"/>
@@ -170,7 +170,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="right|center_vertical"
+                        android:gravity="left|center_vertical"
                         android:textStyle="bold"
                         android:textSize="@dimen/coin_list_text_size"
                         android:text="현재가"/>
@@ -200,7 +200,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="right|center_vertical"
+                        android:gravity="left|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
                         android:text="분당상승"/>
@@ -215,7 +215,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="right|center_vertical"
+                        android:gravity="left|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
                         android:text="24h누적\n(천만)"/>
@@ -230,7 +230,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="right|center_vertical"
+                        android:gravity="left|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
                         android:text="분당거래\n(백만)"/>

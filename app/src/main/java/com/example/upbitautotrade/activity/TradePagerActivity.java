@@ -13,6 +13,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.fragment.CoinEvaluationFragment;
+import com.example.upbitautotrade.fragment.CoinMarketDelta;
 import com.example.upbitautotrade.fragment.MyCoinsAssetsFragment;
 import com.example.upbitautotrade.utils.BackgroundProcessor;
 import com.example.upbitautotrade.viewmodel.AccountsViewModel;
@@ -24,7 +25,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
-    private static final int NUM_PAGES = 2;
+    private static final int NUM_PAGES = 3;
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -150,6 +151,10 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
                     break;
                 case 1:
                     fragment = new CoinEvaluationFragment();
+                    mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
+                    break;
+                case 2:
+                    fragment = new CoinMarketDelta();
                     mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
                     break;
                 default:
