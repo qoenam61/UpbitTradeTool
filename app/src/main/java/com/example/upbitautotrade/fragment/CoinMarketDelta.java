@@ -15,16 +15,15 @@ import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.MarketInfo;
+import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -35,7 +34,6 @@ import java.util.TimeZone;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
 
 public class CoinMarketDelta extends Fragment {
     public static final String TAG = "CoinMarketDelta";;
@@ -52,7 +50,7 @@ public class CoinMarketDelta extends Fragment {
 
     private final Map<String, MarketInfo> mUSDTMarketsMapInfo;
     private final Map<String, MarketInfo> mKRWMarketsMapInfo;
-    private Map<String, Candle> mMinCandleMapInfo;
+    private Map<String, Ticker> mTickerMapInfo;
     private Map<String, DeltaCoinInfo> mMarketDeltaMapInfo;
 
     private UpBitTradeActivity mActivity;
@@ -65,7 +63,7 @@ public class CoinMarketDelta extends Fragment {
     public CoinMarketDelta() {
         mUSDTMarketsMapInfo = new HashMap<>();
         mKRWMarketsMapInfo = new HashMap<>();
-        mMinCandleMapInfo = new HashMap<>();
+        mTickerMapInfo = new HashMap<>();
         mMarketDeltaMapInfo = new HashMap<>();
     }
 
@@ -104,28 +102,38 @@ public class CoinMarketDelta extends Fragment {
                             MarketInfo marketInfo = iterator.next();
                             if (!marketInfo.getMarket_warning().contains(MARKET_WARNING)) {
                                 if (marketInfo.getMarketId().contains(MARKET_NAME_KRW + "-")) {
-                                    Log.d(TAG, "[DEBUG] onStart: mMarketsMapInfo: "+marketInfo.getMarketId());
                                     mKRWMarketsMapInfo.put(marketInfo.getMarketId(), marketInfo);
                                 } else if (marketInfo.getMarketId().contains(MARKET_NAME_USDT + "-")) {
-                                    Log.d(TAG, "[DEBUG] onStart: mMarketsMapInfo: "+marketInfo.getMarketId());
                                     mUSDTMarketsMapInfo.put(marketInfo.getMarketId(), marketInfo);
                                 }
                             }
                         }
-                        registerPeriodicUpdate(mKRWMarketsMapInfo.keySet());
-                        registerPeriodicUpdate(mUSDTMarketsMapInfo.keySet());
+
+                        Set<String> ketSet = new HashSet<>();
+                        Iterator<String> stringIterator = mKRWMarketsMapInfo.keySet().iterator();
+                        while (stringIterator.hasNext()) {
+                            String key = stringIterator.next();
+                            String[] ketList = key.split("-");
+                            Log.d(TAG, "[DEBUG] onStart ketList: "+ketList[1]);
+
+                            if (mUSDTMarketsMapInfo.containsKey(MARKET_NAME_USDT + "-" + ketList[1])) {
+                                ketSet.add(MARKET_NAME_KRW + "-" + ketList[1]);
+                                ketSet.add(MARKET_NAME_USDT + "-" + ketList[1]);
+                                Log.d(TAG, "[DEBUG] onStart add Key KRW: "+(MARKET_NAME_KRW + "-" + ketList[1]) + " USDT: "+(MARKET_NAME_USDT + "-" + ketList[1]));
+                            }
+                        }
+                        registerPeriodicUpdate(ketSet);
                     }
             );
 
-
-            mViewModel.getMinCandleInfo().observe(
+            mViewModel.getResultTickerInfo().observe(
                     getViewLifecycleOwner(),
-                    minCandles -> {
+                    ticker -> {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart: updateMonitorKey");
-                        updateMonitorKey(minCandles);
+                        Log.d(TAG, "[DEBUG] onStart: updateMonitorKey key ");
+                        updateMonitorKey(ticker);
                     }
             );
         }
@@ -136,43 +144,31 @@ public class CoinMarketDelta extends Fragment {
         while (regIterator.hasNext()) {
             String key = regIterator.next();
             if (!key.equals("KRW-KRW")) {
-                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_MIN_CANDLE_INFO, key, MONITOR_MIN_CANDLE_COUNT, 1);
+                Log.d(TAG, "[DEBUG] registerPeriodicUpdate reg key : "+key);
+                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
             }
         }
     }
 
-
-    private void registerPeriodicUpdate(List<String> monitorKeyList) {
-        Iterator<String> monitorIterator = monitorKeyList.iterator();
-        while (monitorIterator.hasNext()) {
-            String key = monitorIterator.next();
-            if (!key.equals("KRW-KRW")) {
-                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_MIN_CANDLE_INFO, key, MONITOR_MIN_CANDLE_COUNT, 1);
-            }
-        }
-    }
-
-    private void updateMonitorKey(List<Candle> minCandlesInfo) {
-        if (minCandlesInfo == null || minCandlesInfo.isEmpty()) {
+    private void updateMonitorKey(List<Ticker> tickersInfo) {
+        if (tickersInfo == null || tickersInfo.isEmpty()) {
             return;
         }
-        float[] tradePrice = new float[MONITOR_MIN_CANDLE_COUNT];
-        int i = 0;
         String key = null;
-        Iterator<Candle> iterator = minCandlesInfo.iterator();
+        Iterator<Ticker> iterator = tickersInfo.iterator();
         while (iterator.hasNext()) {
-            Candle candle = iterator.next();
-            key = candle.getMarketId();
-            mMinCandleMapInfo.put(key, candle);
+            Ticker ticker = iterator.next();
+            key = ticker.getMarketId();
+            mTickerMapInfo.put(key, ticker);
         }
 
         if (key.equals("KRW-BTC")) {
-            mKRW_BTC = mMinCandleMapInfo.get(key).getTradePrice().doubleValue();
+            mKRW_BTC = mTickerMapInfo.get(key).getTradePrice().doubleValue();
             Log.d(TAG, "[DEBUG] updateMonitorKey -mBTC_BTC: "+mKRW_BTC);
         }
 
         if (key.equals("USDT-BTC")) {
-            mUSDT_BTC = mMinCandleMapInfo.get(key).getTradePrice().doubleValue();
+            mUSDT_BTC = mTickerMapInfo.get(key).getTradePrice().doubleValue();
             Log.d(TAG, "[DEBUG] updateMonitorKey -mBTC_USDT: "+mUSDT_BTC);
         }
 
@@ -185,8 +181,8 @@ public class CoinMarketDelta extends Fragment {
             if (marketId != null) {
                 Log.d(TAG, "[DEBUG] updateMonitorKey - add key : "+key);
 
-                Candle usdtCandle = mMinCandleMapInfo.get(MARKET_NAME_USDT + "-" + marketId);
-                Candle krwCandle = mMinCandleMapInfo.get(MARKET_NAME_KRW + "-" + marketId);
+                Ticker usdtCandle = mTickerMapInfo.get(MARKET_NAME_USDT + "-" + marketId);
+                Ticker krwCandle = mTickerMapInfo.get(MARKET_NAME_KRW + "-" + marketId);
                 if (usdtCandle != null && krwCandle != null) {
                     Log.d(TAG, "[DEBUG] updateMonitorKey - mMarketDeltaMapInfo.put add key : "+key);
 
@@ -297,7 +293,7 @@ public class CoinMarketDelta extends Fragment {
         private String coinName;
         private double usdtPrice = 0;
         private double krwPrice = 0;
-        double unit = (1 / mUSDT_BTC) / mKRW_BTC;
+        double unit = mKRW_BTC / mUSDT_BTC;
 
         public String getCoinName() {
             return coinName;
@@ -334,9 +330,9 @@ public class CoinMarketDelta extends Fragment {
 
         @Override
         public int compareTo(DeltaCoinInfo o) {
-            if (this.getDeltaPrice() > o.getDeltaPrice()) {
+            if (this.getDeltaRate() < o.getDeltaRate()) {
                 return 1;
-            } else if (this.getDeltaPrice() < o.getDeltaPrice()) {
+            } else if (this.getDeltaRate() > o.getDeltaRate()) {
                 return -1;
             } else {
                 return 0;

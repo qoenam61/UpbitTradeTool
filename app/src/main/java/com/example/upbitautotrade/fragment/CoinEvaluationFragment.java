@@ -11,7 +11,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -48,7 +47,6 @@ import java.util.Stack;
 import java.util.TimeZone;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MONTH_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
@@ -61,7 +59,7 @@ public class CoinEvaluationFragment extends Fragment {
 
     private final double MONITORING_START_RATE = 0.03;
 
-    private final int TICK_COUNTS = 60;
+    private final int TRADE_COUNTS = 60;
     private final int TICK_TURNS = 1;
     private final double MONITOR_RISING_POINT = 1;
     private final double MONITOR_POINT_RATE = 0.001;
@@ -412,9 +410,9 @@ public class CoinEvaluationFragment extends Fragment {
             DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
             format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
 
-            while (!dequeTradeInfo.isEmpty() && dequeTradeInfo.peek().getTickCount() <= TICK_COUNTS) {
+            while (!dequeTradeInfo.isEmpty() && dequeTradeInfo.peek().getTickCount() <= TRADE_COUNTS) {
                 newTradeInfo = dequeTradeInfo.poll();
-                if (newTradeInfo.getTickCount() == TICK_COUNTS) {
+                if (newTradeInfo.getTickCount() == TRADE_COUNTS) {
                     newTradeInfo.setTickCount(0);
                     newTradeInfo.setTickTurn(tickTurn + 1);
                 }
@@ -583,7 +581,7 @@ public class CoinEvaluationFragment extends Fragment {
             String key = monitorIterator.next();
             if (!key.equals("KRW-KRW")) {
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
-                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TRADE_INFO, key, TICK_COUNTS);
+                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TRADE_INFO, key, TRADE_COUNTS);
             }
         }
     }

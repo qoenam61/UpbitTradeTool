@@ -49,7 +49,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="left|center_vertical"
+                        android:gravity="right|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
                         android:text="USDT"/>
@@ -64,7 +64,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="left|center_vertical"
+                        android:gravity="right|center_vertical"
                         android:textStyle="bold"
                         android:textSize="@dimen/coin_list_text_size"
                         android:text="KRW"/>
@@ -79,7 +79,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="left|center_vertical"
+                        android:gravity="right|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
                         android:text="Delta"/>
@@ -94,7 +94,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
                         android:layout_weight="1"
-                        android:gravity="left|center_vertical"
+                        android:gravity="right|center_vertical"
                         android:textSize="@dimen/coin_list_text_size"
                         android:textStyle="bold"
                         android:text="Delta(%)"/>

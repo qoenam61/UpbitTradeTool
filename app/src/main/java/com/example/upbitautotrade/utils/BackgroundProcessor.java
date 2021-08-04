@@ -169,6 +169,8 @@ public class BackgroundProcessor {
             itemDeque.addAll(TaskList.this);
             while (!itemDeque.isEmpty() && !isStop) {
                 Item item = itemDeque.poll();
+                Log.d(TAG, "[DEBUG] TaskList - MarketId : "+item.key+" type : "+item.type);
+
                 switch (item.type) {
                     case UPDATE_MARKETS_INFO:
                         sendMessage(item);
@@ -270,6 +272,7 @@ public class BackgroundProcessor {
                             TaskList taskList = mProcessTaskMap.get(type);
                             if (taskList != null) {
                                 if (!mThreadPool.getQueue().contains(taskList)) {
+                                    Log.d(TAG, "[DEBUG] startBackgroundProcessor - MarketId : "+taskList.getMarketId()+" type : "+taskList.getType());
                                     mThreadPool.execute(taskList);
                                 } else {
                                     try {

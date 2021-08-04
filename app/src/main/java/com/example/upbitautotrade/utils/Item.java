@@ -61,10 +61,10 @@ public class Item {
             case UPDATE_DAY_CANDLE_INFO:
             case UPDATE_WEEK_CANDLE_INFO:
             case UPDATE_MONTH_CANDLE_INFO:
-                return PERIODIC_TIME_500;
+                sleepTime = PERIODIC_TIME_500;
             default:
                 break;
         }
-        return 0;
+        return sleepTime;
     }
 }
