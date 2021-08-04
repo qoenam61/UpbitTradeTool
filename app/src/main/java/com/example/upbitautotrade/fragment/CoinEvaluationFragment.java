@@ -60,11 +60,11 @@ public class CoinEvaluationFragment extends Fragment {
     private final double MONITORING_START_RATE = 0.03;
 
     private final int TRADE_COUNTS = 60;
-    private final int TICK_TURNS = 1;
+    private final int TICK_TURNS = 6;
     private final double MONITOR_RISING_POINT = 1;
     private final double MONITOR_POINT_RATE = 0.001;
     private final int MONITOR_MIN_CANDLE_COUNT = 5;
-    private final double EVALUATION_TIME = 160  * 1000;
+    private final double EVALUATION_TIME = 120  * 1000;
     private long EVALUATION_OFFSET_TIME = 60;
 
     private View mView;
@@ -527,6 +527,8 @@ public class CoinEvaluationFragment extends Fragment {
 //                    mCandidateItemMapInfo.remove(key);
                 } else if (item.getEndTime() - item.getStartTimeFirst() > EVALUATION_TIME * 5 * 1000) {
 //                    mCandidateItemMapInfo.remove(key);
+                    mBuyingItemKeyList.remove(key);
+                    mBuyingItemMapInfo.remove(key);
                 }
 
             }

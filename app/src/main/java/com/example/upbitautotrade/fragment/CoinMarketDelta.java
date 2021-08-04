@@ -41,7 +41,6 @@ public class CoinMarketDelta extends Fragment {
     public final String MARKET_NAME_KRW = "KRW";
     public final String MARKET_NAME_USDT = "USDT";
     public final String MARKET_WARNING = "CAUTION";
-    private final int MONITOR_MIN_CANDLE_COUNT = 1;
 
     private View mView;
     private CoinEvaluationViewModel mViewModel;
