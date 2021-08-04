@@ -120,7 +120,6 @@ public class MyCoinsAssetsFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart: mAccountsMapInfo");
                         mAccountsMapInfo.clear();
                         Iterator<Accounts> iterator = accounts.iterator();
                         while (iterator.hasNext()) {
@@ -168,18 +167,13 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        Log.d(TAG, "[DEBUG] onPause: ");
         mIsActive = false;
-//        mActivity.getProcessor().removePeriodicUpdate(UPDATE_MARKETS_INFO);
-//        mActivity.getProcessor().removePeriodicUpdate(UPDATE_ACCOUNTS_INFO);
-//        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
         mActivity.getProcessor().stopBackgroundProcessor();
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "[DEBUG] onResume: ");
         mIsActive = true;
         mActivity.getProcessor().startBackgroundProcessor();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);

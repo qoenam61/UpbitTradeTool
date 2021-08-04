@@ -114,12 +114,9 @@ public class CoinMarketDelta extends Fragment {
                         while (stringIterator.hasNext()) {
                             String key = stringIterator.next();
                             String[] ketList = key.split("-");
-                            Log.d(TAG, "[DEBUG] onStart ketList: "+ketList[1]);
-
                             if (mUSDTMarketsMapInfo.containsKey(MARKET_NAME_USDT + "-" + ketList[1])) {
                                 ketSet.add(MARKET_NAME_KRW + "-" + ketList[1]);
                                 ketSet.add(MARKET_NAME_USDT + "-" + ketList[1]);
-                                Log.d(TAG, "[DEBUG] onStart add Key KRW: "+(MARKET_NAME_KRW + "-" + ketList[1]) + " USDT: "+(MARKET_NAME_USDT + "-" + ketList[1]));
                             }
                         }
                         registerPeriodicUpdate(ketSet);
@@ -132,7 +129,6 @@ public class CoinMarketDelta extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart: updateMonitorKey key ");
                         updateMonitorKey(ticker);
                     }
             );
@@ -144,7 +140,6 @@ public class CoinMarketDelta extends Fragment {
         while (regIterator.hasNext()) {
             String key = regIterator.next();
             if (!key.equals("KRW-KRW")) {
-                Log.d(TAG, "[DEBUG] registerPeriodicUpdate reg key : "+key);
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
             }
         }
@@ -164,28 +159,20 @@ public class CoinMarketDelta extends Fragment {
 
         if (key.equals("KRW-BTC")) {
             mKRW_BTC = mTickerMapInfo.get(key).getTradePrice().doubleValue();
-            Log.d(TAG, "[DEBUG] updateMonitorKey -mBTC_BTC: "+mKRW_BTC);
         }
 
         if (key.equals("USDT-BTC")) {
             mUSDT_BTC = mTickerMapInfo.get(key).getTradePrice().doubleValue();
-            Log.d(TAG, "[DEBUG] updateMonitorKey -mBTC_USDT: "+mUSDT_BTC);
         }
 
         String[] coinTag = null;
         coinTag = key.split("-");
-        Log.d(TAG, "[DEBUG] updateMonitorKey - coinTag : "+coinTag);
-
         if (coinTag != null) {
             String marketId = coinTag[1];
             if (marketId != null) {
-                Log.d(TAG, "[DEBUG] updateMonitorKey - add key : "+key);
-
                 Ticker usdtCandle = mTickerMapInfo.get(MARKET_NAME_USDT + "-" + marketId);
                 Ticker krwCandle = mTickerMapInfo.get(MARKET_NAME_KRW + "-" + marketId);
                 if (usdtCandle != null && krwCandle != null) {
-                    Log.d(TAG, "[DEBUG] updateMonitorKey - mMarketDeltaMapInfo.put add key : "+key);
-
                     DeltaCoinInfo deltaCoinInfo = new DeltaCoinInfo();
                     deltaCoinInfo.setCoinName(marketId);
                     deltaCoinInfo.setUsdtPrice(usdtCandle.getTradePrice().doubleValue());
@@ -310,7 +297,6 @@ public class CoinMarketDelta extends Fragment {
         }
 
         public double getDeltaRate() {
-            Log.d(TAG, "[DEBUG] getDeltaRate -unit: "+unit+" getDeltaPrice: "+getDeltaPrice());
             return usdtPrice == 0 || krwPrice == 0 ? 0 : getDeltaPrice() / krwPrice;
         }
 

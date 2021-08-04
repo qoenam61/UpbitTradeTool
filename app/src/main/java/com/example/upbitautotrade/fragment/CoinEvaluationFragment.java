@@ -197,7 +197,6 @@ public class CoinEvaluationFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart: mMarketsMapInfo");
                         mMarketsMapInfo.clear();
                         Iterator<MarketInfo> iterator = marketsInfo.iterator();
                         while (iterator.hasNext()) {
@@ -220,7 +219,6 @@ public class CoinEvaluationFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart: mTickerMapInfo");
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
@@ -240,7 +238,6 @@ public class CoinEvaluationFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart: updateMonitorKey");
                         updateMonitorKey(minCandles);
                     }
             );
@@ -265,7 +262,6 @@ public class CoinEvaluationFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart: makeTradeMapInfo");
                         makeTradeMapInfo(tradesInfo);
                     }
             );
@@ -303,7 +299,6 @@ public class CoinEvaluationFragment extends Fragment {
                 registerPeriodicUpdate(mMonitorKeyList);
                 mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                 mCoinListAdapter.notifyDataSetChanged();
-                Log.d(TAG, "[DEBUG] updateMonitorKey - add key : "+key);
             }
         } else if (prevPrice != 0 && changedPrice / prevPrice < MONITORING_START_RATE) {
             if (!mBuyingItemKeyList.contains(key) && mMonitorKeyList.contains(key)) {
@@ -314,7 +309,6 @@ public class CoinEvaluationFragment extends Fragment {
                 mCoinListAdapter.notifyDataSetChanged();
                 mTickerMapInfo.remove(key);
                 mTradeMapInfo.remove(key);
-                Log.d(TAG, "[DEBUG] updateMonitorKey - remove key : "+key);
             }
         }
     }
@@ -522,9 +516,6 @@ public class CoinEvaluationFragment extends Fragment {
 
     private void buyingSimulation(String key, Ticker ticker) {
         BuyingItem item = mBuyingItemMapInfo.get(key);
-        if (item != null) {
-            Log.d(TAG, "[DEBUG] Check Price - key : " + key + " buyPrice: " +item.getBuyingPrice()+" curr Price: "+ticker.getTradePrice().doubleValue());
-        }
         if (item != null && item.getBuyingPrice() >= ticker.getTradePrice().doubleValue()) {
 
             if (mBuyingItemKeyList.contains(key) && item.getStatus() == item.WAITING) {
@@ -550,7 +541,6 @@ public class CoinEvaluationFragment extends Fragment {
     public void onPause() {
         super.onPause();
         mIsActive = false;
-        Log.d(TAG, "[DEBUG] onPause: ");
         if (!mIsStarting) {
             mActivity.getProcessor().stopBackgroundProcessor();
         }
@@ -559,7 +549,6 @@ public class CoinEvaluationFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        Log.d(TAG, "[DEBUG] onResume: ");
         mIsActive = true;
         mActivity.getProcessor().startBackgroundProcessor();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
