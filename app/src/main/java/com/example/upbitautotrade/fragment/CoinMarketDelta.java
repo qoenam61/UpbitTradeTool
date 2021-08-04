@@ -194,13 +194,11 @@ public class CoinMarketDelta extends Fragment {
 
                     List<String> orderList = new ArrayList<>(mMarketDeltaMapInfo.keySet());
                     Collections.sort(orderList, (value1, value2) -> mMarketDeltaMapInfo.get(value1).compareTo(mMarketDeltaMapInfo.get(value2)));
-
                     mCoinListAdapter.setMonitoringItems(orderList);
-                    mCoinListAdapter.notifyDataSetChanged();
-
                 }
             }
         }
+        mCoinListAdapter.notifyDataSetChanged();
     }
 
     @Override

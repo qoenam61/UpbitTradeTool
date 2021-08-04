@@ -169,6 +169,9 @@ public class BackgroundProcessor {
             itemDeque.addAll(TaskList.this);
             while (!itemDeque.isEmpty() && !isStop) {
                 Item item = itemDeque.poll();
+                if (item == null) {
+                    continue;
+                }
                 Log.d(TAG, "[DEBUG] TaskList - MarketId : "+item.key+" type : "+item.type);
 
                 switch (item.type) {
