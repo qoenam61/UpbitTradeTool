@@ -38,9 +38,9 @@ public class Candle implements Serializable {
     @SerializedName("unit")
     Integer unit;
 
-    int changedPrice;
+    double changedPrice;
 
-    float changedRate;
+    double changedRate;
 
     public String getMarketId() {
         return market;
@@ -86,19 +86,19 @@ public class Candle implements Serializable {
         return unit;
     }
 
-    public int getChangedPrice() {
+    public double getChangedPrice() {
         return changedPrice;
     }
 
-    public float getChangedRate() {
+    public double getChangedRate() {
         return changedRate;
     }
 
-    public void setChangedPrice(int changedPrice) {
+    public void setChangedPrice(double changedPrice) {
         this.changedPrice = changedPrice;
     }
 
-    public void setChangedRate(float changedRate) {
+    public void setChangedRate(double changedRate) {
         this.changedRate = changedRate;
     }
 }

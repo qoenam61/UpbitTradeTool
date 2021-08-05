@@ -57,7 +57,7 @@ public class CoinEvaluationFragment extends Fragment {
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
 
-    private final double MONITORING_START_RATE = 0.03;
+    private final double MONITORING_THRESHOLD_RATE = 0.03;
 
     private final int TRADE_COUNTS = 60;
     private final int TICK_TURNS = 6;
@@ -272,7 +272,7 @@ public class CoinEvaluationFragment extends Fragment {
         if (minCandlesInfo == null || minCandlesInfo.isEmpty()) {
             return;
         }
-        float[] tradePrice = new float[MONITOR_MIN_CANDLE_COUNT];
+        double[] tradePrice = new double[MONITOR_MIN_CANDLE_COUNT];
         int i = 0;
         String key = null;
         Iterator<Candle> iterator = minCandlesInfo.iterator();
@@ -286,13 +286,17 @@ public class CoinEvaluationFragment extends Fragment {
             i++;
         }
 
-        float changedPrice = tradePrice[0] - tradePrice[MONITOR_MIN_CANDLE_COUNT - 1];
-        float prevPrice = tradePrice[MONITOR_MIN_CANDLE_COUNT - 1];
+        double firstPrice = tradePrice[0];
+        double secondPrice = tradePrice[0];
+        double removeRate = secondPrice != 0 ? ((firstPrice - secondPrice) / secondPrice) : 0;
+        double prevPrice = tradePrice[MONITOR_MIN_CANDLE_COUNT - 1];
+        double changedPrice = firstPrice - prevPrice;
+        double rate = prevPrice != 0 ? (changedPrice / prevPrice) : 0;
 
-        mMinCandleMapInfo.get(key).setChangedPrice((int) changedPrice);
-        mMinCandleMapInfo.get(key).setChangedRate(prevPrice != 0 ? (changedPrice / prevPrice) : 0);
+        mMinCandleMapInfo.get(key).setChangedPrice(changedPrice);
+        mMinCandleMapInfo.get(key).setChangedRate(rate);
 
-        if (prevPrice != 0 && (changedPrice / prevPrice) > MONITORING_START_RATE) {
+        if (prevPrice != 0 && rate >= MONITORING_THRESHOLD_RATE) {
             if (!mMonitorKeyList.contains(key)) {
                 removeMonitoringPeriodicUpdate();
                 mMonitorKeyList.add(key);
@@ -300,8 +304,9 @@ public class CoinEvaluationFragment extends Fragment {
                 mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                 mCoinListAdapter.notifyDataSetChanged();
             }
-        } else if (prevPrice != 0 && changedPrice / prevPrice < MONITORING_START_RATE) {
+        } else if (prevPrice != 0 && removeRate < MONITORING_THRESHOLD_RATE * -0.5) {
             if (!mBuyingItemKeyList.contains(key) && mMonitorKeyList.contains(key)) {
+                sellingSimulation(key);
                 removeMonitoringPeriodicUpdate();
                 mMonitorKeyList.remove(key);
                 registerPeriodicUpdate(mMonitorKeyList);
@@ -531,8 +536,13 @@ public class CoinEvaluationFragment extends Fragment {
         }
     }
 
-    private void sellingSimulation() {
-
+    private void sellingSimulation(String key) {
+        if (mBuyingItemMapInfo != null && mBuyingItemMapInfo.containsKey(key)) {
+            Log.d(TAG, "[DEBUG] SELL - !!!! : " +key);
+            BuyingItem item = mBuyingItemMapInfo.get(key);
+            item.setStatus(item.SELL);
+            mBuyingListAdapter.notifyDataSetChanged();
+        }
     }
 
     @Override
@@ -690,7 +700,9 @@ public class CoinEvaluationFragment extends Fragment {
                     holder.mCurrentPrice.setText(mNonZeroFormat.format(currentPrice));
                 }
                 BuyingItem buyingItem = mBuyingItemMapInfo.get(key);
-                if (buyingItem != null) {
+                if (buyingItem != null
+                        && (buyingItem.getStatus().equals(buyingItem.WAITING)
+                        || buyingItem.getStatus().equals(buyingItem.BUY))) {
                     holder.mBuyingPrice.setText(mNonZeroFormat.format(buyingItem.getBuyingPrice()));
                     double changedPrice = currentPrice - buyingItem.getBuyingPrice();
                     double prevPrice = buyingItem.getBuyingPrice();
