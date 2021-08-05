@@ -288,8 +288,9 @@ public class CoinEvaluationFragment extends Fragment {
 
         double firstPrice = tradePrice[0];
         double secondPrice = tradePrice[0];
-        double removeRate = secondPrice != 0 ? ((firstPrice - secondPrice) / secondPrice) : 0;
         double prevPrice = tradePrice[MONITOR_MIN_CANDLE_COUNT - 1];
+
+        double removeRate = secondPrice != 0 ? ((firstPrice - secondPrice) / secondPrice) : 0;
         double changedPrice = firstPrice - prevPrice;
         double rate = prevPrice != 0 ? (changedPrice / prevPrice) : 0;
 
