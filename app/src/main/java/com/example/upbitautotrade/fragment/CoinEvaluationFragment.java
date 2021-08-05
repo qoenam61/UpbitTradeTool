@@ -586,10 +586,8 @@ public class CoinEvaluationFragment extends Fragment {
     }
 
     private void removeMonitoringPeriodicUpdate() {
-        if (!mIsStarting) {
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO);
-        }
+        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
+        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TRADE_INFO);
     }
 
     private class CoinHolder extends RecyclerView.ViewHolder {
