@@ -147,6 +147,7 @@ public class MyCoinsAssetsFragment extends Fragment {
                             Ticker tick = iterator.next();
                             mTickerMapInfo.put(tick.getMarketId(), tick);
                         }
+                        mCoinListAdapter.notifyDataSetChanged();
                     }
             );
 
@@ -186,9 +187,9 @@ public class MyCoinsAssetsFragment extends Fragment {
             removePeriodicUpdate(mKeySet);
             mKeySet.clear();
             mKeySet = keySet;
-            registerPeriodicUpdate(mKeySet);
             update = true;
         }
+        registerPeriodicUpdate(mKeySet);
         if (update) {
             Iterator<String> iterator = mKeySet.iterator();
             while (iterator.hasNext()) {

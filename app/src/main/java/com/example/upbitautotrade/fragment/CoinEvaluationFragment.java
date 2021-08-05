@@ -507,7 +507,6 @@ public class CoinEvaluationFragment extends Fragment {
         item.setStartTimeFirst(newTradeInfo.getEvaluationStartTimeFirst());
         item.setStatus(item.WAITING);
 
-//        mCandidateItemMapInfo.put(key, item);
         mBuyingItemKeyList.add(key);
         mBuyingItemMapInfo.put(key, item);
         mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
@@ -523,14 +522,11 @@ public class CoinEvaluationFragment extends Fragment {
                 if (item.getEndTime() - item.getStartTimeFirst() < EVALUATION_TIME * 5) {
                     item.setBuyingTime(ticker.getTimestamp());
                     item.setStatus(item.BUY);
-                    mBuyingListAdapter.notifyDataSetChanged();
-//                    mCandidateItemMapInfo.remove(key);
                 } else if (item.getEndTime() - item.getStartTimeFirst() > EVALUATION_TIME * 5 * 1000) {
-//                    mCandidateItemMapInfo.remove(key);
                     mBuyingItemKeyList.remove(key);
                     mBuyingItemMapInfo.remove(key);
                 }
-
+                mBuyingListAdapter.notifyDataSetChanged();
             }
         }
     }

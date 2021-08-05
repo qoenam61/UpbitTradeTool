@@ -121,7 +121,7 @@ public class BackgroundProcessor {
 
     public BackgroundProcessor() {
         mProcessTaskMap = new HashMap<>();
-        mThreadPool = new ThreadPoolExecutor(2, 4, 60, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+        mThreadPool = new ThreadPoolExecutor(1, 4, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
     }
 
     private void sendMessage(Item item) {
@@ -155,7 +155,7 @@ public class BackgroundProcessor {
         }
 
         public long getSleepTime() {
-            return size() != 0 ? get(0).getSleepTime() : 17;
+            return size() != 0 ? get(0).getSleepTime() : 30;
         }
 
         public void stop() {
@@ -172,6 +172,7 @@ public class BackgroundProcessor {
                 if (item == null) {
                     continue;
                 }
+                Log.d(TAG, "[DEBUG] TaskList -type: "+item.type+" marketId: "+item.key);
                 switch (item.type) {
                     case UPDATE_MARKETS_INFO:
                         sendMessage(item);
@@ -273,6 +274,7 @@ public class BackgroundProcessor {
                             TaskList taskList = mProcessTaskMap.get(type);
                             if (taskList != null) {
                                 if (!mThreadPool.getQueue().contains(taskList)) {
+                                    Log.d(TAG, "[DEBUG] startBackgroundProcessor -type: "+taskList.getType()+" marketId: "+taskList.getMarketId());
                                     mThreadPool.execute(taskList);
                                 } else {
                                     try {
@@ -284,7 +286,7 @@ public class BackgroundProcessor {
                             }
                         }
                         try {
-                            Thread.sleep(1000);
+                            Thread.sleep(500);
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
