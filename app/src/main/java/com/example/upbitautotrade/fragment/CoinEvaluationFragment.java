@@ -305,8 +305,10 @@ public class CoinEvaluationFragment extends Fragment {
                 mCoinListAdapter.notifyDataSetChanged();
             }
         } else if (prevPrice != 0 && removeRate < MONITORING_THRESHOLD_RATE * -0.5) {
-            if (!mBuyingItemKeyList.contains(key) && mMonitorKeyList.contains(key)) {
+            if (mBuyingItemKeyList.contains(key)) {
                 sellingSimulation(key);
+            }
+            if (!mBuyingItemKeyList.contains(key) && mMonitorKeyList.contains(key)) {
                 removeMonitoringPeriodicUpdate();
                 mMonitorKeyList.remove(key);
                 registerPeriodicUpdate(mMonitorKeyList);
