@@ -13,7 +13,7 @@ import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_WEEK_C
 public class Item {
 
     private final long PERIODIC_TIME_10 = 10;
-    private final long PERIODIC_TIME_40 = 40;
+    private final long PERIODIC_TIME_45 = 45;
     private final long PERIODIC_TIME_50 = 50;
     private final long PERIODIC_TIME_500 = 500;
     private final long PERIODIC_TIME_1000 = 1000;
@@ -57,7 +57,7 @@ public class Item {
             case UPDATE_DAY_CANDLE_INFO:
             case UPDATE_WEEK_CANDLE_INFO:
             case UPDATE_MONTH_CANDLE_INFO:
-                sleepTime = PERIODIC_TIME_40;
+                sleepTime = PERIODIC_TIME_45;
             default:
                 break;
         }
