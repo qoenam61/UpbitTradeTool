@@ -35,7 +35,7 @@
                 android:layout_margin="@dimen/coin_list_item_margin"
                 android:orientation="vertical">
                 <TextView
-                    android:id="@+id/coin_usdt_price"
+                    android:id="@+id/coin_delta_coin_price"
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
                     android:layout_weight="1"

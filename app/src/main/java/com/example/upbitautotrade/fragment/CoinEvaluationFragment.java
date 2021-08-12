@@ -551,6 +551,7 @@ public class CoinEvaluationFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        Log.d(TAG, "[DEBUG] onPause: ");
         mIsActive = false;
         if (!mIsStarting) {
             mActivity.getProcessor().stopBackgroundProcessor();
@@ -560,6 +561,7 @@ public class CoinEvaluationFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "[DEBUG] onResume: ");
         mIsActive = true;
         mActivity.getProcessor().startBackgroundProcessor();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);

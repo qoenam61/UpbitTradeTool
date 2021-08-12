@@ -1,7 +1,6 @@
 package com.example.upbitautotrade.fragment;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,10 +12,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
-import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
+
+import org.w3c.dom.Text;
 
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -32,14 +32,12 @@ import java.util.Set;
 import java.util.TimeZone;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
 
-public class CoinMarketDelta extends Fragment {
+public class MarketUSDTDelta extends Fragment {
     public static final String TAG = "CoinMarketDelta";;
 
     public final String MARKET_NAME_KRW = "KRW";
-    public final String MARKET_NAME_USDT = "USDT";
     public final String MARKET_WARNING = "CAUTION";
 
     private View mView;
@@ -47,7 +45,7 @@ public class CoinMarketDelta extends Fragment {
 
     private CoinListAdapter mCoinListAdapter;
 
-    private final Map<String, MarketInfo> mUSDTMarketsMapInfo;
+    private final Map<String, MarketInfo> mDeltaMarketsMapInfo;
     private final Map<String, MarketInfo> mKRWMarketsMapInfo;
     private Map<String, Ticker> mTickerMapInfo;
     private Map<String, DeltaCoinInfo> mMarketDeltaMapInfo;
@@ -55,12 +53,11 @@ public class CoinMarketDelta extends Fragment {
     private UpBitTradeActivity mActivity;
     private boolean mIsActive = false;
 
-    private double mTetherPrice = 0;
     private double mKRW_BTC = 0;
-    private double mUSDT_BTC = 0;
+    private double mDeltaMarketName_BTC = 0;
 
-    public CoinMarketDelta() {
-        mUSDTMarketsMapInfo = new HashMap<>();
+    public MarketUSDTDelta() {
+        mDeltaMarketsMapInfo = new HashMap<>();
         mKRWMarketsMapInfo = new HashMap<>();
         mTickerMapInfo = new HashMap<>();
         mMarketDeltaMapInfo = new HashMap<>();
@@ -77,6 +74,8 @@ public class CoinMarketDelta extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mView = inflater.inflate(R.layout.fragment_coin_delta, container, false);
         RecyclerView coinList = mView.findViewById(R.id.coin_market_delta_list);
+        TextView marketTitle = mView.findViewById(R.id.coin_market_title);
+        marketTitle.setText(getTitleName());
         LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
         coinList.setLayoutManager(layoutManager);
         mCoinListAdapter = new CoinListAdapter();
@@ -94,7 +93,7 @@ public class CoinMarketDelta extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        mUSDTMarketsMapInfo.clear();
+                        mDeltaMarketsMapInfo.clear();
                         mKRWMarketsMapInfo.clear();
                         Iterator<MarketInfo> iterator = marketsInfo.iterator();
                         while (iterator.hasNext()) {
@@ -102,8 +101,8 @@ public class CoinMarketDelta extends Fragment {
                             if (!marketInfo.getMarket_warning().contains(MARKET_WARNING)) {
                                 if (marketInfo.getMarketId().contains(MARKET_NAME_KRW + "-")) {
                                     mKRWMarketsMapInfo.put(marketInfo.getMarketId(), marketInfo);
-                                } else if (marketInfo.getMarketId().contains(MARKET_NAME_USDT + "-")) {
-                                    mUSDTMarketsMapInfo.put(marketInfo.getMarketId(), marketInfo);
+                                } else if (marketInfo.getMarketId().contains(getMarketName() + "-")) {
+                                    mDeltaMarketsMapInfo.put(marketInfo.getMarketId(), marketInfo);
                                 }
                             }
                         }
@@ -113,9 +112,9 @@ public class CoinMarketDelta extends Fragment {
                         while (stringIterator.hasNext()) {
                             String key = stringIterator.next();
                             String[] ketList = key.split("-");
-                            if (mUSDTMarketsMapInfo.containsKey(MARKET_NAME_USDT + "-" + ketList[1])) {
+                            if (mDeltaMarketsMapInfo.containsKey(getMarketName() + "-" + ketList[1])) {
                                 ketSet.add(MARKET_NAME_KRW + "-" + ketList[1]);
-                                ketSet.add(MARKET_NAME_USDT + "-" + ketList[1]);
+                                ketSet.add(getMarketName() + "-" + ketList[1]);
                             }
                         }
                         registerPeriodicUpdate(ketSet);
@@ -132,6 +131,14 @@ public class CoinMarketDelta extends Fragment {
                     }
             );
         }
+    }
+
+    protected String getMarketName() {
+        return "USDT";
+    }
+
+    private String getTitleName() {
+        return getMarketName() + " - " + "KRW 차이";
     }
 
     private void registerPeriodicUpdate(Set<String> keySet) {
@@ -156,12 +163,12 @@ public class CoinMarketDelta extends Fragment {
             mTickerMapInfo.put(key, ticker);
         }
 
-        if (key.equals("KRW-BTC")) {
+        if (key.equals(MARKET_NAME_KRW + "-" + "BTC")) {
             mKRW_BTC = mTickerMapInfo.get(key).getTradePrice().doubleValue();
         }
 
-        if (key.equals("USDT-BTC")) {
-            mUSDT_BTC = mTickerMapInfo.get(key).getTradePrice().doubleValue();
+        if (key.equals(getMarketName() + "-" + "BTC")) {
+            mDeltaMarketName_BTC = mTickerMapInfo.get(key).getTradePrice().doubleValue();
         }
 
         String[] coinTag = null;
@@ -169,12 +176,12 @@ public class CoinMarketDelta extends Fragment {
         if (coinTag != null) {
             String marketId = coinTag[1];
             if (marketId != null) {
-                Ticker usdtCandle = mTickerMapInfo.get(MARKET_NAME_USDT + "-" + marketId);
+                Ticker deltaCandle = mTickerMapInfo.get(getMarketName() + "-" + marketId);
                 Ticker krwCandle = mTickerMapInfo.get(MARKET_NAME_KRW + "-" + marketId);
-                if (usdtCandle != null && krwCandle != null) {
+                if (deltaCandle != null && krwCandle != null) {
                     DeltaCoinInfo deltaCoinInfo = new DeltaCoinInfo();
                     deltaCoinInfo.setCoinName(marketId);
-                    deltaCoinInfo.setUsdtPrice(usdtCandle.getTradePrice().doubleValue());
+                    deltaCoinInfo.setDeltaCoinPrice(deltaCandle.getTradePrice().doubleValue());
                     deltaCoinInfo.setKrwPrice(krwCandle.getTradePrice().doubleValue());
                     mMarketDeltaMapInfo.put(marketId, deltaCoinInfo);
 
@@ -204,7 +211,7 @@ public class CoinMarketDelta extends Fragment {
 
     private class CoinHolder extends RecyclerView.ViewHolder {
         public TextView mCoinName;
-        public TextView mUSDTPrice;
+        public TextView mDeltaMarketCoinPrice;
         public TextView mKRWPrice;
         public TextView mDeltaPrice;
         public TextView mDeltaPriceRate;
@@ -212,7 +219,7 @@ public class CoinMarketDelta extends Fragment {
         public CoinHolder(View itemView) {
             super(itemView);
             mCoinName = itemView.findViewById(R.id.coin_name);
-            mUSDTPrice = itemView.findViewById(R.id.coin_usdt_price);
+            mDeltaMarketCoinPrice = itemView.findViewById(R.id.coin_delta_coin_price);
             mKRWPrice = itemView.findViewById(R.id.coin_krw_price);
             mDeltaPrice = itemView.findViewById(R.id.coin_delta_price);
             mDeltaPriceRate = itemView.findViewById(R.id.coin_delta_price_rate);
@@ -259,7 +266,7 @@ public class CoinMarketDelta extends Fragment {
 
             DeltaCoinInfo deltaCoinInfo = mMarketDeltaMapInfo.get(key);
             if (deltaCoinInfo != null) {
-                holder.mUSDTPrice.setText(mFormat.format(deltaCoinInfo.getUsdtPrice()));
+                holder.mDeltaMarketCoinPrice.setText(mFormat.format(deltaCoinInfo.getDeltaCoinPrice()));
                 holder.mKRWPrice.setText(mFormat.format(deltaCoinInfo.getKrwPrice()));
                 holder.mDeltaPrice.setText(mFormat.format(deltaCoinInfo.getDeltaPrice()));
                 holder.mDeltaPriceRate.setText(mPercentFormat.format(deltaCoinInfo.getDeltaRate()));
@@ -275,16 +282,16 @@ public class CoinMarketDelta extends Fragment {
 
     private class DeltaCoinInfo implements Comparable<DeltaCoinInfo> {
         private String coinName;
-        private double usdtPrice = 0;
+        private double deltaCoinPrice = 0;
         private double krwPrice = 0;
-        double unit = mKRW_BTC / mUSDT_BTC;
+        double unit = mKRW_BTC / mDeltaMarketName_BTC;
 
         public String getCoinName() {
             return coinName;
         }
 
-        public double getUsdtPrice() {
-            return usdtPrice * unit;
+        public double getDeltaCoinPrice() {
+            return deltaCoinPrice * unit;
         }
 
         public double getKrwPrice() {
@@ -292,19 +299,19 @@ public class CoinMarketDelta extends Fragment {
         }
 
         public double getDeltaPrice() {
-            return usdtPrice == 0 || krwPrice == 0 ? 0 : (getUsdtPrice() - krwPrice) ;
+            return deltaCoinPrice == 0 || krwPrice == 0 ? 0 : (getDeltaCoinPrice() - krwPrice) ;
         }
 
         public double getDeltaRate() {
-            return usdtPrice == 0 || krwPrice == 0 ? 0 : getDeltaPrice() / krwPrice;
+            return deltaCoinPrice == 0 || krwPrice == 0 ? 0 : getDeltaPrice() / krwPrice;
         }
 
         public void setCoinName(String coinName) {
             this.coinName = coinName;
         }
 
-        public void setUsdtPrice(double usdtPrice) {
-            this.usdtPrice = usdtPrice;
+        public void setDeltaCoinPrice(double deltaCoinPrice) {
+            this.deltaCoinPrice = deltaCoinPrice;
         }
 
         public void setKrwPrice(double krwPrice) {

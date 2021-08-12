@@ -124,11 +124,13 @@ public class MyCoinsAssetsFragment extends Fragment {
                         Iterator<Accounts> iterator = accounts.iterator();
                         while (iterator.hasNext()) {
                             Accounts account = iterator.next();
+                            Log.d(TAG, "[DEBUG] onStart put : "+account.getCurrency());
                             mAccountsMapInfo.put(account.getCurrency(), account);
                             if (account.getCurrency().equals("KRW")) {
                                 iterator.remove();
                             }
                         }
+                        Log.d(TAG, "[DEBUG] onStart: updateAccountInfo -size: "+mAccountsMapInfo.keySet().size());
                         updateKeySets(mAccountsMapInfo.keySet());
                         updateAccountInfo();
                         mCoinListAdapter.setItems(accounts);
@@ -147,6 +149,7 @@ public class MyCoinsAssetsFragment extends Fragment {
                             Ticker tick = iterator.next();
                             mTickerMapInfo.put(tick.getMarketId(), tick);
                         }
+                        Log.d(TAG, "[DEBUG] onStart: notifyDataSetChanged");
                         mCoinListAdapter.notifyDataSetChanged();
                     }
             );
@@ -168,6 +171,7 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
+        Log.d(TAG, "[DEBUG] onPause: ");
         mIsActive = false;
         mActivity.getProcessor().stopBackgroundProcessor();
     }
@@ -175,6 +179,7 @@ public class MyCoinsAssetsFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        Log.d(TAG, "[DEBUG] onResume: ");
         mIsActive = true;
         mActivity.getProcessor().startBackgroundProcessor();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);

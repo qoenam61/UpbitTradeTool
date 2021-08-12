@@ -225,6 +225,8 @@ public class BackgroundProcessor {
     }
 
     public void registerPeriodicUpdate(int type, String key, int count, int unit, int daysAgo, String to, String cursor, String priceUnit) {
+        Log.d(TAG, "[DEBUG] registerPeriodicUpdate -type: "+type+" key: "+key);
+
         Item item = new Item(type, key, count, unit, daysAgo, to, cursor, priceUnit);
 
         Map<Integer, TaskList> map = mProcessTaskMap;
@@ -242,6 +244,7 @@ public class BackgroundProcessor {
     }
 
     public void removePeriodicUpdate(int type, String key) {
+        Log.d(TAG, "[DEBUG] removePeriodicUpdate -type: "+type+" key: "+key);
         TaskList taskList = mProcessTaskMap.get(type);
         if (mProcessTaskMap.containsKey(type) && taskList != null) {
             if (key == null) {
@@ -262,6 +265,7 @@ public class BackgroundProcessor {
 
     public void startBackgroundProcessor() {
         if (mProcessThread == null) {
+            Log.d(TAG, "[DEBUG] startBackgroundProcessor: ");
             mProcessThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -320,6 +324,7 @@ public class BackgroundProcessor {
         mProcessTaskMap.clear();
         mProcessTaskMap = new HashMap<>();
         mHandler.removeCallbacksAndMessages(null);
+        Log.d(TAG, "[DEBUG] clearProcess: ");
     }
 
     public AccountsViewModel getAccountsViewModel() {
