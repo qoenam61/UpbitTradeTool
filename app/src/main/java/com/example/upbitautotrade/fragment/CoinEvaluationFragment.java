@@ -282,7 +282,8 @@ public class CoinEvaluationFragment extends Fragment {
             if (i == 0) {
                 mMinCandleMapInfo.put(key, candle);
             }
-            tradePrice[i] = candle.getTradePrice().intValue();
+            tradePrice[i] = candle.getTradePrice().doubleValue();
+            tradePrice[i] = candle.getTradePrice().doubleValue();
             i++;
         }
 
@@ -676,7 +677,7 @@ public class CoinEvaluationFragment extends Fragment {
                 }
                 Ticker ticker = mTickerMapInfo.get(key);
                 if (ticker != null) {
-                    holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().intValue()));
+                    holder.mCurrentPrice.setText(mNonZeroFormat.format(ticker.getTradePrice().doubleValue()));
                     holder.mRate.setText(mPercentFormat.format(ticker.getSignedChangeRate()));
                     holder.mTickAmount.setText(mFormat.format(ticker.getAccTradePrice24h().doubleValue() / 10000000));
                 }
@@ -697,9 +698,9 @@ public class CoinEvaluationFragment extends Fragment {
                 holder.mCoinName.setText(marketInfo.getKorean_name());
 
                 Ticker ticker = mTickerMapInfo.get(key);
-                int currentPrice = 0;
+                double currentPrice = 0;
                 if (ticker != null) {
-                    currentPrice = ticker.getTradePrice().intValue();
+                    currentPrice = ticker.getTradePrice().doubleValue();
                     holder.mCurrentPrice.setText(mNonZeroFormat.format(currentPrice));
                 }
                 BuyingItem buyingItem = mBuyingItemMapInfo.get(key);

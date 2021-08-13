@@ -1,5 +1,6 @@
 package com.example.upbitautotrade.model;
 
+import com.example.upbitautotrade.fragment.MarketUSDTDelta;
 import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;

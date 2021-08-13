@@ -12,6 +12,7 @@ import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
+import com.example.upbitautotrade.fragment.CoinCorrelationGroup;
 import com.example.upbitautotrade.fragment.CoinEvaluationFragment;
 import com.example.upbitautotrade.fragment.MarketBTCDelta;
 import com.example.upbitautotrade.fragment.MarketUSDTDelta;
@@ -26,7 +27,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
-    private static final int NUM_PAGES = 4;
+    private static final int NUM_PAGES = 5;
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -47,6 +48,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     private Fragment mCoinEvaluationFragment;
     private Fragment mMarketUSDTDelta;
     private Fragment mMarketBTCDelta;
+    private Fragment mMarketCorrleation;
 
     public TradePagerActivity() {
         mBackgroundProcessor = new BackgroundProcessor();
@@ -73,6 +75,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
         mCoinEvaluationFragment = new CoinEvaluationFragment();
         mMarketUSDTDelta = new MarketUSDTDelta();
         mMarketBTCDelta = new MarketBTCDelta();
+        mMarketCorrleation = new CoinCorrelationGroup();
     }
 
     @Override
@@ -161,6 +164,10 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
                     break;
                 case 3:
                     fragment = mMarketBTCDelta;
+                    mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
+                    break;
+                case 4:
+                    fragment = mMarketCorrleation;
                     mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
                     break;
                 default:
