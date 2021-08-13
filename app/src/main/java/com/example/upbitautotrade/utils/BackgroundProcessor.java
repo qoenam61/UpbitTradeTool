@@ -51,7 +51,7 @@ public class BackgroundProcessor {
     private Map<Integer, TaskList> mProcessTaskMap;
 
     private Thread mProcessThread;
-    private final ThreadPoolExecutor mThreadPool;
+    private ThreadPoolExecutor mThreadPool;
 
     private Handler mHandler = new Handler(Looper.getMainLooper()) {
         @Override
@@ -64,7 +64,6 @@ public class BackgroundProcessor {
             String priceUnit = msg.getData().getString(BUNDLE_KEY_PRICE_UNIT + msg.what);
             String cursor = msg.getData().getString(BUNDLE_KEY_CURSOR + msg.what);
             int daysAgo = msg.getData().getInt(BUNDLE_KEY_DAYS_AGO + msg.what);
-
             switch (msg.what) {
                 case UPDATE_MARKETS_INFO:
                     if (mViewModel instanceof AccountsViewModel) {
@@ -121,6 +120,10 @@ public class BackgroundProcessor {
 
     public BackgroundProcessor() {
         mProcessTaskMap = new HashMap<>();
+        makeThreadPoolExecutor();
+    }
+
+    private void makeThreadPoolExecutor() {
         mThreadPool = new ThreadPoolExecutor(1, 4, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
     }
 
@@ -225,10 +228,7 @@ public class BackgroundProcessor {
     }
 
     public void registerPeriodicUpdate(int type, String key, int count, int unit, int daysAgo, String to, String cursor, String priceUnit) {
-        Log.d(TAG, "[DEBUG] registerPeriodicUpdate -type: "+type+" key: "+key);
-
         Item item = new Item(type, key, count, unit, daysAgo, to, cursor, priceUnit);
-
         Map<Integer, TaskList> map = mProcessTaskMap;
         if (!map.containsKey(type)) {
             TaskList taskList = new TaskList();
@@ -244,7 +244,6 @@ public class BackgroundProcessor {
     }
 
     public void removePeriodicUpdate(int type, String key) {
-        Log.d(TAG, "[DEBUG] removePeriodicUpdate -type: "+type+" key: "+key);
         TaskList taskList = mProcessTaskMap.get(type);
         if (mProcessTaskMap.containsKey(type) && taskList != null) {
             if (key == null) {
@@ -265,7 +264,6 @@ public class BackgroundProcessor {
 
     public void startBackgroundProcessor() {
         if (mProcessThread == null) {
-            Log.d(TAG, "[DEBUG] startBackgroundProcessor: ");
             mProcessThread = new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -316,22 +314,14 @@ public class BackgroundProcessor {
             TaskList taskList = iterator.next();
             if (taskList != null && mThreadPool != null) {
                 taskList.stop();
-                mThreadPool.remove(taskList);
                 iterator.remove();
             }
         }
+        mThreadPool.shutdownNow();
+        mThreadPool.purge();
         mThreadPool.getQueue().clear();
+        makeThreadPoolExecutor();
         mProcessTaskMap.clear();
-        mProcessTaskMap = new HashMap<>();
         mHandler.removeCallbacksAndMessages(null);
-        Log.d(TAG, "[DEBUG] clearProcess: ");
-    }
-
-    public AccountsViewModel getAccountsViewModel() {
-        return (AccountsViewModel) mViewModel;
-    }
-
-    public CoinEvaluationViewModel getCoinEvaluationViewModel() {
-        return (CoinEvaluationViewModel) mViewModel;
     }
 }

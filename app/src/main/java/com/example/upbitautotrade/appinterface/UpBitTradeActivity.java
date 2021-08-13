@@ -14,4 +14,6 @@ public interface UpBitTradeActivity {
     public AccountsViewModel getAccountsViewModel();
     public CoinEvaluationViewModel getCoinEvaluationViewModel();
     public BackgroundProcessor getProcessor();
+    public String getAccessKey();
+    public String getSecretKey();
 }

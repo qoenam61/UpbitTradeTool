@@ -43,6 +43,10 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
      * The pager adapter, which provides the pages to the view pager widget.
      */
     private FragmentStateAdapter pagerAdapter;
+    private Fragment mMyCoinsAssetsFragment;
+    private Fragment mCoinEvaluationFragment;
+    private Fragment mMarketUSDTDelta;
+    private Fragment mMarketBTCDelta;
 
     public TradePagerActivity() {
         mBackgroundProcessor = new BackgroundProcessor();
@@ -64,6 +68,11 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
         mViewPager.setPageTransformer(new ZoomOutPageTransformer());
         mAccountsViewModel = new ViewModelProvider(this).get(AccountsViewModel.class);
         mCoinEvaluationViewModel = new ViewModelProvider(this).get(CoinEvaluationViewModel.class);
+
+        mMyCoinsAssetsFragment = new MyCoinsAssetsFragment();
+        mCoinEvaluationFragment = new CoinEvaluationFragment();
+        mMarketUSDTDelta = new MarketUSDTDelta();
+        mMarketBTCDelta = new MarketBTCDelta();
     }
 
     @Override
@@ -112,20 +121,12 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
 
     @Override
     public AccountsViewModel getAccountsViewModel() {
-        BackgroundProcessor processor = mBackgroundProcessor;
-        if (processor == null) {
-            return null;
-        }
-        return processor.getAccountsViewModel();
+        return mAccountsViewModel;
     }
 
     @Override
     public CoinEvaluationViewModel getCoinEvaluationViewModel() {
-        BackgroundProcessor processor = mBackgroundProcessor;
-        if (processor == null) {
-            return null;
-        }
-        return processor.getCoinEvaluationViewModel();
+        return mCoinEvaluationViewModel;
     }
 
     @Override
@@ -147,19 +148,19 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
             Fragment fragment = null;
             switch (position) {
                 case 0:
-                    fragment = new MyCoinsAssetsFragment();
+                    fragment = mMyCoinsAssetsFragment;
                     mBackgroundProcessor.setViewModel(mAccountsViewModel, mAccessKey, mSecretKey);
                     break;
                 case 1:
-                    fragment = new CoinEvaluationFragment();
+                    fragment = mCoinEvaluationFragment;
                     mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
                     break;
                 case 2:
-                    fragment = new MarketUSDTDelta();
+                    fragment = mMarketUSDTDelta;
                     mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
                     break;
                 case 3:
-                    fragment = new MarketBTCDelta();
+                    fragment = mMarketBTCDelta;
                     mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
                     break;
                 default:
@@ -174,7 +175,6 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
             return NUM_PAGES;
         }
     }
-
 
     public class ZoomOutPageTransformer implements ViewPager2.PageTransformer {
         private static final float MIN_SCALE = 0.85f;
@@ -215,4 +215,11 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
         }
     }
 
+    public String getAccessKey() {
+        return mAccessKey;
+    }
+
+    public String getSecretKey() {
+        return mSecretKey;
+    }
 }

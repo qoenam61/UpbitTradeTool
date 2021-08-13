@@ -69,4 +69,14 @@ public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTr
     public BackgroundProcessor getProcessor() {
         return null;
     }
+
+    @Override
+    public String getAccessKey() {
+        return null;
+    }
+
+    @Override
+    public String getSecretKey() {
+        return null;
+    }
 }

@@ -204,6 +204,8 @@ public class MarketUSDTDelta extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        mActivity.getProcessor().setViewModel(mActivity.getCoinEvaluationViewModel(), mActivity.getAccessKey(), mActivity.getSecretKey());
+        mViewModel =  mActivity.getCoinEvaluationViewModel();
         mIsActive = true;
         mActivity.getProcessor().startBackgroundProcessor();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
