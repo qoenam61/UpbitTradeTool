@@ -99,8 +99,8 @@ public class CoinCorrelationGroup extends Fragment {
         mCoinListAdapter = new CoinListAdapter();
         coinList.setAdapter(mCoinListAdapter);
 
-
-
+        TextView title = mView.findViewById(R.id.fragment_title);
+        title.setText(getTitleName());
         return mView;
     }
 
@@ -225,11 +225,8 @@ public class CoinCorrelationGroup extends Fragment {
             if (!marketId.equals(compareMarketId)) {
                 List<Double> comparePriceList = new ArrayList<>();
 
-                Iterator<DayCandle> compareCandleIterator = candles.iterator();
-                while (compareCandleIterator.hasNext()) {
-                    DayCandle candle = compareCandleIterator.next();
-                    comparePriceList.add(candle.getTradePrice().doubleValue());
-                }
+                setCompareItem(candles, comparePriceList);
+
                 double colValue = correlation(basePriceList.stream().mapToDouble(Double::doubleValue).toArray(),
                         comparePriceList.stream().mapToDouble(Double::doubleValue).toArray());
                 Log.d(TAG, "[DEBUG] correlationCheck -marketId: "+compareMarketId + " value: "+colValue);
@@ -244,6 +241,18 @@ public class CoinCorrelationGroup extends Fragment {
         Collections.sort(correlationResultList, (value1, value2) -> mCorrelationResultSet.get(value1).compareTo(mCorrelationResultSet.get(value2)));
         mCoinListAdapter.setMonitoringItems(correlationResultList);
         mCoinListAdapter.notifyDataSetChanged();
+    }
+
+    protected void setCompareItem(List<DayCandle> candles, List<Double> comparePriceList) {
+        Iterator<DayCandle> compareCandleIterator = candles.iterator();
+        while (compareCandleIterator.hasNext()) {
+            DayCandle candle = compareCandleIterator.next();
+            comparePriceList.add(candle.getTradePrice().doubleValue());
+        }
+    }
+
+    protected String getTitleName() {
+        return "가격 유사 그룹 선택";
     }
 
     private double correlation(double[] xs, double[] ys) {

@@ -5,11 +5,12 @@
     android:orientation="vertical">
 
     <TextView
+        android:id="@+id/fragment_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textSize="@dimen/large_text_size"
-        android:text="그룹 선택"/>
+        android:text="가격 유사 그룹 선택"/>
 
     <Spinner
         android:id="@+id/coin_select_group"

@@ -14,6 +14,7 @@ import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.fragment.CoinCorrelationGroup;
 import com.example.upbitautotrade.fragment.CoinEvaluationFragment;
+import com.example.upbitautotrade.fragment.CoinRateCorrelationGroup;
 import com.example.upbitautotrade.fragment.MarketBTCDelta;
 import com.example.upbitautotrade.fragment.MarketUSDTDelta;
 import com.example.upbitautotrade.fragment.MyCoinsAssetsFragment;
@@ -27,7 +28,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     /**
      * The number of pages (wizard steps) to show in this demo.
      */
-    private static final int NUM_PAGES = 5;
+    private static final int NUM_PAGES = 6;
 
     /**
      * The pager widget, which handles animation and allows swiping horizontally to access previous
@@ -49,6 +50,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     private Fragment mMarketUSDTDelta;
     private Fragment mMarketBTCDelta;
     private Fragment mMarketCorrleation;
+    private Fragment mMarketCorrleationRate;
 
     public TradePagerActivity() {
         mBackgroundProcessor = new BackgroundProcessor();
@@ -76,6 +78,7 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
         mMarketUSDTDelta = new MarketUSDTDelta();
         mMarketBTCDelta = new MarketBTCDelta();
         mMarketCorrleation = new CoinCorrelationGroup();
+        mMarketCorrleationRate = new CoinRateCorrelationGroup();
     }
 
     @Override
@@ -168,6 +171,10 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
                     break;
                 case 4:
                     fragment = mMarketCorrleation;
+                    mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
+                    break;
+                case 5:
+                    fragment = mMarketCorrleationRate;
                     mBackgroundProcessor.setViewModel(mCoinEvaluationViewModel, mAccessKey, mSecretKey);
                     break;
                 default:
