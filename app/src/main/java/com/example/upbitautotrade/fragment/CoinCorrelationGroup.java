@@ -140,23 +140,26 @@ public class CoinCorrelationGroup extends Fragment {
 
 
                         Spinner spinner = mView.findViewById(R.id.coin_select_group);
-                        mSpinnerAdapter = new ArrayAdapter<>(
-                                getContext(), android.R.layout.simple_spinner_item, marketKoranNameList);
-                        spinner.setAdapter(mSpinnerAdapter);
-                        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-                            @Override
-                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                                String marketId = mMarketListInfo.get(position);;
-                                if (mBaseMarketId == null || !mBaseMarketId.equals(marketId)) {
-                                    mCorrelationResultSet.clear();
-                                    mBaseMarketId = marketId;
-                                }
-                            }
+                        if (mSpinnerAdapter == null) {
+                            mSpinnerAdapter = new ArrayAdapter<>(
+                                    getContext(), android.R.layout.simple_spinner_item, marketKoranNameList);
 
-                            @Override
-                            public void onNothingSelected(AdapterView<?> parent) {
-                            }
-                        });
+                            spinner.setAdapter(mSpinnerAdapter);
+                            spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                                @Override
+                                public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                    String marketId = mMarketListInfo.get(position);;
+                                    if (mBaseMarketId == null || !mBaseMarketId.equals(marketId)) {
+                                        mCorrelationResultSet.clear();
+                                        mBaseMarketId = marketId;
+                                    }
+                                }
+
+                                @Override
+                                public void onNothingSelected(AdapterView<?> parent) {
+                                }
+                            });
+                        }
                         mSpinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
                         mSpinnerAdapter.notifyDataSetChanged();
                         registerPeriodicUpdate(mMarketsMapInfo.keySet());
@@ -264,18 +267,42 @@ public class CoinCorrelationGroup extends Fragment {
         double syy = 0.0;
         double sxy = 0.0;
 
-        int n = xs.length;
+        int n = 0;
+        if (xs.length > ys.length) {
+            n = ys.length;
+            for(int i = 0; i < n; ++i) {
+                double x = xs[i + 1];
+                double y = ys[i];
+                sx += x;
+                sy += y;
+                sxx += x * x;
+                syy += y * y;
+                sxy += x * y;
+            }
+        } else {
+            n = xs.length;
+            for(int i = 0; i < n; ++i) {
+                double x = xs[i];
+                double y = ys[i];
+                sx += x;
+                sy += y;
+                sxx += x * x;
+                syy += y * y;
+                sxy += x * y;
+            }
+        }
+
+/*        int n = xs.length > ys.length ? ys.length : xs.length;
 
         for(int i = 0; i < n; ++i) {
             double x = xs[i];
             double y = ys[i];
-
             sx += x;
             sy += y;
             sxx += x * x;
             syy += y * y;
             sxy += x * y;
-        }
+        }*/
 
         // covariation
         double cov = sxy / n - sx * sy / n / n;
