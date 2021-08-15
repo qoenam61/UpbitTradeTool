@@ -13,6 +13,7 @@ import androidx.viewpager2.widget.ViewPager2;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.fragment.CoinCorrelationGroup;
+import com.example.upbitautotrade.fragment.CoinEvaluationAdvanceFragment;
 import com.example.upbitautotrade.fragment.CoinEvaluationFragment;
 import com.example.upbitautotrade.fragment.CoinRateCorrelationGroup;
 import com.example.upbitautotrade.fragment.MarketBTCDelta;
@@ -74,7 +75,8 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
         mCoinEvaluationViewModel = new ViewModelProvider(this).get(CoinEvaluationViewModel.class);
 
         mMyCoinsAssetsFragment = new MyCoinsAssetsFragment();
-        mCoinEvaluationFragment = new CoinEvaluationFragment();
+//        mCoinEvaluationFragment = new CoinEvaluationFragment();
+        mCoinEvaluationFragment = new CoinEvaluationAdvanceFragment();
         mMarketUSDTDelta = new MarketUSDTDelta();
         mMarketBTCDelta = new MarketBTCDelta();
         mMarketCorrleation = new CoinCorrelationGroup();
