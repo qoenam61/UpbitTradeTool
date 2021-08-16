@@ -12,6 +12,7 @@ import java.io.IOException;
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
@@ -51,6 +52,7 @@ public abstract class DefaultRetrofit {
         public okhttp3.Response intercept(Chain chain) throws IOException {
             Request origin = chain.request();
             Request request = changedRequest(origin);
+            Log.d(TAG, "[DEBUG] intercept: "+request.toString());
             return chain.proceed(request);
         }
     }
@@ -65,6 +67,8 @@ public abstract class DefaultRetrofit {
     abstract String getAuthToken();
 
     public abstract void setParam(String param1, String param2, String param3);
+
+    public abstract void setParam(String param1, String param2, String param3, String param4, String param5, String param6);
 
     public UpBitApi getUpBitApi() {
         return mUpBitApi;

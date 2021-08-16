@@ -17,9 +17,11 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.MarketInfo;
+import com.example.upbitautotrade.model.Post;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
+import com.google.gson.annotations.SerializedName;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -36,8 +38,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.TimeZone;
+import java.util.UUID;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_ORDER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
 
@@ -48,8 +52,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
 
     private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
-    private final int TICK_COUNTS = 300;
-    private final double CHANGED_RATE = 0.02;
+    private final int TICK_COUNTS = 150;
+    private final double CHANGED_RATE = 0.005;
     private final int TRADE_COUNTS = 300;
 
     private View mView;
@@ -72,6 +76,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private Map<String, Ticker> mTickerMapInfo;
     private Map<String, Deque<TradeInfo>> mTradeMapInfo;
 
+    private List<Post> mOrderInfoList;
+
     boolean mIsStarting = false;
     boolean mIsActive = false;
 
@@ -92,6 +98,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mBuyingItemMapInfo = new HashMap<>();
         mBuyingItemKeyList = new ArrayList<>();
         mTradeMapInfo = new HashMap<>();
+        mOrderInfoList = new ArrayList<>();
     }
 
 
@@ -195,6 +202,16 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         mBuyingListAdapter.notifyDataSetChanged();
                     }
             );
+
+            mViewModel.getOrderInfo().observe(
+                    getViewLifecycleOwner(),
+                    orderInfo -> {
+                        if (!mIsActive) {
+                            return;
+                        }
+                        Log.d(TAG, "[DEBUG] onStart - orderInfo: "+orderInfo);
+                    }
+            );
         }
     }
 
@@ -257,6 +274,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (!mMonitorKeyList.contains(key)) {
                 mMonitorKeyList.add(key);
             }
+
             if (priceChangedRate >= CHANGED_RATE) {
                 registerPeriodicUpdate(key);
 
@@ -290,9 +308,21 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             double toBuyPrice = coinInfo.getToBuyPrice();
 
             if (toBuyPrice < ticker.getTradePrice().doubleValue()) {
+
                 coinInfo.setStatus(coinInfo.BUY);
                 coinInfo.setBuyingTime(ticker.getTimestamp());
                 mBuyingItemMapInfo.put(key, coinInfo);
+                if (mViewModel != null) {
+                    Log.d(TAG, "[DEBUG] real BUY - !!!! marketId: " + key+" price: "+toBuyPrice);
+
+                    double volume = (6000 / toBuyPrice);
+                    String uuid = UUID.randomUUID().toString();
+                    Post post = new Post(key, "bid", Double.toString(volume), null, "price", uuid);
+//                    Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
+                    registerProcess(UPDATE_ORDER_INFO, post);
+                    mOrderInfoList.add(post);
+                    Log.d(TAG, "[DEBUG] buyingSimulation buy - post: "+post);
+                }
                 Log.d(TAG, "[DEBUG] BUY - !!!! : " + key);
             } else {
                 double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
@@ -324,6 +354,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mBuyingItemMapInfo.remove(key);
                 mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
 
+                if (mViewModel != null) {
+                    Log.d(TAG, "[DEBUG] real SELL - !!!! : " + key);
+                    String uuid = UUID.randomUUID().toString();
+                    Post post = new Post(key, "ask", Double.toString(1), null, "market", uuid);
+                    registerProcess(UPDATE_ORDER_INFO, post);
+                    mOrderInfoList.add(post);
+                    Log.d(TAG, "[DEBUG] buyingSimulation sell - post: "+post);
+                }
                 Log.d(TAG, "[DEBUG] SELL - !!!! : " + key);
             }
         }
@@ -345,6 +383,20 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mIsActive = true;
         mActivity.getProcessor().startBackgroundProcessor();
         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
+    }
+
+    private void registerProcess(int type, Post post) {
+        if (post == null) {
+            return;
+        }
+        String marketId = post.getMarketId();
+        String side = post.getSide();
+        String volume = post.getVolume();
+        String price = post.getPrice();
+        String ord_type = post.getOrdType();
+        String identifier = post.getIdentifier();
+
+        mActivity.getProcessor().registerProcess(type, marketId, side, volume, price, ord_type, identifier);
     }
 
     private void registerPeriodicUpdate(Set<String> keySet) {

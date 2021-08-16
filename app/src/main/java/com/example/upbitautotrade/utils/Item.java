@@ -1,5 +1,7 @@
 package com.example.upbitautotrade.utils;
 
+import com.google.gson.annotations.SerializedName;
+
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_ACCOUNTS_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_CHANCE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_DAY_CANDLE_INFO;
@@ -27,6 +29,13 @@ public class Item {
     String cursor = null;
     String priceUnit = null;
 
+    String side;
+    String volume;
+    String price;
+    String ord_type;
+    String identifier;
+
+
     public Item(int type, String key) {
         this.type = type;
         this.key = key;
@@ -41,6 +50,16 @@ public class Item {
         this.to = to;
         this.cursor = cursor;
         this.priceUnit = priceUnit;
+    }
+
+    public Item(int type, String key, String side, String volume, String price, String ord_type, String identifier) {
+        this.type = type;
+        this.key = key;
+        this.side = side;
+        this.volume = volume;
+        this.price = price;
+        this.ord_type = ord_type;
+        this.identifier = identifier;
     }
 
     public long getSleepTime() {

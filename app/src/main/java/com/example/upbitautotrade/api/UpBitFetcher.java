@@ -9,6 +9,8 @@ import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.MonthCandle;
+import com.example.upbitautotrade.model.Post;
+import com.example.upbitautotrade.model.ResponseOrder;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
@@ -16,8 +18,17 @@ import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.util.List;
 
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import okio.BufferedSink;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -43,6 +54,7 @@ public class UpBitFetcher {
     private AccountsRetrofit mAccountsRetrofit;
     private ChanceRetrofit mChanceRetrofit;
     private TickerRetrofit mTickerRetrofit;
+    private OrderRetrofit mOrderRetrofit;
     private MutableLiveData<Throwable> mErrorLiveData;
 
     public UpBitFetcher(ConnectionState listener) {
@@ -57,6 +69,8 @@ public class UpBitFetcher {
         mChanceRetrofit.makeUpBitApi();
         mTickerRetrofit = new TickerRetrofit(accessKey, secretKey);
         mTickerRetrofit.makeUpBitApi();
+        mOrderRetrofit = new OrderRetrofit(accessKey, secretKey);
+        mOrderRetrofit.makeUpBitApi();
     }
 
     public MutableLiveData<Throwable> getErrorLiveData() {
@@ -296,6 +310,63 @@ public class UpBitFetcher {
 
             @Override
             public void onFailure(Call<List<TradeInfo>> call, Throwable t) {
+                Log.w(TAG, "onFailure: "+t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<ResponseOrder> postOrderInfo(Post post) {
+        if (mOrderRetrofit == null || post == null) {
+            return null;
+        }
+
+        String marketId = post.getMarketId();
+        String side = post.getSide();
+        String volume = post.getVolume();
+        String price = post.getPrice();
+        String ord_type = post.getOrdType();
+        String identifier = post.getIdentifier();
+        mOrderRetrofit.setParam(marketId, side, volume, price, ord_type, identifier);
+
+        MutableLiveData<ResponseOrder> result = new MutableLiveData<>();
+
+        JSONObject paramObject = new JSONObject();
+        try {
+            paramObject.put("market", marketId);
+            paramObject.put("side", side);
+            paramObject.put("volume", volume);
+            paramObject.put("price", price);
+            paramObject.put("ord_type", ord_type);
+            paramObject.put("identifier", identifier);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+
+//        Call<ResponseOrder> call = mOrderRetrofit.getUpBitApi().postOrderInfo(paramObject, marketId, side, volume, price, ord_type, identifier);
+        Call<ResponseOrder> call = mOrderRetrofit.getUpBitApi().postOrderInfo(paramObject);
+        Log.d(TAG, "[DEBUG] postOrderInfo: "+call.toString());
+        call.enqueue(new Callback<ResponseOrder>() {
+            @Override
+            public void onResponse(Call<ResponseOrder> call, Response<ResponseOrder> response) {
+                Log.d(TAG, "[DEBUG] onResponse: "+response.body());
+                if (response.body() != null) {
+                    result.setValue(response.body());
+                }/* else {
+                    try {
+                        JSONObject jsonObject = new JSONObject(response.errorBody().toString());                    Log.d(TAG, "[DEBUG] onResponse: " + response.errorBody().toString());
+                        Log.d(TAG, "[DEBUG] onResponse: " + jsonObject);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }*/
+            }
+
+            @Override
+            public void onFailure(Call<ResponseOrder> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
             }

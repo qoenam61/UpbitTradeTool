@@ -6,14 +6,20 @@ import com.example.upbitautotrade.model.Chance;
 import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.MonthCandle;
+import com.example.upbitautotrade.model.Post;
+import com.example.upbitautotrade.model.ResponseOrder;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
 
+import org.json.JSONObject;
+
 import java.util.List;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
+import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
@@ -98,4 +104,15 @@ public interface UpBitApi {
                                        @Query("count") int count
 //                                       @Query("cursor") String cursor
     );
+
+    @POST("/v1/orders")
+    Call<ResponseOrder> postOrderInfo(@Body JSONObject paramObject
+//                                      ,
+//                                      @Query("market") String marketId,
+//                                      @Query("side") String side,
+//                                      @Query("volume") String volume,
+//                                      @Query("price") String price,
+//                                      @Query("ord_type") String ord_type,
+//                                      @Query("identifier") String identifier
+                                      );
 }

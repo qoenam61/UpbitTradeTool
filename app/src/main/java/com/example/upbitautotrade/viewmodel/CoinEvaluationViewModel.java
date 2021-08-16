@@ -11,6 +11,8 @@ import com.example.upbitautotrade.api.UpBitFetcher;
 import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MonthCandle;
+import com.example.upbitautotrade.model.Post;
+import com.example.upbitautotrade.model.ResponseOrder;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
@@ -37,6 +39,10 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
 
     private final MutableLiveData<TradeInput> mSearchTradeInfo;
     private final LiveData<List<TradeInfo>> mResultTradeInfo;
+
+    private final MutableLiveData<Post> mSearchOrderInfo;
+    private final LiveData<ResponseOrder> mResultOrderInfo;
+
 
     public CoinEvaluationViewModel(Application application) {
         super(application);
@@ -99,6 +105,11 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
                         )
         );
 
+        mSearchOrderInfo = new MutableLiveData<>();
+        mResultOrderInfo = Transformations.switchMap(
+                mSearchOrderInfo, input ->
+                        mUpBitFetcher.postOrderInfo(input)
+        );
     }
 
     @Override
@@ -167,6 +178,16 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
     public LiveData<List<TradeInfo>> getTradeInfo() {
         return mResultTradeInfo;
     }
+
+    public void searchOrderInfo(String marketId, String side, String volume, String price, String ord_type, String identifier) {
+        Post post = new Post(marketId, side, volume, price, ord_type, identifier);
+        mSearchOrderInfo.setValue(post);
+    }
+
+    public LiveData<ResponseOrder> getOrderInfo() {
+        return mResultOrderInfo;
+    }
+
 
     private class CandleInput {
         int unit;
