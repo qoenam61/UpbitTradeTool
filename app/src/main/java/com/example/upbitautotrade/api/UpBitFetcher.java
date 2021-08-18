@@ -368,10 +368,17 @@ public class UpBitFetcher {
                     result.setValue(response.body());
                 }
                 else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse - jObjError: "+jObjError);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     Log.d(TAG, "[DEBUG] onResponse -toString: " + call.toString()
                             + " code: " + response.code()
-                            + " message: " + response.message()
-                            + " errorBody: "+response.errorBody()
                             + " headers: "+response.headers()
                             + " raw: "+response.raw());
                 }
