@@ -315,8 +315,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     Log.d(TAG, "[DEBUG] real BUY - !!!! marketId: " + key+" price: "+toBuyPrice);
                     double volume = (6000 / toBuyPrice);
                     String uuid = UUID.randomUUID().toString();
-                    Post post = new Post(key, "bid", null, Double.toString(6000), "price", uuid);
-//                    Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
+//                    Post post = new Post(key, "bid", null, Double.toString(6000), "price", uuid);
+                    Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
                     registerProcess(UPDATE_ORDER_INFO, post);
                     mOrderInfoList.add(post);
                     Log.d(TAG, "[DEBUG] buyingSimulation buy - post: "+post);
@@ -427,6 +427,38 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO, monitorKey);
     }
 
+    private String convertPrice(double price) {
+        DecimalFormat mFormatUnder10 = new DecimalFormat("#.##");
+        DecimalFormat mFormatUnder100 = new DecimalFormat("##.#");
+        DecimalFormat mFormatUnder1_000 = new DecimalFormat("###");
+        DecimalFormat mFormatUnder10_000 = new DecimalFormat("####");
+        DecimalFormat mFormatUnder100_000 = new DecimalFormat("#####");
+        DecimalFormat mFormatUnder1_000_000 = new DecimalFormat("######");
+        DecimalFormat mFormatUnder10_000_000 = new DecimalFormat("#######");
+        DecimalFormat mFormatUnder100_000_000 = new DecimalFormat("########");
+
+        String result = null;
+        if (price < 10) {
+            result = mFormatUnder10.format(price);
+        } else if (price < 100) {
+            price = price * 0.1
+            result = mFormatUnder100.format(price);
+        } else if (price < 1000) {
+            result = mFormatUnder1_000.format(price);
+        } else if (price < 10000) {
+            result = mFormatUnder10_000.format(price);
+        } else if (price < 100000) {
+            result = mFormatUnder100_000.format(price);
+        } else if (price < 1000000) {
+            result = mFormatUnder1_000_000.format(price);
+        } else if (price < 10000000) {
+            result = mFormatUnder10_000_000.format(price);
+        } else if (price < 100000000) {
+            result = mFormatUnder100_000_000.format(price);
+        }
+
+        return null;
+    }
 
     private class CoinHolder extends RecyclerView.ViewHolder {
         public TextView mCoinName;

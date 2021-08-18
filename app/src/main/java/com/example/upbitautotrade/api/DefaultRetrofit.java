@@ -8,6 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.util.Map;
 
 import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
@@ -69,6 +70,8 @@ public abstract class DefaultRetrofit {
     public abstract void setParam(String param1, String param2, String param3);
 
     public abstract void setParam(String param1, String param2, String param3, String param4, String param5, String param6);
+
+    public abstract void setParam(Map<String, String> map);
 
     public UpBitApi getUpBitApi() {
         return mUpBitApi;

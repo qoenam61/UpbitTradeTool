@@ -17,8 +17,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import okhttp3.Request;
-
 public class OrderRetrofit extends ChanceRetrofit {
     protected Map<String, String> mQueryMapElements;
 
@@ -80,6 +78,14 @@ public class OrderRetrofit extends ChanceRetrofit {
             params.put("identifier", param6);
         }
 
+        mQueryElements = new ArrayList<>();
+        for(Map.Entry<String, String> entity : params.entrySet()) {
+            mQueryElements.add(entity.getKey() + "=" + entity.getValue());
+        }
+    }
+
+    @Override
+    public void setParam(Map<String, String> params) {
         mQueryElements = new ArrayList<>();
         for(Map.Entry<String, String> entity : params.entrySet()) {
             mQueryElements.add(entity.getKey() + "=" + entity.getValue());

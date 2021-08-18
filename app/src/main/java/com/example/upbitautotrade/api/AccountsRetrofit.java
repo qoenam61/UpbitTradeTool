@@ -11,6 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
 import okhttp3.Interceptor;
@@ -49,5 +50,10 @@ public class AccountsRetrofit extends DefaultRetrofit{
 
     @Override
     public void setParam(String param1, String param2, String param3, String param4, String param5, String param6) {
+    }
+
+    @Override
+    public void setParam(Map<String, String> map) {
+
     }
 }

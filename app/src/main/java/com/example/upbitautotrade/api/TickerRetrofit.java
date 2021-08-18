@@ -3,6 +3,7 @@ package com.example.upbitautotrade.api;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 
+import java.util.Map;
 import java.util.UUID;
 
 import okhttp3.Request;
@@ -32,6 +33,11 @@ public class TickerRetrofit extends DefaultRetrofit {
 
     @Override
     public void setParam(String param1, String param2, String param3, String param4, String param5, String param6) {
+
+    }
+
+    @Override
+    public void setParam(Map<String, String> map) {
 
     }
 }

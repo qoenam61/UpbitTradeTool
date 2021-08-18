@@ -331,11 +331,36 @@ public class UpBitFetcher {
         String price = post.getPrice();
         String ord_type = post.getOrdType();
         String identifier = post.getIdentifier();
-        mOrderRetrofit.setParam(marketId, side, volume, price, ord_type, identifier);
 
-        MutableLiveData<ResponseOrder> result = new MutableLiveData<>();
+        //        mOrderRetrofit.setParam(marketId, side, volume, price, ord_type, identifier);
 
-        JSONObject paramObject = new JSONObject();
+
+        HashMap<String, String> params = new HashMap<>();
+        if (marketId != null) {
+            params.put("market", marketId);
+        }
+        if (side != null) {
+            params.put("side", side);
+        }
+
+        if (volume != null) {
+            params.put("volume", volume);
+        }
+        if (price != null) {
+            params.put("price", price);
+        }
+
+        if (ord_type != null) {
+            params.put("ord_type", ord_type);
+        }
+        if (identifier != null) {
+            params.put("identifier", identifier);
+        }
+
+        Log.d(TAG, "[DEBUG] postOrderInfo: "+params.toString());
+        mOrderRetrofit.setParam(params);
+
+/*        JSONObject paramObject = new JSONObject();
         try {
             if (marketId != null) {
                 paramObject.put("market", marketId);
@@ -359,10 +384,10 @@ public class UpBitFetcher {
             }
         } catch (JSONException e) {
             e.printStackTrace();
-        }
-        Log.d(TAG, "[DEBUG] postOrderInfo: "+paramObject.toString());
+        }*/
 
-        Call<ResponseOrder> call = mOrderRetrofit.getUpBitApi().postOrderInfo(paramObject);
+        MutableLiveData<ResponseOrder> result = new MutableLiveData<>();
+        Call<ResponseOrder> call = mOrderRetrofit.getUpBitApi().postOrderInfo(params);
         call.enqueue(new Callback<ResponseOrder>() {
             @Override
             public void onResponse(Call<ResponseOrder> call, Response<ResponseOrder> response) {
