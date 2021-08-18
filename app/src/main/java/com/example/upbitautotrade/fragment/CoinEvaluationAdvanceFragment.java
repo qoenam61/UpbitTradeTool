@@ -182,7 +182,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart: makeTradeMapInfo");
                         makeTradeMapInfo(tradesInfo);
                     }
             );
@@ -193,7 +192,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart: getResultTickerInfo");
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
@@ -211,7 +209,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart - orderInfo: "+orderInfo);
                     }
             );
         }
@@ -316,7 +313,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mBuyingItemMapInfo.put(key, coinInfo);
                 if (mViewModel != null) {
                     Log.d(TAG, "[DEBUG] real BUY - !!!! marketId: " + key+" price: "+toBuyPrice);
-
                     double volume = (6000 / toBuyPrice);
                     String uuid = UUID.randomUUID().toString();
                     Post post = new Post(key, "bid", null, Double.toString(6000), "price", uuid);
@@ -325,7 +321,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mOrderInfoList.add(post);
                     Log.d(TAG, "[DEBUG] buyingSimulation buy - post: "+post);
                 }
-                Log.d(TAG, "[DEBUG] BUY - !!!! : " + key);
             } else {
                 double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
                 double changedRate = changedPrice / toBuyPrice;
@@ -364,7 +359,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mOrderInfoList.add(post);
                     Log.d(TAG, "[DEBUG] buyingSimulation sell - post: "+post);
                 }
-                Log.d(TAG, "[DEBUG] SELL - !!!! : " + key);
             }
         }
     }

@@ -203,7 +203,7 @@ public class BackgroundProcessor {
                 if (item == null) {
                     continue;
                 }
-                Log.d(TAG, "[DEBUG] TaskList -type: "+item.type+" marketId: "+item.key);
+//                Log.d(TAG, "[DEBUG] TaskList -type: "+item.type+" marketId: "+item.key);
                 switch (item.type) {
                     case UPDATE_MARKETS_INFO:
                     case UPDATE_ORDER_INFO:
@@ -246,20 +246,10 @@ public class BackgroundProcessor {
 
     public void registerProcess(int type, String marketId, String side, String volume, String price, String ord_type, String identifier) {
         Item item = new Item(type, marketId, side, volume, price, ord_type, identifier);
-//        Map<Integer, TaskList> map = mProcessTaskMap;
-//        if (map.get(type) == null) {
-//            TaskList taskList = new TaskList();
-//            taskList.add(item);
-//            mProcessTaskMap.put(type, taskList);
-//        } else {
-//            mProcessTaskMap.get(type).add(item);
-//        }
-
         TaskList taskList = new TaskList();
         taskList.add(item);
         Thread thread = new Thread(taskList);
         thread.start();
-        Log.d(TAG, "[DEBUG] registerPeriodicUpdate: ");
     }
 
     public void registerPeriodicUpdate(int type, String key) {
@@ -323,7 +313,7 @@ public class BackgroundProcessor {
                             TaskList taskList = mProcessTaskMap.get(type);
                             if (taskList != null) {
                                 if (!mThreadPool.getQueue().contains(taskList) && mThreadPool.getQueue().size() < (mThreadPool.getMaximumPoolSize() * 2)) {
-                                    Log.d(TAG, "[DEBUG] startBackgroundProcessor -type: "+taskList.getType()+" marketId: "+taskList.getMarketId());
+//                                    Log.d(TAG, "[DEBUG] startBackgroundProcessor -type: "+taskList.getType()+" marketId: "+taskList.getMarketId());
                                     mThreadPool.execute(taskList);
                                 } else {
                                     try {

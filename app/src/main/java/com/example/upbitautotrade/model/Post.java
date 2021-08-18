@@ -1,25 +1,12 @@
 package com.example.upbitautotrade.model;
 
-import com.google.gson.annotations.SerializedName;
-
 public class Post {
 
-    @SerializedName("market")
     String market;
-
-    @SerializedName("side")
     String side;
-
-    @SerializedName("volume")
     String volume;
-
-    @SerializedName("price")
     String price;
-
-    @SerializedName("ord_type")
     String ord_type;
-
-    @SerializedName("identifier")
     String identifier;
 
     public Post(String marketId, String side, String volume, String price, String ord_type, String identifier) {

@@ -340,26 +340,28 @@ public class UpBitFetcher {
             if (marketId != null) {
                 paramObject.put("market", marketId);
             }
-            if (marketId != null) {
+            if (side != null) {
                 paramObject.put("side", side);
             }
 
-            if (marketId != null) {
+            if (volume != null) {
                 paramObject.put("volume", volume);
             }
-            if (marketId != null) {
+            if (price != null) {
                 paramObject.put("price", price);
             }
 
-            if (marketId != null) {
+            if (ord_type != null) {
                 paramObject.put("ord_type", ord_type);
             }
-            if (marketId != null) {
+            if (identifier != null) {
                 paramObject.put("identifier", identifier);
             }
         } catch (JSONException e) {
             e.printStackTrace();
         }
+        Log.d(TAG, "[DEBUG] postOrderInfo: "+paramObject.toString());
+
         Call<ResponseOrder> call = mOrderRetrofit.getUpBitApi().postOrderInfo(paramObject);
         call.enqueue(new Callback<ResponseOrder>() {
             @Override
@@ -370,17 +372,19 @@ public class UpBitFetcher {
                 else {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse - jObjError: "+jObjError);
+                        Log.d(TAG, "[DEBUG] onResponse -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: "+response.raw()
+                                + " jObjError: " + jObjError
+                        );
                     } catch (JSONException e) {
                         e.printStackTrace();
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
 
-                    Log.d(TAG, "[DEBUG] onResponse -toString: " + call.toString()
-                            + " code: " + response.code()
-                            + " headers: "+response.headers()
-                            + " raw: "+response.raw());
+
                 }
             }
 

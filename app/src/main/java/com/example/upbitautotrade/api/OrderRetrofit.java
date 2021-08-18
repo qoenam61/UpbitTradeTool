@@ -26,34 +26,13 @@ public class OrderRetrofit extends ChanceRetrofit {
         super(accessKey, secretKey);
     }
 
-
-/*
-    @Override
-    public Request changedRequest(Request origin) {
-        return origin.newBuilder()
-                .header("Authorization", getAuthToken())
-                .build();
-    }
-*/
-
     @Override
     protected String getAuthToken() {
         if (mAccessKey == null || mSecretKey == null) {
             return null;
         }
         String queryString = String.join("&", mQueryElements.toArray(new String[0]));
-/*
-        JSONObject paramObject = new JSONObject();
-        try {
-            paramObject.put("market", mQueryMapElements.get("market"));
-            paramObject.put("side", mQueryMapElements.get("side"));
-            paramObject.put("volume", mQueryMapElements.get("volume"));
-            paramObject.put("price", mQueryMapElements.get("price"));
-            paramObject.put("ord_type", mQueryMapElements.get("ord_type"));
-            paramObject.put("identifier", mQueryMapElements.get("identifier"));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
+
         Log.d("TAG", "[DEBUG] getAuthToken: "+queryString);
         MessageDigest md = null;
         try {
@@ -100,7 +79,6 @@ public class OrderRetrofit extends ChanceRetrofit {
         if (param6 != null) {
             params.put("identifier", param6);
         }
-        mQueryMapElements = params;
 
         mQueryElements = new ArrayList<>();
         for(Map.Entry<String, String> entity : params.entrySet()) {
