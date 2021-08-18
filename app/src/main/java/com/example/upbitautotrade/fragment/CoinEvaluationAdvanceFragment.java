@@ -52,8 +52,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
 
     private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
-    private final int TICK_COUNTS = 150;
-    private final double CHANGED_RATE = 0.005;
+    private final int TICK_COUNTS = 100;
+    private final double CHANGED_RATE = 0.001;
     private final int TRADE_COUNTS = 300;
 
     private View mView;
@@ -182,6 +182,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
+                        Log.d(TAG, "[DEBUG] onStart: makeTradeMapInfo");
                         makeTradeMapInfo(tradesInfo);
                     }
             );
@@ -192,6 +193,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
+                        Log.d(TAG, "[DEBUG] onStart: getResultTickerInfo");
                         Iterator<Ticker> iterator = ticker.iterator();
                         while (iterator.hasNext()) {
                             Ticker tick = iterator.next();
@@ -317,7 +319,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
                     double volume = (6000 / toBuyPrice);
                     String uuid = UUID.randomUUID().toString();
-                    Post post = new Post(key, "bid", Double.toString(volume), null, "price", uuid);
+                    Post post = new Post(key, "bid", null, Double.toString(6000), "price", uuid);
 //                    Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
                     registerProcess(UPDATE_ORDER_INFO, post);
                     mOrderInfoList.add(post);

@@ -15,9 +15,13 @@ import com.example.upbitautotrade.model.WeekCandle;
 import org.json.JSONObject;
 
 import java.util.List;
+import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.Field;
+import retrofit2.http.FieldMap;
+import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
@@ -106,13 +110,10 @@ public interface UpBitApi {
     );
 
     @POST("/v1/orders")
-    Call<ResponseOrder> postOrderInfo(@Body JSONObject paramObject
-//                                      ,
-//                                      @Query("market") String marketId,
-//                                      @Query("side") String side,
-//                                      @Query("volume") String volume,
-//                                      @Query("price") String price,
-//                                      @Query("ord_type") String ord_type,
-//                                      @Query("identifier") String identifier
-                                      );
+    Call<ResponseOrder> postOrderInfo(@Body JSONObject paramObject);
+
+    @FormUrlEncoded
+    @POST("/v1/orders")
+    Call<ResponseOrder> postOrderInfo(@FieldMap Map<String, String> fields);
+
 }

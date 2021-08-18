@@ -17,6 +17,9 @@ public class Item {
     private final long PERIODIC_TIME_10 = 10;
     private final long PERIODIC_TIME_45 = 45;
     private final long PERIODIC_TIME_50 = 50;
+    private final long PERIODIC_TIME_65 = 65;
+    private final long PERIODIC_TIME_70 = 70;
+    private final long PERIODIC_TIME_80 = 80;
     private final long PERIODIC_TIME_500 = 500;
     private final long PERIODIC_TIME_1000 = 1000;
 
@@ -29,11 +32,11 @@ public class Item {
     String cursor = null;
     String priceUnit = null;
 
-    String side;
-    String volume;
-    String price;
-    String ord_type;
-    String identifier;
+    String side = null;;
+    String volume = null;;
+    String price = null;;
+    String ord_type = null;;
+    String identifier = null;;
 
 
     public Item(int type, String key) {
@@ -76,7 +79,7 @@ public class Item {
             case UPDATE_DAY_CANDLE_INFO:
             case UPDATE_WEEK_CANDLE_INFO:
             case UPDATE_MONTH_CANDLE_INFO:
-                sleepTime = PERIODIC_TIME_45;
+                sleepTime = PERIODIC_TIME_65;
             default:
                 break;
         }

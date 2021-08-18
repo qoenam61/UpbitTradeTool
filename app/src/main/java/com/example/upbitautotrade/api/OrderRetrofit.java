@@ -1,7 +1,12 @@
 package com.example.upbitautotrade.api;
 
+import android.util.Log;
+
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
@@ -15,6 +20,7 @@ import java.util.UUID;
 import okhttp3.Request;
 
 public class OrderRetrofit extends ChanceRetrofit {
+    protected Map<String, String> mQueryMapElements;
 
     public OrderRetrofit(String accessKey, String secretKey) {
         super(accessKey, secretKey);
@@ -36,6 +42,19 @@ public class OrderRetrofit extends ChanceRetrofit {
             return null;
         }
         String queryString = String.join("&", mQueryElements.toArray(new String[0]));
+/*
+        JSONObject paramObject = new JSONObject();
+        try {
+            paramObject.put("market", mQueryMapElements.get("market"));
+            paramObject.put("side", mQueryMapElements.get("side"));
+            paramObject.put("volume", mQueryMapElements.get("volume"));
+            paramObject.put("price", mQueryMapElements.get("price"));
+            paramObject.put("ord_type", mQueryMapElements.get("ord_type"));
+            paramObject.put("identifier", mQueryMapElements.get("identifier"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }*/
+        Log.d("TAG", "[DEBUG] getAuthToken: "+queryString);
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-512");
@@ -81,6 +100,7 @@ public class OrderRetrofit extends ChanceRetrofit {
         if (param6 != null) {
             params.put("identifier", param6);
         }
+        mQueryMapElements = params;
 
         mQueryElements = new ArrayList<>();
         for(Map.Entry<String, String> entity : params.entrySet()) {

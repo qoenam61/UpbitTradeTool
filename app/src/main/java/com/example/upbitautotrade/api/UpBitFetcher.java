@@ -24,7 +24,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
@@ -299,6 +301,7 @@ public class UpBitFetcher {
             call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, count);
 //            call = mTickerRetrofit.getUpBitApi().getTradeInfo(marketId, count, cursor);
         }
+        long startTime = System.currentTimeMillis();
 
         call.enqueue(new Callback<List<TradeInfo>>() {
             @Override
@@ -334,35 +337,44 @@ public class UpBitFetcher {
 
         JSONObject paramObject = new JSONObject();
         try {
-            paramObject.put("market", marketId);
-            paramObject.put("side", side);
-            paramObject.put("volume", volume);
-            paramObject.put("price", price);
-            paramObject.put("ord_type", ord_type);
-            paramObject.put("identifier", identifier);
+            if (marketId != null) {
+                paramObject.put("market", marketId);
+            }
+            if (marketId != null) {
+                paramObject.put("side", side);
+            }
+
+            if (marketId != null) {
+                paramObject.put("volume", volume);
+            }
+            if (marketId != null) {
+                paramObject.put("price", price);
+            }
+
+            if (marketId != null) {
+                paramObject.put("ord_type", ord_type);
+            }
+            if (marketId != null) {
+                paramObject.put("identifier", identifier);
+            }
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
-
-//        Call<ResponseOrder> call = mOrderRetrofit.getUpBitApi().postOrderInfo(paramObject, marketId, side, volume, price, ord_type, identifier);
         Call<ResponseOrder> call = mOrderRetrofit.getUpBitApi().postOrderInfo(paramObject);
-        Log.d(TAG, "[DEBUG] postOrderInfo: "+call.toString());
         call.enqueue(new Callback<ResponseOrder>() {
             @Override
             public void onResponse(Call<ResponseOrder> call, Response<ResponseOrder> response) {
-                Log.d(TAG, "[DEBUG] onResponse: "+response.body());
-                if (response.body() != null) {
+                if(response.isSuccessful()) {
                     result.setValue(response.body());
-                }/* else {
-                    try {
-                        JSONObject jsonObject = new JSONObject(response.errorBody().toString());                    Log.d(TAG, "[DEBUG] onResponse: " + response.errorBody().toString());
-                        Log.d(TAG, "[DEBUG] onResponse: " + jsonObject);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
-
-                }*/
+                }
+                else {
+                    Log.d(TAG, "[DEBUG] onResponse -toString: " + call.toString()
+                            + " code: " + response.code()
+                            + " message: " + response.message()
+                            + " errorBody: "+response.errorBody()
+                            + " headers: "+response.headers()
+                            + " raw: "+response.raw());
+                }
             }
 
             @Override
