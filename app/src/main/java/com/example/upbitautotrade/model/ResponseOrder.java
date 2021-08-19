@@ -14,10 +14,10 @@ public class ResponseOrder {
     String	orderType;
 
     @SerializedName("price")
-    String	price;
+    Number	price;
 
     @SerializedName("avg_price")
-    String	avgPrice;
+    Number	avgPrice;
 
     @SerializedName("state")
     String	state;
@@ -29,10 +29,10 @@ public class ResponseOrder {
     String	created_at;
 
     @SerializedName("volume")
-    String	volume;
+    Number	volume;
 
     @SerializedName("remaining_volume")
-    String	remainingVolume;
+    Number	remainingVolume;
 
     @SerializedName("reserved_fee")
     String	reservedFee;
@@ -64,11 +64,11 @@ public class ResponseOrder {
         return orderType;
     }
 
-    public String getPrice() {
+    public Number getPrice() {
         return price;
     }
 
-    public String getAvgPrice() {
+    public Number getAvgPrice() {
         return avgPrice;
     }
 
@@ -84,11 +84,11 @@ public class ResponseOrder {
         return created_at;
     }
 
-    public String getVolume() {
+    public Number getVolume() {
         return volume;
     }
 
-    public String getRemainingVolume() {
+    public Number getRemainingVolume() {
         return remainingVolume;
     }
 

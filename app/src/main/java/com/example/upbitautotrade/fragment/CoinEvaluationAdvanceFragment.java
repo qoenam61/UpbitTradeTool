@@ -212,7 +212,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             return;
                         }
                         registerPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, orderInfo.getMarket(), orderInfo.getUuid());
-                        Log.d(TAG, "[DEBUG] onStart getPostOrderInfo key: "+ orderInfo.getMarket() + " getUuid: " + orderInfo.getUuid());
+                        Log.d(TAG, "[DEBUG] onStart getPostOrderInfo key: "+ orderInfo.getMarket()
+                                + " getSide: " + orderInfo.getSide()
+                                + " getUuid: " + orderInfo.getUuid());
                     }
             );
 
@@ -397,18 +399,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     Log.d(TAG, "[DEBUG] buyingSimulation sell - post: "+post);
                 }
 
-                coinInfo.setMarketId(key);
-                coinInfo.setStatus(coinInfo.SELL);
-                coinInfo.setSellPrice(ticker.getTradePrice().doubleValue());
 
-                mResultListInfo.add(coinInfo);
-                mResultListAdapter.setResultItems(mResultListInfo);
-
-                removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
-                removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
-                mBuyingItemKeyList.remove(key);
-                mBuyingItemMapInfo.remove(key);
-                mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
             }
         }
     }
@@ -420,12 +411,28 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
         String key = orderInfo.getMarket();
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+
         if (orderInfo.getState().equals("done") && orderInfo.getSide().equals("bid")) {
             Log.d(TAG, "[DEBUG] monitoringBuyList real BUY - !!!! marketId: " + key+" price: "+coinInfo.getToBuyPrice());
             removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
             coinInfo.setStatus(coinInfo.BUY);
-//            coinInfo.setBuyingTime(orderInfo.);
+//            coinInfo.setBuyingTime(orderInfo.getAvgPrice().doubleValue());
             mBuyingItemMapInfo.put(key, coinInfo);
+            mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+        }
+
+        if (orderInfo.getState().equals("done") && orderInfo.getSide().equals("ask")) {
+            coinInfo.setMarketId(key);
+            coinInfo.setStatus(coinInfo.SELL);
+            coinInfo.setSellPrice(orderInfo.getAvgPrice().doubleValue());
+
+            mResultListInfo.add(coinInfo);
+            mResultListAdapter.setResultItems(mResultListInfo);
+
+            removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
+            removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
+            mBuyingItemKeyList.remove(key);
+            mBuyingItemMapInfo.remove(key);
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
         }
 
