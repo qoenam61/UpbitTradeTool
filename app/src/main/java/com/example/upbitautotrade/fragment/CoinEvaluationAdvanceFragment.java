@@ -209,6 +209,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         if (!mIsActive) {
                             return;
                         }
+                        Log.d(TAG, "[DEBUG] onStart - orderInfo: "+orderInfo);
                     }
             );
         }
@@ -316,7 +317,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     double volume = (6000 / toBuyPrice);
                     String uuid = UUID.randomUUID().toString();
 //                    Post post = new Post(key, "bid", null, Double.toString(6000), "price", uuid);
-                    Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
+                    Post post = new Post(key, "bid", Double.toString(volume), convertPrice(toBuyPrice), "limit", uuid);
                     registerProcess(UPDATE_ORDER_INFO, post);
                     mOrderInfoList.add(post);
                     Log.d(TAG, "[DEBUG] buyingSimulation buy - post: "+post);
@@ -438,26 +439,49 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         DecimalFormat mFormatUnder100_000_000 = new DecimalFormat("########");
 
         String result = null;
+        double priceResult = 0;
         if (price < 10) {
-            result = mFormatUnder10.format(price);
+            priceResult = Math.floor(price * 100) / 100;
+            result = mFormatUnder10.format(priceResult);
         } else if (price < 100) {
-            price = price * 0.1
-            result = mFormatUnder100.format(price);
+            priceResult = Math.floor(price * 10) / 10;
+            result = mFormatUnder100.format(priceResult);
         } else if (price < 1000) {
-            result = mFormatUnder1_000.format(price);
+            priceResult = Math.floor(price);
+            result = mFormatUnder1_000.format(priceResult);
         } else if (price < 10000) {
-            result = mFormatUnder10_000.format(price);
+            // 5
+            double extra = Math.round(((price % 10) * 2) / 10 ) / 2 * 10;
+            priceResult = Math.floor(price / 10) * 10 + extra;
+            result = mFormatUnder10_000.format(priceResult);
         } else if (price < 100000) {
-            result = mFormatUnder100_000.format(price);
+            // 10
+            double extra = Math.round(((price % 10)) / 10 ) * 10;
+            priceResult = Math.floor(price / 100) * 100 + extra;
+            result = mFormatUnder100_000.format(priceResult);
         } else if (price < 1000000) {
-            result = mFormatUnder1_000_000.format(price);
+            // 50, 100
+            double extra = 0;
+            if (price < 500000) {
+                extra = Math.round(((price % 100) * 2) / 100) / 2 * 100;
+            } else {
+                extra = Math.round(((price % 100)) / 100) * 100;
+            }
+            priceResult = Math.floor(price / 1000) * 1000 + extra;
+            result = mFormatUnder1_000_000.format(priceResult) + extra;
         } else if (price < 10000000) {
-            result = mFormatUnder10_000_000.format(price);
+            // 1000
+            double extra = Math.round(((price % 1000)) / 1000) * 1000;
+            priceResult = Math.floor(price / 10000) * 10000 + extra;
+            result = mFormatUnder10_000_000.format(priceResult) + extra;
         } else if (price < 100000000) {
-            result = mFormatUnder100_000_000.format(price);
+            // 1000
+            double extra = Math.round(((price % 1000)) / 1000) * 1000;
+            priceResult = Math.floor(price / 10000) * 10000 + extra;
+            result = mFormatUnder100_000_000.format(priceResult) + extra;
         }
-
-        return null;
+        Log.d(TAG, "[DEBUG] convertPrice - price: "+price +" convert: "+priceResult +" result: "+result);
+        return result;
     }
 
     private class CoinHolder extends RecyclerView.ViewHolder {
