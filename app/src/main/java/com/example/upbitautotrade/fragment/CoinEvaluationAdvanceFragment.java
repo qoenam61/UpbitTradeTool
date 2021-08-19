@@ -18,10 +18,10 @@ import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.Post;
+import com.example.upbitautotrade.model.ResponseOrder;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
-import com.google.gson.annotations.SerializedName;
 
 import java.text.DateFormat;
 import java.text.DecimalFormat;
@@ -40,8 +40,10 @@ import java.util.Stack;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_DELETE_ORDER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_ORDER_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_POST_ORDER_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_SEARCH_ORDER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
 
@@ -203,15 +205,52 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
             );
 
-            mViewModel.getOrderInfo().observe(
+            mViewModel.getPostOrderInfo().observe(
                     getViewLifecycleOwner(),
                     orderInfo -> {
                         if (!mIsActive) {
                             return;
                         }
-                        Log.d(TAG, "[DEBUG] onStart - orderInfo: "+orderInfo);
+                        registerPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, orderInfo.getMarket(), orderInfo.getUuid());
+                        Log.d(TAG, "[DEBUG] onStart getPostOrderInfo key: "+ orderInfo.getMarket() + " getUuid: " + orderInfo.getUuid());
                     }
             );
+
+            mViewModel.getSearchOrderInfo().observe(
+                    getViewLifecycleOwner(),
+                    orderInfo -> {
+                        if (!mIsActive) {
+                            return;
+                        }
+                        monitoringBuyList(orderInfo);
+                    }
+            );
+
+            mViewModel.getDeleteOrderInfo().observe(
+                    getViewLifecycleOwner(),
+                    orderInfo -> {
+                        if (!mIsActive) {
+                            return;
+                        }
+                        Log.d(TAG, "[DEBUG] onStart getDeleteOrderInfo - getUuid: " + orderInfo.getUuid()
+                                + " getMarket: "+orderInfo.getMarket()
+                                + " getSide: "+orderInfo.getSide()
+                                + " getPrice: "+orderInfo.getPrice()
+                                + " getAvgPrice: "+orderInfo.getAvgPrice()
+                                + " getOrderType: "+orderInfo.getOrderType()
+                                + " getState: "+orderInfo.getState()
+                                + " getCreated_at: "+orderInfo.getCreated_at()
+                                + " getVolume: "+orderInfo.getVolume()
+                                + " getRemainingVolume: "+orderInfo.getRemainingVolume()
+                                + " getReservedFee: "+orderInfo.getReservedFee()
+                                + " getPaid_fee: "+orderInfo.getPaid_fee()
+                                + " getLocked: "+orderInfo.getLocked()
+                                + " getExecutedVolume: "+orderInfo.getExecutedVolume()
+                                + " getTradesCount: "+orderInfo.getTradesCount()
+                        );
+                    }
+            );
+
         }
     }
 
@@ -279,6 +318,17 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 registerPeriodicUpdate(key);
 
                 CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice);
+
+                double toBuyPrice = coinInfo.getToBuyPrice();
+                double volume = (6000 / toBuyPrice);
+                String uuid = UUID.randomUUID().toString();
+//                    Post post = new Post(key, "bid", null, Double.toString(6000), "price", uuid);
+                Post post = new Post(key, "bid", Double.toString(volume), convertPrice(toBuyPrice), "limit", uuid);
+                registerProcess(UPDATE_POST_ORDER_INFO, post);
+                mOrderInfoList.add(post);
+
+                Log.d(TAG, "[DEBUG] makeTradeMapInfo real Waiting - !!!! marketId: " + key+" price: "+convertPrice(toBuyPrice));
+
                 coinInfo.setStatus(coinInfo.WAITING);
                 mBuyingItemKeyList.add(key);
                 mBuyingItemMapInfo.put(key, coinInfo);
@@ -304,29 +354,26 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     private void buyingSimulation(String key, Ticker ticker) {
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
-        if (mBuyingItemKeyList.contains(key) && coinInfo.getStatus().equals(coinInfo.WAITING)) {
+        if (mBuyingItemKeyList.contains(key) &&
+                (coinInfo.getStatus().equals(coinInfo.WAITING))) {
             double toBuyPrice = coinInfo.getToBuyPrice();
-
-            if (toBuyPrice < ticker.getTradePrice().doubleValue()) {
-
-                coinInfo.setStatus(coinInfo.BUY);
-                coinInfo.setBuyingTime(ticker.getTimestamp());
-                mBuyingItemMapInfo.put(key, coinInfo);
-                if (mViewModel != null) {
-                    Log.d(TAG, "[DEBUG] real BUY - !!!! marketId: " + key+" price: "+toBuyPrice);
-                    double volume = (6000 / toBuyPrice);
-                    String uuid = UUID.randomUUID().toString();
-//                    Post post = new Post(key, "bid", null, Double.toString(6000), "price", uuid);
-                    Post post = new Post(key, "bid", Double.toString(volume), convertPrice(toBuyPrice), "limit", uuid);
-                    registerProcess(UPDATE_ORDER_INFO, post);
-                    mOrderInfoList.add(post);
-                    Log.d(TAG, "[DEBUG] buyingSimulation buy - post: "+post);
-                }
-            } else {
+            if (toBuyPrice > ticker.getTradePrice().doubleValue()) {
                 double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
                 double changedRate = changedPrice / toBuyPrice;
                 if (changedRate < CHANGED_RATE * -0.5) {
-                    removeMonitoringPeriodicUpdate(key);
+                    Iterator<Post> iterator = mOrderInfoList.iterator();
+                    while (iterator.hasNext()) {
+                        Post post = iterator.next();
+                        if (key.equals(post.getMarketId()) && post.getSide().equals("bid")) {
+                            Log.d(TAG, "[DEBUG] buyingSimulation real Cancel - !!!! : " + key);
+
+                            String uuid = post.getIdentifier();
+                            registerProcess(UPDATE_DELETE_ORDER_INFO, uuid);
+                            iterator.remove();
+                        }
+                    }
+                    removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
+                    removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
                     mBuyingItemKeyList.remove(key);
                     mBuyingItemMapInfo.remove(key);
                 }
@@ -340,6 +387,16 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             double changedRate = changedPrice / toBuyPrice;
             Log.d(TAG, "[DEBUG] buyingSimulation - getMaxProfitRate: "+coinInfo.getMaxProfitRate()+" changedRate: "+changedRate);
             if (changedRate - coinInfo.getMaxProfitRate() < CHANGED_RATE * -0.5) {
+
+                if (mViewModel != null) {
+                    Log.d(TAG, "[DEBUG] buyingSimulation real SELL - !!!! : " + key);
+                    String uuid = UUID.randomUUID().toString();
+                    Post post = new Post(key, "ask", Double.toString(1), null, "market", uuid);
+                    registerProcess(UPDATE_POST_ORDER_INFO, post);
+                    mOrderInfoList.add(post);
+                    Log.d(TAG, "[DEBUG] buyingSimulation sell - post: "+post);
+                }
+
                 coinInfo.setMarketId(key);
                 coinInfo.setStatus(coinInfo.SELL);
                 coinInfo.setSellPrice(ticker.getTradePrice().doubleValue());
@@ -347,22 +404,50 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mResultListInfo.add(coinInfo);
                 mResultListAdapter.setResultItems(mResultListInfo);
 
-                removeMonitoringPeriodicUpdate(key);
+                removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
+                removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
                 mBuyingItemKeyList.remove(key);
                 mBuyingItemMapInfo.remove(key);
                 mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
-
-                if (mViewModel != null) {
-                    Log.d(TAG, "[DEBUG] real SELL - !!!! : " + key);
-                    String uuid = UUID.randomUUID().toString();
-                    Post post = new Post(key, "ask", Double.toString(1), null, "market", uuid);
-                    registerProcess(UPDATE_ORDER_INFO, post);
-                    mOrderInfoList.add(post);
-                    Log.d(TAG, "[DEBUG] buyingSimulation sell - post: "+post);
-                }
             }
         }
     }
+
+    private void monitoringBuyList(ResponseOrder orderInfo) {
+
+        if (orderInfo == null) {
+            return;
+        }
+        String key = orderInfo.getMarket();
+        CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+        if (orderInfo.getState().equals("done") && orderInfo.getSide().equals("bid")) {
+            Log.d(TAG, "[DEBUG] monitoringBuyList real BUY - !!!! marketId: " + key+" price: "+coinInfo.getToBuyPrice());
+            removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
+            coinInfo.setStatus(coinInfo.BUY);
+//            coinInfo.setBuyingTime(orderInfo.);
+            mBuyingItemMapInfo.put(key, coinInfo);
+            mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+        }
+
+        Log.d(TAG, "[DEBUG] monitoringBuyList - getUuid: " + orderInfo.getUuid()
+                + " getMarket: "+orderInfo.getMarket()
+                + " getSide: "+orderInfo.getSide()
+                + " getPrice: "+orderInfo.getPrice()
+                + " getAvgPrice: "+orderInfo.getAvgPrice()
+                + " getOrderType: "+orderInfo.getOrderType()
+                + " getState: "+orderInfo.getState()
+                + " getCreated_at: "+orderInfo.getCreated_at()
+                + " getVolume: "+orderInfo.getVolume()
+                + " getRemainingVolume: "+orderInfo.getRemainingVolume()
+                + " getReservedFee: "+orderInfo.getReservedFee()
+                + " getPaid_fee: "+orderInfo.getPaid_fee()
+                + " getLocked: "+orderInfo.getLocked()
+                + " getExecutedVolume: "+orderInfo.getExecutedVolume()
+                + " getTradesCount: "+orderInfo.getTradesCount()
+        );
+    }
+
+
     @Override
     public void onPause() {
         super.onPause();
@@ -396,6 +481,13 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mActivity.getProcessor().registerProcess(type, marketId, side, volume, price, ord_type, identifier);
     }
 
+    private void registerProcess(int type, String uuid) {
+        if (uuid == null) {
+            return;
+        }
+        mActivity.getProcessor().registerProcess(type, null, null, null, null, null, uuid);
+    }
+
     private void registerPeriodicUpdate(Set<String> keySet) {
         Iterator<String> regIterator = keySet.iterator();
         while (regIterator.hasNext()) {
@@ -404,6 +496,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TRADE_INFO, key, TRADE_COUNTS);
             }
         }
+    }
+
+    private void registerPeriodicUpdate(int type, String key, String identifier) {
+        mActivity.getProcessor().registerPeriodicUpdate(type, key, identifier);
     }
 
     private void registerPeriodicUpdate(List<String> monitorKeyList) {
@@ -416,16 +512,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
     }
 
-    private void removeMonitoringPeriodicUpdate() {
-        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO);
-    }
-
     private void registerPeriodicUpdate(String monitorKey) {
         mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, monitorKey);
     }
 
-    private void removeMonitoringPeriodicUpdate(String monitorKey) {
-        mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO, monitorKey);
+    private void removeMonitoringPeriodicUpdate(int type, String monitorKey) {
+        mActivity.getProcessor().removePeriodicUpdate(type, monitorKey);
     }
 
     private String convertPrice(double price) {

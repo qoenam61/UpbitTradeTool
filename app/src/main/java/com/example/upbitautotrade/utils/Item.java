@@ -5,9 +5,12 @@ import com.google.gson.annotations.SerializedName;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_ACCOUNTS_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_CHANCE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_DAY_CANDLE_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_DELETE_ORDER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MONTH_CANDLE_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_POST_ORDER_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_SEARCH_ORDER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_WEEK_CANDLE_INFO;
@@ -44,6 +47,12 @@ public class Item {
         this.key = key;
     }
 
+    public Item(int type, String key, String identifier) {
+        this.type = type;
+        this.key = key;
+        this.identifier = identifier;
+    }
+
     public Item(int type, String key, int count, int unit, int daysAgo, String to, String cursor, String priceUnit) {
         this.type = type;
         this.key = key;
@@ -65,6 +74,8 @@ public class Item {
         this.identifier = identifier;
     }
 
+
+
     public long getSleepTime() {
         long sleepTime = 0;
         switch (type) {
@@ -79,9 +90,13 @@ public class Item {
             case UPDATE_DAY_CANDLE_INFO:
             case UPDATE_WEEK_CANDLE_INFO:
             case UPDATE_MONTH_CANDLE_INFO:
+            case UPDATE_POST_ORDER_INFO:
+            case UPDATE_SEARCH_ORDER_INFO:
+            case UPDATE_DELETE_ORDER_INFO:
                 sleepTime = PERIODIC_TIME_65;
-            default:
                 break;
+            default:
+                sleepTime = PERIODIC_TIME_70;
         }
         return sleepTime;
     }

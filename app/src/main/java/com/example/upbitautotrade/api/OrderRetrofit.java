@@ -55,6 +55,7 @@ public class OrderRetrofit extends ChanceRetrofit {
         String authenticationToken = "Bearer " + jwtToken;
         return authenticationToken;
     }
+/*
 
     @Override
     public void setParam(String param1, String param2, String param3, String param4, String param5, String param6) {
@@ -83,6 +84,7 @@ public class OrderRetrofit extends ChanceRetrofit {
             mQueryElements.add(entity.getKey() + "=" + entity.getValue());
         }
     }
+*/
 
     @Override
     public void setParam(Map<String, String> params) {

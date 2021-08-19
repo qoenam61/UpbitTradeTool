@@ -14,12 +14,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class ChanceRetrofit extends DefaultRetrofit {
-    private String TAG = "ChanceRetrofit";
+import okhttp3.Request;
 
-    protected ArrayList<String> mQueryElements;
+public class SearchOrderRetrofit extends ChanceRetrofit {
+    private String TAG = "SearchOrderRetrofit";
 
-    public ChanceRetrofit(String accessKey, String secretKey) {
+    public SearchOrderRetrofit(String accessKey, String secretKey) {
         super(accessKey, secretKey);
     }
 
@@ -28,7 +28,8 @@ public class ChanceRetrofit extends DefaultRetrofit {
         if (mAccessKey == null || mSecretKey == null) {
             return null;
         }
-        String queryString = String.join("&", mQueryElements.toArray(new String[0]));
+//        String queryString = String.join("&", mQueryElements.toArray(new String[0]));
+        String queryString = getQueryString();
         Log.d(TAG, "[DEBUG] getAuthToken: "+queryString);
         MessageDigest md = null;
         try {
@@ -58,9 +59,11 @@ public class ChanceRetrofit extends DefaultRetrofit {
     public void setParam(String param1, String param2, String param3) {
         HashMap<String, String> params = new HashMap<>();
         if (param1 != null) {
-            params.put("market", param1);
+            params.put("uuid", param1);
         }
-
+        if (param2 != null) {
+            params.put("identifier", param2);
+        }
         mQueryElements = new ArrayList<>();
         for(Map.Entry<String, String> entity : params.entrySet()) {
             mQueryElements.add(entity.getKey() + "=" + entity.getValue());
@@ -68,12 +71,14 @@ public class ChanceRetrofit extends DefaultRetrofit {
     }
 
     @Override
-    public void setParam(String param1, String param2, String param3, String param4, String param5, String param6) {
-
+    public void setParam(Map<String, String> params) {
+        mQueryElements = new ArrayList<>();
+        for(Map.Entry<String, String> entity : params.entrySet()) {
+            mQueryElements.add(entity.getKey() + "=" + entity.getValue());
+        }
     }
 
-    @Override
-    public void setParam(Map<String, String> map) {
-
+    public String getQueryString() {
+        return String.join("&", mQueryElements.toArray(new String[0]));
     }
 }

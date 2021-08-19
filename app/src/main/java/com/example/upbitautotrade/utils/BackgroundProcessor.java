@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
@@ -21,7 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +35,9 @@ public class BackgroundProcessor {
     public static final int UPDATE_WEEK_CANDLE_INFO = 9;
     public static final int UPDATE_MONTH_CANDLE_INFO = 10;
     public static final int UPDATE_TRADE_INFO = 11;
-    public static final int UPDATE_ORDER_INFO = 12;
+    public static final int UPDATE_POST_ORDER_INFO = 12;
+    public static final int UPDATE_SEARCH_ORDER_INFO = 13;
+    public static final int UPDATE_DELETE_ORDER_INFO = 14;
 
     private final String BUNDLE_KEY_UNIT = "unit";
     private final String BUNDLE_KEY_MARKET_ID = "market_id";
@@ -77,7 +77,6 @@ public class BackgroundProcessor {
             String price = msg.getData().getString(BUNDLE_KEY_PRICE + msg.what);;
             String orderType = msg.getData().getString(BUNDLE_KEY_ORDER_TYPE + msg.what);;
             String identifier = msg.getData().getString(BUNDLE_KEY_IDENTIFIER + msg.what);;
-
 
             switch (msg.what) {
                 case UPDATE_MARKETS_INFO:
@@ -127,9 +126,19 @@ public class BackgroundProcessor {
                         ((CoinEvaluationViewModel)mViewModel).searchTradeInfo(marketId, to, count, cursor, daysAgo);
                     }
                     break;
-                case UPDATE_ORDER_INFO:
+                case UPDATE_POST_ORDER_INFO:
                     if (mViewModel instanceof CoinEvaluationViewModel) {
-                        ((CoinEvaluationViewModel)mViewModel).searchOrderInfo(marketId, side, volume, price, orderType, identifier);
+                        ((CoinEvaluationViewModel)mViewModel).postOrderInfo(marketId, side, volume, price, orderType, identifier);
+                    }
+                    break;
+                case UPDATE_SEARCH_ORDER_INFO:
+                    if (mViewModel instanceof CoinEvaluationViewModel) {
+                        ((CoinEvaluationViewModel)mViewModel).searchOrderInfo(identifier);
+                    }
+                    break;
+                case UPDATE_DELETE_ORDER_INFO:
+                    if (mViewModel instanceof CoinEvaluationViewModel) {
+                        ((CoinEvaluationViewModel)mViewModel).deleteOrderInfo(identifier);
                     }
                     break;
                 default:
@@ -162,7 +171,6 @@ public class BackgroundProcessor {
         bundle.putString(BUNDLE_KEY_PRICE + item.type, item.price);
         bundle.putString(BUNDLE_KEY_ORDER_TYPE + item.type, item.ord_type);
         bundle.putString(BUNDLE_KEY_IDENTIFIER + item.type, item.identifier);
-
 
         Message message = new Message();
         message.what = item.type;
@@ -206,7 +214,8 @@ public class BackgroundProcessor {
 //                Log.d(TAG, "[DEBUG] TaskList -type: "+item.type+" marketId: "+item.key);
                 switch (item.type) {
                     case UPDATE_MARKETS_INFO:
-                    case UPDATE_ORDER_INFO:
+                    case UPDATE_POST_ORDER_INFO:
+                    case UPDATE_DELETE_ORDER_INFO:
                         sendMessage(item);
                         clear();
                         break;
@@ -218,6 +227,7 @@ public class BackgroundProcessor {
                     case UPDATE_WEEK_CANDLE_INFO:
                     case UPDATE_MONTH_CANDLE_INFO:
                     case UPDATE_TRADE_INFO:
+                    case UPDATE_SEARCH_ORDER_INFO:
                         sendMessage(item);
                         break;
                     default:
@@ -244,12 +254,36 @@ public class BackgroundProcessor {
         }
     }
 
+    public void registerProcess(int type, String key, String identifier) {
+        Item item = new Item(type, key, identifier);
+        Map<Integer, TaskList> map = mProcessTaskMap;
+        if (map.get(type) == null) {
+            TaskList taskList = new TaskList();
+            taskList.add(item);
+            mProcessTaskMap.put(type, taskList);
+        } else {
+            mProcessTaskMap.get(type).add(item);
+        }
+    }
+
     public void registerProcess(int type, String marketId, String side, String volume, String price, String ord_type, String identifier) {
         Item item = new Item(type, marketId, side, volume, price, ord_type, identifier);
         TaskList taskList = new TaskList();
         taskList.add(item);
         Thread thread = new Thread(taskList);
         thread.start();
+    }
+
+    public void registerPeriodicUpdate(int type, String key, String identifier) {
+        Item item = new Item(type, key, identifier);
+        Map<Integer, TaskList> map = mProcessTaskMap;
+        if (!map.containsKey(type)) {
+            TaskList taskList = new TaskList();
+            taskList.add(item);
+            mProcessTaskMap.put(type, taskList);
+        } else {
+            mProcessTaskMap.get(type).add(item);
+        }
     }
 
     public void registerPeriodicUpdate(int type, String key) {

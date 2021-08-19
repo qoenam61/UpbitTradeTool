@@ -55,6 +55,7 @@ public class UpBitFetcher {
 
     private AccountsRetrofit mAccountsRetrofit;
     private ChanceRetrofit mChanceRetrofit;
+    private SearchOrderRetrofit mSearchOrderRetrofit;
     private TickerRetrofit mTickerRetrofit;
     private OrderRetrofit mOrderRetrofit;
     private MutableLiveData<Throwable> mErrorLiveData;
@@ -73,6 +74,8 @@ public class UpBitFetcher {
         mTickerRetrofit.makeUpBitApi();
         mOrderRetrofit = new OrderRetrofit(accessKey, secretKey);
         mOrderRetrofit.makeUpBitApi();
+        mSearchOrderRetrofit = new SearchOrderRetrofit(accessKey, secretKey);
+        mSearchOrderRetrofit.makeUpBitApi();
     }
 
     public MutableLiveData<Throwable> getErrorLiveData() {
@@ -332,9 +335,6 @@ public class UpBitFetcher {
         String ord_type = post.getOrdType();
         String identifier = post.getIdentifier();
 
-        //        mOrderRetrofit.setParam(marketId, side, volume, price, ord_type, identifier);
-
-
         HashMap<String, String> params = new HashMap<>();
         if (marketId != null) {
             params.put("market", marketId);
@@ -360,32 +360,6 @@ public class UpBitFetcher {
         Log.d(TAG, "[DEBUG] postOrderInfo: "+params.toString());
         mOrderRetrofit.setParam(params);
 
-/*        JSONObject paramObject = new JSONObject();
-        try {
-            if (marketId != null) {
-                paramObject.put("market", marketId);
-            }
-            if (side != null) {
-                paramObject.put("side", side);
-            }
-
-            if (volume != null) {
-                paramObject.put("volume", volume);
-            }
-            if (price != null) {
-                paramObject.put("price", price);
-            }
-
-            if (ord_type != null) {
-                paramObject.put("ord_type", ord_type);
-            }
-            if (identifier != null) {
-                paramObject.put("identifier", identifier);
-            }
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }*/
-
         MutableLiveData<ResponseOrder> result = new MutableLiveData<>();
         Call<ResponseOrder> call = mOrderRetrofit.getUpBitApi().postOrderInfo(params);
         call.enqueue(new Callback<ResponseOrder>() {
@@ -393,11 +367,12 @@ public class UpBitFetcher {
             public void onResponse(Call<ResponseOrder> call, Response<ResponseOrder> response) {
                 if(response.isSuccessful()) {
                     result.setValue(response.body());
+                    Log.d(TAG, "[DEBUG] onResponse postOrderInfo - body: "+response.body());
                 }
                 else {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse -toString: " + call.toString()
+                        Log.d(TAG, "[DEBUG] onResponse postOrderInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: "+response.raw()
@@ -408,14 +383,103 @@ public class UpBitFetcher {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
-
                 }
             }
 
             @Override
             public void onFailure(Call<ResponseOrder> call, Throwable t) {
                 Log.w(TAG, "onFailure: "+t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<ResponseOrder> searchOrderInfo(String uuid) {
+        if (mSearchOrderRetrofit == null) {
+            return null;
+        }
+
+        HashMap<String, String> params = new HashMap<>();
+        if (uuid != null) {
+            params.put("uuid", uuid);
+        }
+
+        mSearchOrderRetrofit.setParam(params);
+
+        MutableLiveData<ResponseOrder> result = new MutableLiveData<>();
+        Call<ResponseOrder> call = mSearchOrderRetrofit.getUpBitApi().searchOrderInfo(uuid);
+        call.enqueue(new Callback<ResponseOrder>() {
+            @Override
+            public void onResponse(Call<ResponseOrder> call, Response<ResponseOrder> response) {
+                if (response.isSuccessful()) {
+                    result.setValue(response.body());
+                } else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse searchOrderInfo -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseOrder> call, Throwable t) {
+                Log.w(TAG, "onFailure: " + t);
+                mErrorLiveData.setValue(t);
+            }
+        });
+        return result;
+    }
+
+    public LiveData<ResponseOrder> deleteOrderInfo(String uuid) {
+        if (mSearchOrderRetrofit == null) {
+            return null;
+        }
+
+        HashMap<String, String> params = new HashMap<>();
+        if (uuid != null) {
+            params.put("uuid", uuid);
+        }
+
+        mSearchOrderRetrofit.setParam(params);
+
+        MutableLiveData<ResponseOrder> result = new MutableLiveData<>();
+        Call<ResponseOrder> call = mSearchOrderRetrofit.getUpBitApi().deleteOrderInfo(uuid);
+        call.enqueue(new Callback<ResponseOrder>() {
+            @Override
+            public void onResponse(Call<ResponseOrder> call, Response<ResponseOrder> response) {
+                if (response.isSuccessful()) {
+                    result.setValue(response.body());
+                    Log.d(TAG, "[DEBUG] onResponse deleteOrderInfo - body: " + response.body());
+                } else {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse deleteOrderInfo -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseOrder> call, Throwable t) {
+                Log.w(TAG, "onFailure: " + t);
                 mErrorLiveData.setValue(t);
             }
         });

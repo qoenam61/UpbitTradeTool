@@ -11,6 +11,7 @@ import com.example.upbitautotrade.api.UpBitFetcher;
 import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MonthCandle;
+import com.example.upbitautotrade.model.OrderInfo;
 import com.example.upbitautotrade.model.Post;
 import com.example.upbitautotrade.model.ResponseOrder;
 import com.example.upbitautotrade.model.Ticker;
@@ -18,6 +19,8 @@ import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
 
 import java.util.List;
+
+import retrofit2.http.Query;
 
 public class CoinEvaluationViewModel extends UpBitViewModel{
     private final String TAG = "CoinEvaluationViewModel";
@@ -40,9 +43,14 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
     private final MutableLiveData<TradeInput> mSearchTradeInfo;
     private final LiveData<List<TradeInfo>> mResultTradeInfo;
 
-    private final MutableLiveData<Post> mSearchOrderInfo;
-    private final LiveData<ResponseOrder> mResultOrderInfo;
+    private final MutableLiveData<Post> mPostOrderInfo;
+    private final LiveData<ResponseOrder> mPostOrderResultInfo;
 
+    private final MutableLiveData<String> mSearchOrderInfo;
+    private final LiveData<ResponseOrder> mSearchOrderResultInfo;
+
+    private final MutableLiveData<String> mDeleteOrderInfo;
+    private final LiveData<ResponseOrder> mDeleteOrderResultInfo;
 
     public CoinEvaluationViewModel(Application application) {
         super(application);
@@ -105,10 +113,22 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
                         )
         );
 
-        mSearchOrderInfo = new MutableLiveData<>();
-        mResultOrderInfo = Transformations.switchMap(
-                mSearchOrderInfo, input ->
+        mPostOrderInfo = new MutableLiveData<>();
+        mPostOrderResultInfo = Transformations.switchMap(
+                mPostOrderInfo, input ->
                         mUpBitFetcher.postOrderInfo(input)
+        );
+
+        mSearchOrderInfo = new MutableLiveData<>();
+        mSearchOrderResultInfo = Transformations.switchMap(
+                mSearchOrderInfo, input ->
+                        mUpBitFetcher.searchOrderInfo(input)
+        );
+
+        mDeleteOrderInfo = new MutableLiveData<>();
+        mDeleteOrderResultInfo = Transformations.switchMap(
+                mDeleteOrderInfo, input ->
+                        mUpBitFetcher.deleteOrderInfo(input)
         );
     }
 
@@ -179,13 +199,29 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
         return mResultTradeInfo;
     }
 
-    public void searchOrderInfo(String marketId, String side, String volume, String price, String ord_type, String identifier) {
+    public void postOrderInfo(String marketId, String side, String volume, String price, String ord_type, String identifier) {
         Post post = new Post(marketId, side, volume, price, ord_type, identifier);
-        mSearchOrderInfo.setValue(post);
+        mPostOrderInfo.setValue(post);
     }
 
-    public LiveData<ResponseOrder> getOrderInfo() {
-        return mResultOrderInfo;
+    public LiveData<ResponseOrder> getPostOrderInfo() {
+        return mPostOrderResultInfo;
+    }
+
+    public void searchOrderInfo(String uuid) {
+        mSearchOrderInfo.setValue(uuid);
+    }
+
+    public LiveData<ResponseOrder> getSearchOrderInfo() {
+        return mSearchOrderResultInfo;
+    }
+
+    public void deleteOrderInfo(String uuid) {
+        mDeleteOrderInfo.setValue(uuid);
+    }
+
+    public LiveData<ResponseOrder> getDeleteOrderInfo() {
+        return mDeleteOrderResultInfo;
     }
 
 

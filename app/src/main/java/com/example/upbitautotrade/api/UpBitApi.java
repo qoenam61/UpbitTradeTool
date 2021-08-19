@@ -19,6 +19,7 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
@@ -109,11 +110,23 @@ public interface UpBitApi {
 //                                       @Query("cursor") String cursor
     );
 
-    @POST("/v1/orders")
-    Call<ResponseOrder> postOrderInfo(@Body JSONObject paramObject);
-
     @FormUrlEncoded
     @POST("/v1/orders")
     Call<ResponseOrder> postOrderInfo(@FieldMap Map<String, String> fields);
 
+    @GET("/v1/order")
+    Call<ResponseOrder> searchOrderInfo(@Query("uuid") String uuid);
+
+    @GET("/v1/order")
+    Call<ResponseOrder> searchOrderInfo(@Query("uuid") String uuid,
+                                      @Query("identifier") String identifier
+    );
+
+    @DELETE("/v1/order")
+    Call<ResponseOrder> deleteOrderInfo(@Query("uuid") String uuid);
+
+    @DELETE("/v1/order")
+    Call<ResponseOrder> deleteOrderInfo(@Query("uuid") String uuid,
+                                        @Query("identifier") String identifier
+    );
 }
