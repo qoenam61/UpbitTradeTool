@@ -117,16 +117,6 @@ public interface UpBitApi {
     @GET("/v1/order")
     Call<ResponseOrder> searchOrderInfo(@Query("uuid") String uuid);
 
-    @GET("/v1/order")
-    Call<ResponseOrder> searchOrderInfo(@Query("uuid") String uuid,
-                                      @Query("identifier") String identifier
-    );
-
     @DELETE("/v1/order")
     Call<ResponseOrder> deleteOrderInfo(@Query("uuid") String uuid);
-
-    @DELETE("/v1/order")
-    Call<ResponseOrder> deleteOrderInfo(@Query("uuid") String uuid,
-                                        @Query("identifier") String identifier
-    );
 }
