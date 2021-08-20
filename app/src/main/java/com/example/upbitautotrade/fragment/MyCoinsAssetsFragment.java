@@ -213,7 +213,9 @@ public class MyCoinsAssetsFragment extends Fragment {
         while (iterator.hasNext()) {
             String key = iterator.next();
             mActivity.getProcessor().removePeriodicUpdate(UPDATE_ACCOUNTS_INFO, MARKET_NAME + "-" + key);
-            mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO, MARKET_NAME + "-" + key);
+            if (!key.equals("KRW-KRW")) {
+                mActivity.getProcessor().removePeriodicUpdate(UPDATE_TICKER_INFO, MARKET_NAME + "-" + key);
+            }
         }
     }
 
