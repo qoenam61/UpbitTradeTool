@@ -513,7 +513,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             }
             coinInfo.setStatus(CoinInfo.BUY);
             coinInfo.setVolume(orderInfo.getVolume().doubleValue());
-//            coinInfo.setBuyingTime(orderInfo.getPrice().doubleValue());
+            coinInfo.setBuyTime(System.currentTimeMillis());
             mBuyingItemMapInfo.put(key, coinInfo);
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
 

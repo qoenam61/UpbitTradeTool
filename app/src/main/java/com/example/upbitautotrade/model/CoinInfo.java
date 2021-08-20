@@ -9,7 +9,8 @@ public class CoinInfo {
     double closePrice;
     double highPrice;
     double lowPrice;
-    long buyingTime;
+    long buyTime;
+    long sellTime;
     double sellPrice;
 
     double profitRate;
@@ -41,12 +42,20 @@ public class CoinInfo {
         return convertPrice(Math.min((openPrice + closePrice) / 2, (highPrice + lowPrice) / 2));
     }
 
-    public void setBuyingTime(long buyingTime) {
-        this.buyingTime = buyingTime;
+    public void setBuyTime(long buyTime) {
+        this.buyTime = buyTime;
     }
 
-    public long getBuyingTime() {
-        return buyingTime;
+    public long getBuyTime() {
+        return buyTime;
+    }
+
+    public void setSellTime(long sellTime) {
+        this.sellTime = sellTime;
+    }
+
+    public long getSellTime() {
+        return sellTime;
     }
 
     public double getSellPrice() {
