@@ -409,7 +409,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mCurrentOrderInfoMap.put(key, post);
 
                 registerProcess(UPDATE_POST_ORDER_INFO, post);
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo real Waiting - !!!! marketId: " + key+" price: "+toBuyPrice);
+                Log.d(TAG, "[DEBUG] makeTradeMapInfo real Waiting - !!!! marketId: " + key+" price: "+toBuyPrice + " priceAmount: "+mPriceAmount);
             }
         } else {
             mMonitorKeyList.remove(key);

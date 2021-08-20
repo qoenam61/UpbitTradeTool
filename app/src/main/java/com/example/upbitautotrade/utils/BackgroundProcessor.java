@@ -238,7 +238,7 @@ public class BackgroundProcessor {
                 try {
                     Thread.sleep(getSleepTime());
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    Log.w(TAG, "Exception to Thread sleep");
                 }
             }
         }
@@ -369,7 +369,7 @@ public class BackgroundProcessor {
                         try {
                             Thread.sleep(500);
                         } catch (InterruptedException e) {
-                            e.printStackTrace();
+                            Log.w(TAG, "exception Thread sleep");
                         }
                     }
                 }

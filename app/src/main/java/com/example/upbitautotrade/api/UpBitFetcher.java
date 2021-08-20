@@ -19,21 +19,14 @@ import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
 import com.example.upbitautotrade.model.Accounts;
 import com.example.upbitautotrade.model.Chance;
-import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okio.BufferedSink;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
