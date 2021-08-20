@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.SystemClock;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -62,7 +63,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
     private final int TICK_COUNTS = 300;
     private final double CHANGED_RATE = 0.01;
-    private final int TRADE_COUNTS = 1000;
+    private final int TRADE_COUNTS = 600;
 
     private View mView;
 
@@ -199,7 +200,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 String monitorTime = monitorTimeEditText.getText().toString();
                 String monitorRate = monitorRateEditText.getText().toString();
                 String monitorTick = monitorTickEditText.getText().toString();
-                Log.d(TAG, "[DEBUG] onClick -buyingPrice: "+buyingPrice +" monitorTime: "+monitorTime+" monitorRate: "+monitorRate+" monitorTick: "+monitorTick);
 
                 try {
                     mPriceAmount = (buyingPrice != null || !buyingPrice.isEmpty()) ? Double.parseDouble(buyingPrice.replace(",","")) : PRICE_AMOUNT;
@@ -210,7 +210,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     Log.e(TAG, "Error NumberFormatException");
                 }
 
-                Log.d(TAG, "[DEBUG] onClick -mPriceAmount: "+mPriceAmount +" mMonitorTime: "+mMonitorTime+" mMonitorRate: "+mMonitorRate+" mMonitorTick: "+mMonitorTick);
+                Log.d(TAG, "onClick -mPriceAmount: "+mPriceAmount +" mMonitorTime: "+mMonitorTime+" mMonitorRate: "+mMonitorRate+" mMonitorTick: "+mMonitorTick);
 
                 buyingPriceText.setText(nonZeroFormat.format(mPriceAmount));
                 monitorTimeText.setText(nonZeroFormat.format(mMonitorTime / (60 * 1000)));
@@ -423,10 +423,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.WAITING)) {
             // Request to Cancel.
             double toBuyPrice = coinInfo.getToBuyPrice();
-            if (toBuyPrice > ticker.getTradePrice().doubleValue()) {
+            long duration = System.currentTimeMillis() - coinInfo.getWaitTime();
+            if (toBuyPrice > ticker.getTradePrice().doubleValue() || duration > mMonitorTime * 3) {
                 double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
                 double changedRate = changedPrice / toBuyPrice;
-                if (changedRate < mMonitorRate * -0.5) {
+
+                if (changedRate < mMonitorRate * -0.5 || duration > mMonitorTime * 3) {
                     Post post = mCurrentOrderInfoMap.get(key);
                     if (post != null && key.equals(post.getMarketId())
                             && post.getSide().equals("bid")
@@ -491,6 +493,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 Log.d(TAG, "[DEBUG] monitoringBuyList Monitoring - !!!! marketId: " + key+" price: "+ coinInfo.getToBuyPrice());
                 coinInfo.setStatus(CoinInfo.WAITING);
                 coinInfo.setVolume(orderInfo.getVolume().doubleValue());
+                coinInfo.setWaitTime(System.currentTimeMillis());
                 mBuyingItemKeyList.add(key);
                 mBuyingItemMapInfo.put(key, coinInfo);
                 mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
@@ -528,6 +531,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("ask")) {
             coinInfo.setMarketId(key);
             coinInfo.setStatus(CoinInfo.SELL);
+            coinInfo.setSellTime(System.currentTimeMillis());
             Ticker ticker = mTickerMapInfo.get(key);
             coinInfo.setSellPrice(ticker != null ? ticker.getTradePrice().doubleValue() : 0);
             Log.d(TAG, "[DEBUG] monitoringBuyList real Sell - !!! marketId: " + key+" sell price: "+ (orderInfo.getPrice() != null ? orderInfo.getPrice().doubleValue() : 0));

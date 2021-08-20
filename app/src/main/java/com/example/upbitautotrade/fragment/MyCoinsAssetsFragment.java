@@ -33,11 +33,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_ACCOUNTS_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_CHANCE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MIN_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
-import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
 
 public class MyCoinsAssetsFragment extends Fragment {
     private static final String TAG = "MyCoinsAssetsFragment";
@@ -224,7 +221,7 @@ public class MyCoinsAssetsFragment extends Fragment {
         while (regIterator.hasNext()) {
             String key = regIterator.next();
             mActivity.getProcessor().registerPeriodicUpdate(UPDATE_ACCOUNTS_INFO, MARKET_NAME + "-" + key);
-            if (!key.equals("KRW-KRW")) {
+            if (!key.equals("KRW")) {
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, MARKET_NAME + "-" + key);
             }
         }

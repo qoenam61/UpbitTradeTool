@@ -9,6 +9,8 @@ public class CoinInfo {
     double closePrice;
     double highPrice;
     double lowPrice;
+
+    long waitTime;
     long buyTime;
     long sellTime;
     double sellPrice;
@@ -40,6 +42,14 @@ public class CoinInfo {
 
     public double getToBuyPrice() {
         return convertPrice(Math.min((openPrice + closePrice) / 2, (highPrice + lowPrice) / 2));
+    }
+
+    public void setWaitTime(long waitTime) {
+        this.waitTime = waitTime;
+    }
+
+    public long getWaitTime() {
+        return waitTime;
     }
 
     public void setBuyTime(long buyTime) {
