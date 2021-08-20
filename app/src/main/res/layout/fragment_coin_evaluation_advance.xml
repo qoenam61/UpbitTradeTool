@@ -2,24 +2,24 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_alignParentBottom="true">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="9"
-        android:orientation="vertical"
-        android:layout_margin="@dimen/default_margin">
+        android:layout_weight="2.5"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="@dimen/large_text_size"
+            android:text="수익 평가 (시뮬레이션)"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.1"
+            android:layout_weight="2"
             android:orientation="vertical">
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textStyle="bold"
-                android:textSize="@dimen/large_text_size"
-                android:text="수익 평가 (시뮬레이션)"/>
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -43,6 +43,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:textSize="@dimen/coin_list_text_size"
+                        android:maxLength="8"
                         android:inputType="numberDecimal"
                         android:text="0"/>
                     <EditText
@@ -51,7 +52,9 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:textSize="@dimen/coin_list_text_size"
-                        android:hint="금액을 입력하시오"/>
+                        android:maxLength="8"
+                        android:inputType="numberDecimal"
+                        android:hint="금액을 입력"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -71,14 +74,18 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:textSize="@dimen/coin_list_text_size"
-                        android:text="0"/>
+                        android:maxLength="2"
+                        android:text="0"
+                        android:inputType="numberDecimal"/>
                     <EditText
                         android:id="@+id/trade_input_monitor_time"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:textSize="@dimen/coin_list_text_size"
-                        android:hint="체크시간을 입력하시오"/>
+                        android:inputType="numberDecimal"
+                        android:maxLength="2"
+                        android:hint="체크시간을 입력"/>
                 </LinearLayout>
                 <LinearLayout
                     android:layout_width="0dp"
@@ -93,36 +100,81 @@
                         android:textStyle="bold"
                         android:text="매수기준(%)"/>
                     <TextView
-                        android:id="@+id/trade_threshold_rate"
+                        android:id="@+id/trade_monitor_rate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:textSize="@dimen/coin_list_text_size"
+                        android:maxLength="2"
+                        android:inputType="numberDecimal"
                         android:text="0"/>
                     <EditText
-                        android:id="@+id/trade_input_threshold_rate"
+                        android:id="@+id/trade_input_monitor_rate"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:textSize="@dimen/coin_list_text_size"
-                        android:hint="매수기준을 입력하시오"/>
+                        android:inputType="numberDecimal"
+                        android:maxLength="2"
+                        android:hint="매수기준을 입력"/>
+                </LinearLayout>
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:textStyle="bold"
+                        android:text="틱기준"/>
+                    <TextView
+                        android:id="@+id/trade_monitor_tick"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:maxLength="5"
+                        android:inputType="numberDecimal"
+                        android:text="0"/>
+                    <EditText
+                        android:id="@+id/trade_input_monitor_tick"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:textSize="@dimen/coin_list_text_size"
+                        android:inputType="numberDecimal"
+                        android:maxLength="5"
+                        android:hint="틱개수를 입력"/>
                 </LinearLayout>
             </LinearLayout>
             <Button
                 android:id="@+id/trade_input_button"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
                 android:layout_gravity="center"
                 android:textSize="@dimen/coin_list_text_size"
                 android:text="적용"/>
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/default_margin"/>
         </LinearLayout>
+
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/default_margin"/>
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="9"
+        android:orientation="vertical"
+        android:layout_margin="@dimen/default_margin">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.5"
+            android:layout_weight="1"
             android:orientation="vertical">
             <TextView
                 android:layout_width="match_parent"
@@ -372,7 +424,7 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1.5"
+            android:layout_weight="1"
             android:orientation="vertical">
             <TextView
                 android:layout_width="match_parent"
@@ -492,6 +544,7 @@
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"

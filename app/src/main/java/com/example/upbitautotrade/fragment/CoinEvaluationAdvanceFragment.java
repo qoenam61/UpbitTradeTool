@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.fragment.app.Fragment;
@@ -22,6 +23,7 @@ import com.example.upbitautotrade.model.Post;
 import com.example.upbitautotrade.model.ResponseOrder;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.model.TradeInfo;
+import com.example.upbitautotrade.utils.NumberWatcher;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 
 import java.text.DateFormat;
@@ -54,10 +56,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
 
-    private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
-    private final int TICK_COUNTS = 100;
-    private final double CHANGED_RATE = 0.001;
-    private final int TRADE_COUNTS = 300;
+    private final double PRICE_AMOUNT = 6000;
+    private final double MONITORING_PERIOD_TIME = 1;
+    private final int TICK_COUNTS = 300;
+    private final double CHANGED_RATE = 0.01;
+    private final int TRADE_COUNTS = 1000;
 
     private View mView;
 
@@ -83,6 +86,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private CoinListAdapter mCoinListAdapter;
     private Map<String, Deque<TradeInfo>> mTradeMapInfo;
     private List<String> mMonitorKeyList;
+
+    // Parameter
+    private double mPriceAmount = 6000;
+    private double mMonitorTime = 1;
+    private double mMonitorRate = 0.01;
+    private double mMonitorTick = 300;
 
     boolean mIsStarting = false;
     boolean mIsActive = false;
@@ -155,6 +164,53 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             startButton.setBackgroundTintList(ColorStateList.valueOf(Color.LTGRAY));
         });
 
+        EditText buyingPriceEditText = mView.findViewById(R.id.trade_input_buying_price);
+        EditText monitorTimeEditText = mView.findViewById(R.id.trade_input_monitor_time);
+        EditText monitorRateEditText = mView.findViewById(R.id.trade_input_monitor_rate);
+        EditText monitorTickEditText = mView.findViewById(R.id.trade_input_monitor_tick);
+        TextView buyingPriceText = mView.findViewById(R.id.trade_buying_price);
+        TextView monitorTimeText = mView.findViewById(R.id.trade_monitor_time);
+        TextView monitorRateText = mView.findViewById(R.id.trade_monitor_rate);
+        TextView monitorTickText = mView.findViewById(R.id.trade_monitor_tick);
+
+
+        buyingPriceEditText.addTextChangedListener(new NumberWatcher(buyingPriceEditText));
+
+        DecimalFormat nonZeroFormat = new DecimalFormat("###,###,###,###");
+        DecimalFormat percentFormat = new DecimalFormat("###.##" + "%");
+
+        buyingPriceText.setText(nonZeroFormat.format(mPriceAmount));
+        monitorTimeText.setText(nonZeroFormat.format(mMonitorTime));
+        monitorRateText.setText(percentFormat.format(mMonitorRate));
+        monitorTickText.setText(nonZeroFormat.format(mMonitorTick));
+
+        Button applyButton = mView.findViewById(R.id.trade_input_button);
+        applyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String buyingPrice = buyingPriceEditText.getText().toString();
+                String monitorTime = monitorTimeEditText.getText().toString();
+                String monitorRate = monitorRateEditText.getText().toString();
+                String monitorTick = monitorTickEditText.getText().toString();
+                Log.d(TAG, "[DEBUG] onClick -buyingPrice: "+buyingPrice +" monitorTime: "+monitorTime+" monitorRate: "+monitorRate+" monitorTick: "+monitorTick);
+
+                try {
+                    mPriceAmount = (buyingPrice != null || !buyingPrice.isEmpty()) ? Double.parseDouble(buyingPrice.replace(",","")) : PRICE_AMOUNT;
+                    mMonitorTime = (monitorTime != null || !monitorTime.isEmpty()) ? Double.parseDouble(monitorTime) * 60 * 1000 : MONITORING_PERIOD_TIME;
+                    mMonitorRate = (monitorRate != null || !monitorRate.isEmpty()) ? Double.parseDouble(monitorRate.replace("%", "")) / 100 : CHANGED_RATE;
+                    mMonitorTick = (monitorTick != null || !monitorTick.isEmpty()) ? Double.parseDouble(monitorTick.replace(",","")) : TICK_COUNTS;
+                } catch (NumberFormatException e) {
+                    Log.e(TAG, "Error NumberFormatException");
+                }
+
+                Log.d(TAG, "[DEBUG] onClick -mPriceAmount: "+mPriceAmount +" mMonitorTime: "+mMonitorTime+" mMonitorRate: "+mMonitorRate+" mMonitorTick: "+mMonitorTick);
+
+                buyingPriceText.setText(nonZeroFormat.format(mPriceAmount));
+                monitorTimeText.setText(nonZeroFormat.format(mMonitorTime / (60 * 1000)));
+                monitorRateText.setText(percentFormat.format(mMonitorRate));
+                monitorTickText.setText(nonZeroFormat.format(mMonitorTick));
+            }
+        });
 
         return mView;
     }
@@ -306,7 +362,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         Iterator<TradeInfo> removeIterator = tradeInfoQueue.iterator();
         while (removeIterator.hasNext()) {
             TradeInfo tradeInfo = removeIterator.next();
-            if (tradeInfoQueue.peekLast().getTimestamp() - tradeInfo.getTimestamp() > MONITORING_PERIOD_TIME) {
+            if (tradeInfoQueue.peekLast().getTimestamp() - tradeInfo.getTimestamp() > mMonitorTime) {
                 removeIterator.remove();
             } else {
                 double price = tradeInfo.getTradePrice().doubleValue();
@@ -324,16 +380,15 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mMonitorKeyList.add(key);
             }
 
-            if (priceChangedRate >= CHANGED_RATE) {
+            if (priceChangedRate >= mMonitorRate) {
                 registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
 
                 CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice);
 
                 // Post to Buy
                 double toBuyPrice = coinInfo.getToBuyPrice();
-                double volume = (6000 / toBuyPrice);
+                double volume = (mPriceAmount / toBuyPrice);
                 String uuid = UUID.randomUUID().toString();
-//                    Post post = new Post(key, "bid", null, Double.toString(6000), "price", uuid);
                 Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
                 post.setState(Post.WAIT);
                 post.setCoinInfo(coinInfo);
@@ -357,7 +412,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (toBuyPrice > ticker.getTradePrice().doubleValue()) {
                 double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
                 double changedRate = changedPrice / toBuyPrice;
-                if (changedRate < CHANGED_RATE * -0.5) {
+                if (changedRate < mMonitorRate * -0.5) {
                     Post post = mCurrentOrderInfoMap.get(key);
                     if (post != null && key.equals(post.getMarketId())
                             && post.getSide().equals("bid")
@@ -374,7 +429,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
             double changedRate = changedPrice / toBuyPrice;
             Log.d(TAG, "[DEBUG] buyingSimulation - getMaxProfitRate: "+coinInfo.getMaxProfitRate()+" changedRate: "+changedRate);
-            if (changedRate - coinInfo.getMaxProfitRate() < CHANGED_RATE * -0.5) {
+            if (changedRate - coinInfo.getMaxProfitRate() < mMonitorRate * -0.5) {
                 if (mViewModel != null) {
                     Post post = mCurrentOrderInfoMap.get(key);
                     if (post != null && key.equals(post.getMarketId())
@@ -416,6 +471,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             return;
         }
 
+        // WAIT
         if (orderInfo.getState().equals(Post.WAIT) && orderInfo.getSide().equals("bid")) {
             if (!mBuyingItemKeyList.contains(key)) {
                 Log.d(TAG, "[DEBUG] monitoringBuyList Monitoring - !!!! marketId: " + key+" price: "+ coinInfo.getToBuyPrice());
@@ -433,6 +489,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             }
         }
 
+        // BUY
         if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("bid")) {
             Log.d(TAG, "[DEBUG] monitoringBuyList real BUY - !!!! marketId: " + key+" buy price: "+ coinInfo.getToBuyPrice());
             removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
@@ -451,10 +508,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             }
         }
 
+        // SELL
         if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("ask")) {
             coinInfo.setMarketId(key);
             coinInfo.setStatus(CoinInfo.SELL);
-            coinInfo.setSellPrice(orderInfo.getPrice() != null ? orderInfo.getPrice().doubleValue() : 0);
+            Ticker ticker = mTickerMapInfo.get(key);
+            coinInfo.setSellPrice(ticker != null ? ticker.getTradePrice().doubleValue() : 0);
             Log.d(TAG, "[DEBUG] monitoringBuyList real Sell - !!! marketId: " + key+" sell price: "+ (orderInfo.getPrice() != null ? orderInfo.getPrice().doubleValue() : 0));
             mResultListInfo.add(coinInfo);
             mResultListAdapter.setResultItems(mResultListInfo);
