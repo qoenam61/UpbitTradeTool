@@ -118,11 +118,6 @@ public class TradePagerActivity extends FragmentActivity implements UpBitTradeAc
     }
 
     @Override
-    public Activity getActivity() {
-        return getActivity();
-    }
-
-    @Override
     public UpBitViewModel getViewModel() {
         return null;
     }

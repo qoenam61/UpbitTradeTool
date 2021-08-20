@@ -71,7 +71,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     // Result View
     private CoinListAdapter mResultListAdapter;
     private List<CoinInfo> mResultListInfo;
-//    private List<Post> mOrderInfoList;
     private Map<String, Post>  mCurrentOrderInfoMap;
 
     // Buying View
@@ -101,7 +100,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mMarketsMapInfo = new HashMap<>();
 
         mResultListInfo = new ArrayList<>();
-//        mOrderInfoList = new ArrayList<>();
         mCurrentOrderInfoMap = new HashMap<>();
 
         mBuyingItemMapInfo = new HashMap<>();
@@ -339,31 +337,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
                 post.setState(Post.WAIT);
                 post.setCoinInfo(coinInfo);
-//                mOrderInfoList.add(post);
                 mCurrentOrderInfoMap.put(key, post);
 
                 registerProcess(UPDATE_POST_ORDER_INFO, post);
                 Log.d(TAG, "[DEBUG] makeTradeMapInfo real Waiting - !!!! marketId: " + key+" price: "+toBuyPrice);
-
-//                coinInfo.setStatus(CoinInfo.WAITING);
-//                mBuyingItemKeyList.add(key);
-//                mBuyingItemMapInfo.put(key, coinInfo);
-//                mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
-//                mMonitorKeyList.remove(key);
-
-//                Log.d(TAG, "[DEBUG] makeTradeMapInfo - tickCount: " + tickCount
-//                        + " openPrice: " + openPrice
-//                        + " closePrice: " + closePrice
-//                        + " highPrice: " + highPrice
-//                        + " lowPrice: " + lowPrice
-//                        + " rate: " + priceChangedRate
-//                        + " ToBuyPrice: " + coinInfo.getToBuyPrice()
-//                );
             }
         } else {
             mMonitorKeyList.remove(key);
         }
-
         mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
         mTradeMapInfo.put(key, tradeInfoQueue);
     }
@@ -384,25 +365,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         Log.d(TAG, "[DEBUG] buyingSimulation real Cancel - !!!! : " + key);
                         registerProcess(UPDATE_DELETE_ORDER_INFO, post.getIdentifier());
                     }
-
-//                    Iterator<Post> iterator = mOrderInfoList.iterator();
-//                    while (iterator.hasNext()) {
-//                        Post post = iterator.next();
-//                        if (key.equals(post.getMarketId())
-//                                && post.getSide().equals("bid")
-//                                && post.getState().equals(Post.WAIT)) {
-//                            Log.d(TAG, "[DEBUG] buyingSimulation real Cancel - !!!! : " + key);
-//                            registerProcess(UPDATE_DELETE_ORDER_INFO, post.getIdentifier());
-//                        }
-//                    }
-
-//                    removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
-//                    removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
-//                    mBuyingItemKeyList.remove(key);
-//                    mBuyingItemMapInfo.remove(key);
                 }
             }
-//            mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
         } else if (mBuyingItemKeyList.contains(key) && coinInfo.getStatus().equals(CoinInfo.BUY)) {
             // Post to Sell
             coinInfo.setProfitRate(ticker.getTradePrice().doubleValue());
@@ -421,26 +385,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         Post postSell = new Post(key, "ask", post.getVolume(), null, "market", uuid);
                         registerProcess(UPDATE_POST_ORDER_INFO, postSell);
                     }
-
-
-//                    Iterator<Post> iterator = mOrderInfoList.iterator();
-//                    while (iterator.hasNext()) {
-//                        Post post = iterator.next();
-//                        if (key.equals(post.getMarketId())
-//                                && post.getSide().equals("bid")
-//                                && post.getState().equals(Post.DONE)) {
-//                            Log.d(TAG, "[DEBUG] buyingSimulation real SELL - !!!! : " + key);
-//                            String uuid = UUID.randomUUID().toString();
-//                            Post postSell = new Post(key, "ask", post.getVolume(), null, "market", uuid);
-//                            registerProcess(UPDATE_POST_ORDER_INFO, postSell);
-//                        }
-//                    }
-
-//                    mOrderInfoList.add(post);
-                    Log.d(TAG, "[DEBUG] buyingSimulation sell - post: "+post);
                 }
-
-
             }
         }
     }
@@ -456,20 +401,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
             mCurrentOrderInfoMap.remove(key);
         }
-
-//        Iterator<Post> iterator = mOrderInfoList.iterator();
-//        while (iterator.hasNext()) {
-//            Post post = iterator.next();
-//            String key = post.getMarketId();
-//            if (post.getIdentifier().equals(orderInfo.getUuid())) {
-//                iterator.remove();
-//                removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
-//                removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
-//                mBuyingItemKeyList.remove(key);
-//                mBuyingItemMapInfo.remove(key);
-//                mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
-//            }
-//        }
     }
 
     private void monitoringBuyList(ResponseOrder orderInfo) {
@@ -493,20 +424,27 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mBuyingItemMapInfo.put(key, coinInfo);
                 mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                 mMonitorKeyList.remove(key);
+                mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
+                Post post = mCurrentOrderInfoMap.get(key);
+                if (post != null) {
+                    post.setState(Post.WAIT);
+                    post.setCoinInfo(coinInfo);
+                }
             }
         }
 
         if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("bid")) {
-            Log.d(TAG, "[DEBUG] monitoringBuyList real BUY - !!!! marketId: " + key+" price: "+ coinInfo.getToBuyPrice());
+            Log.d(TAG, "[DEBUG] monitoringBuyList real BUY - !!!! marketId: " + key+" buy price: "+ coinInfo.getToBuyPrice());
             removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
             coinInfo.setStatus(CoinInfo.BUY);
-//            coinInfo.setBuyingTime(orderInfo.getAvgPrice().doubleValue());
+//            coinInfo.setBuyingTime(orderInfo.getPrice().doubleValue());
             mBuyingItemMapInfo.put(key, coinInfo);
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
 
             Post post = mCurrentOrderInfoMap.get(key);
             if (post != null) {
                 post.setState(Post.DONE);
+                post.setCoinInfo(coinInfo);
             }
         }
 
@@ -514,7 +452,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             coinInfo.setMarketId(key);
             coinInfo.setStatus(CoinInfo.SELL);
             coinInfo.setSellPrice(orderInfo.getPrice() != null ? orderInfo.getPrice().doubleValue() : 0);
-
+            Log.d(TAG, "[DEBUG] monitoringBuyList real Sell - !!! marketId: " + key+" sell price: "+ (orderInfo.getPrice() != null ? orderInfo.getPrice().doubleValue() : 0));
             mResultListInfo.add(coinInfo);
             mResultListAdapter.setResultItems(mResultListInfo);
 
@@ -531,18 +469,18 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 //                            + " getUuid: " + orderInfo.getUuid()
                             + " getMarket: "+orderInfo.getMarket()
                             + " getSide: "+orderInfo.getSide()
-                            + " getPrice: "+orderInfo.getPrice()
-            //                + " getAvgPrice: "+orderInfo.getAvgPrice()
-            //                + " getOrderType: "+orderInfo.getOrderType()
                             + " getState: "+orderInfo.getState()
-            //                + " getCreated_at: "+orderInfo.getCreated_at()
+                            + " getPrice: "+orderInfo.getPrice()
+                            + " getAvgPrice: "+orderInfo.getAvgPrice()
+                            + " getOrderType: "+orderInfo.getOrderType()
+                            + " getCreated_at: "+orderInfo.getCreated_at()
                             + " getVolume: "+orderInfo.getVolume()
-            //                + " getRemainingVolume: "+orderInfo.getRemainingVolume()
-            //                + " getReservedFee: "+orderInfo.getReservedFee()
-            //                + " getPaid_fee: "+orderInfo.getPaid_fee()
-            //                + " getLocked: "+orderInfo.getLocked()
-            //                + " getExecutedVolume: "+orderInfo.getExecutedVolume()
-            //                + " getTradesCount: "+orderInfo.getTradesCount()
+                            + " getRemainingVolume: "+orderInfo.getRemainingVolume()
+                            + " getReservedFee: "+orderInfo.getReservedFee()
+                            + " getPaid_fee: "+orderInfo.getPaid_fee()
+                            + " getLocked: "+orderInfo.getLocked()
+                            + " getExecutedVolume: "+orderInfo.getExecutedVolume()
+                            + " getTradesCount: "+orderInfo.getTradesCount()
         );
     }
 

@@ -1,5 +1,6 @@
 package com.example.upbitautotrade.viewmodel;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
 import android.util.Log;
@@ -38,13 +39,14 @@ public class UpBitViewModel extends AndroidViewModel {
 
     private LoginState mListener;
 
+    protected Activity mActivity;
+
     public interface LoginState {
         void onLoginState(boolean isLogin);
     }
 
     public UpBitViewModel(Application application) {
         super(application);
-
         initFetcher(application.getApplicationContext());
         mErrorLiveData = mUpBitFetcher.getErrorLiveData();
 
@@ -71,6 +73,11 @@ public class UpBitViewModel extends AndroidViewModel {
                 mListener.onLoginState(isConnect);
             }
         });
+    }
+
+    public void setActivity(Activity activity) {
+        mActivity = activity;
+        mUpBitFetcher.setActivity(activity);
     }
 
     public void setKey(String accessKey, String secretKey) {

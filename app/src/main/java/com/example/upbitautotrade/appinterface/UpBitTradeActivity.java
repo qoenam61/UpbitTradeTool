@@ -9,7 +9,6 @@ import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 
 public interface UpBitTradeActivity {
 
-    public Activity getActivity();
     public UpBitViewModel getViewModel();
     public AccountsViewModel getAccountsViewModel();
     public CoinEvaluationViewModel getCoinEvaluationViewModel();

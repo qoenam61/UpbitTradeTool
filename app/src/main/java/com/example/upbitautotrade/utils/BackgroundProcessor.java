@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.ViewModel;
@@ -13,6 +14,7 @@ import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
 
 import java.util.ArrayList;
+import java.util.ConcurrentModificationException;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -340,7 +342,13 @@ public class BackgroundProcessor {
                 public void run() {
                     while (true) {
                         List<Integer> list = new ArrayList<>();
-                        list.addAll(mProcessTaskMap.keySet());
+                        try {
+                            list.addAll(mProcessTaskMap.keySet());
+                        } catch (ConcurrentModificationException e) {
+                            Log.e(TAG, "error: ConcurrentModificationException");
+                            continue;
+                        }
+
                         Iterator<Integer> iterator = list.iterator();
                         while (iterator.hasNext()) {
                             int type = iterator.next();

@@ -38,16 +38,12 @@ public class UpBitTradeMainActivity extends AppCompatActivity implements UpBitTr
             fm.beginTransaction().add(R.id.fragmentContainer, upbitLoginFragment).commit();
         }
         mUpBitViewModel = new ViewModelProvider(this).get(UpBitViewModel.class);
+        mUpBitViewModel.setActivity(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-    }
-
-    @Override
-    public Activity getActivity() {
-        return getActivity();
     }
 
     @Override

@@ -1,6 +1,9 @@
 package com.example.upbitautotrade.api;
 
+import android.app.Activity;
+import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -41,6 +44,8 @@ public class UpBitFetcher {
 
     private final ConnectionState mListener;
 
+    private Activity mActivity;
+
     private String mAccessKey;
     private String mSecretKey;
 
@@ -78,6 +83,10 @@ public class UpBitFetcher {
         mSearchOrderRetrofit.makeUpBitApi();
     }
 
+    public void setActivity(Activity activity) {
+        mActivity = activity;
+    }
+
     public MutableLiveData<Throwable> getErrorLiveData() {
         return mErrorLiveData;
     }
@@ -91,6 +100,7 @@ public class UpBitFetcher {
         call.enqueue(new Callback<List<Accounts>>() {
             @Override
             public void onResponse(Call<List<Accounts>> call, Response<List<Accounts>> response) {
+                Log.d(TAG, "onResponse: ");
                 if (response.body() != null) {
                     if (isLogIn) {
                         mListener.onConnection(true);
@@ -101,7 +111,30 @@ public class UpBitFetcher {
                         mListener.onConnection(false);
                     }
                 }
-            }
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse getAccounts -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                        if (mActivity != null) {
+                                mActivity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        } catch(JSONException e){
+                            e.printStackTrace();
+                        } catch(IOException e){
+                            e.printStackTrace();
+                        }
+                    }
+                }
 
             @Override
             public void onFailure(Call<List<Accounts>> call, Throwable t) {
@@ -127,6 +160,29 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse getTicker -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                        if (mActivity != null) {
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                    }
+                }
             }
 
             @Override
@@ -151,6 +207,29 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse getOrdersChance -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                        if (mActivity != null) {
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                    }
+                }
             }
 
             @Override
@@ -173,6 +252,29 @@ public class UpBitFetcher {
             public void onResponse(Call<List<MarketInfo>> call, Response<List<MarketInfo>> response) {
                 if (response.body() != null) {
                     result.setValue(response.body());
+                }
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse getMarketInfo -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                        if (mActivity != null) {
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -199,6 +301,29 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse getMinCandleInfo -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                        if (mActivity != null) {
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                    }
+                }
             }
 
             @Override
@@ -223,6 +348,29 @@ public class UpBitFetcher {
             public void onResponse(Call<List<DayCandle>> call, Response<List<DayCandle>> response) {
                 if (response.body() != null) {
                     result.setValue(response.body());
+                }
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse getDayCandleInfo -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                        if (mActivity != null) {
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -249,6 +397,29 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse getWeekCandleInfo -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                        if (mActivity != null) {
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                    }
+                }
             }
 
             @Override
@@ -273,6 +444,29 @@ public class UpBitFetcher {
             public void onResponse(Call<List<MonthCandle>> call, Response<List<MonthCandle>> response) {
                 if (response.body() != null) {
                     result.setValue(response.body());
+                }
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse getMonthCandleInfo -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                        if (mActivity != null) {
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -311,6 +505,29 @@ public class UpBitFetcher {
             public void onResponse(Call<List<TradeInfo>> call, Response<List<TradeInfo>> response) {
                 if (response.body() != null) {
                     result.setValue(response.body());
+                }
+                if (!response.isSuccessful()) {
+                    try {
+                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+                        Log.d(TAG, "[DEBUG] onResponse getTradeInfo -toString: " + call.toString()
+                                + " code: " + response.code()
+                                + " headers: " + response.headers()
+                                + " raw: " + response.raw()
+                                + " jObjError: " + jObjError
+                        );
+                        if (mActivity != null) {
+                            mActivity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                }
+                            });
+                        }
+                    } catch(JSONException e){
+                        e.printStackTrace();
+                    } catch(IOException e){
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -370,18 +587,28 @@ public class UpBitFetcher {
                     Log.d(TAG, "[DEBUG] onResponse postOrderInfo - body: "+response.body());
                 }
                 else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse postOrderInfo -toString: " + call.toString()
-                                + " code: " + response.code()
-                                + " headers: " + response.headers()
-                                + " raw: "+response.raw()
-                                + " jObjError: " + jObjError
-                        );
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (!response.isSuccessful()) {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            Log.d(TAG, "[DEBUG] onResponse postOrderInfo -toString: " + call.toString()
+                                    + " code: " + response.code()
+                                    + " headers: " + response.headers()
+                                    + " raw: " + response.raw()
+                                    + " jObjError: " + jObjError
+                            );
+                            if (mActivity != null) {
+                                mActivity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        } catch(JSONException e){
+                            e.printStackTrace();
+                        } catch(IOException e){
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -415,18 +642,28 @@ public class UpBitFetcher {
                 if (response.isSuccessful()) {
                     result.setValue(response.body());
                 } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse searchOrderInfo -toString: " + call.toString()
-                                + " code: " + response.code()
-                                + " headers: " + response.headers()
-                                + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
-                        );
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (!response.isSuccessful()) {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            Log.d(TAG, "[DEBUG] onResponse searchOrderInfo -toString: " + call.toString()
+                                    + " code: " + response.code()
+                                    + " headers: " + response.headers()
+                                    + " raw: " + response.raw()
+                                    + " jObjError: " + jObjError
+                            );
+                            if (mActivity != null) {
+                                mActivity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        } catch(JSONException e){
+                            e.printStackTrace();
+                        } catch(IOException e){
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
@@ -461,18 +698,28 @@ public class UpBitFetcher {
                     result.setValue(response.body());
                     Log.d(TAG, "[DEBUG] onResponse deleteOrderInfo - body: " + response.body());
                 } else {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse deleteOrderInfo -toString: " + call.toString()
-                                + " code: " + response.code()
-                                + " headers: " + response.headers()
-                                + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
-                        );
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    } catch (IOException e) {
-                        e.printStackTrace();
+                    if (!response.isSuccessful()) {
+                        try {
+                            JSONObject jObjError = new JSONObject(response.errorBody().string());
+                            Log.d(TAG, "[DEBUG] onResponse deleteOrderInfo -toString: " + call.toString()
+                                    + " code: " + response.code()
+                                    + " headers: " + response.headers()
+                                    + " raw: " + response.raw()
+                                    + " jObjError: " + jObjError
+                            );
+                            if (mActivity != null) {
+                                mActivity.runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    }
+                                });
+                            }
+                        } catch(JSONException e){
+                            e.printStackTrace();
+                        } catch(IOException e){
+                            e.printStackTrace();
+                        }
                     }
                 }
             }
