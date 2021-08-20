@@ -61,8 +61,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     private final double PRICE_AMOUNT = 6000;
     private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
-    private final int TICK_COUNTS = 300;
-    private final double CHANGED_RATE = 0.01;
+    private final int TICK_COUNTS = 180;
+    private final double CHANGED_RATE = 0.015;
     private final int TRADE_COUNTS = 600;
 
     private View mView;
@@ -91,10 +91,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private List<String> mMonitorKeyList;
 
     // Parameter
-    private double mPriceAmount = 6000;
-    private double mMonitorTime = 1;
-    private double mMonitorRate = 0.01;
-    private double mMonitorTick = 300;
+    private double mPriceAmount = PRICE_AMOUNT;
+    private double mMonitorTime = MONITORING_PERIOD_TIME / (60 * 1000);
+    private double mMonitorRate = CHANGED_RATE;
+    private double mMonitorTick = TICK_COUNTS;
 
     boolean mIsStarting = false;
     boolean mIsActive = false;
@@ -189,7 +189,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         monitorTickText.setText(nonZeroFormat.format(mMonitorTick));
         buyingPriceEditText.setText(nonZeroFormat.format(mPriceAmount));
         monitorTimeEditText.setText(nonZeroFormat.format(mMonitorTime));
-        monitorRateEditText.setText(percentFormat.format(mMonitorRate));
+        monitorRateEditText.setText(Double.toString(mMonitorRate * 100));
         monitorTickEditText.setText(nonZeroFormat.format(mMonitorTick));
 
         Button applyButton = mView.findViewById(R.id.trade_input_button);
@@ -467,6 +467,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         if (post != null && post.getIdentifier().equals(orderInfo.getUuid())) {
             removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
             removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
+
             mBuyingItemKeyList.remove(key);
             mBuyingItemMapInfo.remove(key);
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
@@ -511,7 +512,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("bid")) {
             Log.d(TAG, "[DEBUG] monitoringBuyList real BUY - !!!! marketId: " + key+" buy price: "+ coinInfo.getToBuyPrice());
             removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
-            if (!mBuyingItemKeyList.add(key)) {
+            if (!mBuyingItemKeyList.contains(key)) {
                 mBuyingItemKeyList.add(key);
             }
             coinInfo.setStatus(CoinInfo.BUY);
@@ -540,14 +541,15 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
             removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
             removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
+
             mBuyingItemKeyList.remove(key);
             mBuyingItemMapInfo.remove(key);
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
-
             mCurrentOrderInfoMap.remove(key);
         }
 
-            Log.d(TAG, "[DEBUG] monitoringBuyList - "
+        mBuyingListAdapter.notifyDataSetChanged();
+        Log.d(TAG, "[DEBUG] monitoringBuyList - "
 //                            + " getUuid: " + orderInfo.getUuid()
                             + " getMarket: "+orderInfo.getMarket()
                             + " getSide: "+orderInfo.getSide()
@@ -795,7 +797,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
             } else if (mMode == MODE_RESULT) {
-                String key = CoinEvaluationAdvanceFragment.this.mResultListInfo.get(position).getMarketId();
+                String key = mResultListInfo.get(position).getMarketId();
                 MarketInfo marketInfo = mMarketsMapInfo.get(key);
                 if (marketInfo != null) {
                     holder.mCoinName.setText(marketInfo.getKorean_name());
@@ -808,7 +810,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 //                    currentPrice = ticker.getTradePrice().doubleValue();
 //                    holder.mCurrentPrice.setText(mNonZeroFormat.format(currentPrice));
 //                }
-                CoinInfo resultItem = CoinEvaluationAdvanceFragment.this.mResultListInfo.get(position);
+                CoinInfo resultItem = mResultListInfo.get(position);
                 if (resultItem != null
                         && (resultItem.getStatus().equals(CoinInfo.SELL))) {
                     holder.mBuyPrice.setText(mNonZeroFormat.format(resultItem.getToBuyPrice()));
