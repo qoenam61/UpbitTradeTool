@@ -28,9 +28,7 @@ public class SearchOrderRetrofit extends ChanceRetrofit {
         if (mAccessKey == null || mSecretKey == null) {
             return null;
         }
-//        String queryString = String.join("&", mQueryElements.toArray(new String[0]));
         String queryString = getQueryString();
-        Log.d(TAG, "[DEBUG] getAuthToken: "+queryString);
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-512");

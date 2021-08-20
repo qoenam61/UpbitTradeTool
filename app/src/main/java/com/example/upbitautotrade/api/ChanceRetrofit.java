@@ -29,7 +29,6 @@ public class ChanceRetrofit extends DefaultRetrofit {
             return null;
         }
         String queryString = String.join("&", mQueryElements.toArray(new String[0]));
-        Log.d(TAG, "[DEBUG] getAuthToken: "+queryString);
         MessageDigest md = null;
         try {
             md = MessageDigest.getInstance("SHA-512");

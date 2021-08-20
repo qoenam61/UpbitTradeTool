@@ -574,7 +574,6 @@ public class UpBitFetcher {
             params.put("identifier", identifier);
         }
 
-        Log.d(TAG, "[DEBUG] postOrderInfo: "+params.toString());
         mOrderRetrofit.setParam(params);
 
         MutableLiveData<ResponseOrder> result = new MutableLiveData<>();

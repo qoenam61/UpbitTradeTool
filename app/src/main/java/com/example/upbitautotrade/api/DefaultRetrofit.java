@@ -53,7 +53,7 @@ public abstract class DefaultRetrofit {
         public okhttp3.Response intercept(Chain chain) throws IOException {
             Request origin = chain.request();
             Request request = changedRequest(origin);
-            Log.d(TAG, "[DEBUG] intercept: "+request.toString());
+            Log.d(TAG, "intercept: "+request.toString());
             return chain.proceed(request);
         }
     }

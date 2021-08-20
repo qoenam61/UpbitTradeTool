@@ -325,7 +325,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             }
 
             if (priceChangedRate >= CHANGED_RATE) {
-                registerPeriodicUpdate(key);
+                registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
 
                 CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice);
 
@@ -380,9 +380,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     if (post != null && key.equals(post.getMarketId())
                             && post.getSide().equals("bid")
                             && post.getState().equals(Post.DONE)) {
-                        Log.d(TAG, "[DEBUG] buyingSimulation real SELL - !!!! : " + key);
                         String uuid = UUID.randomUUID().toString();
                         Post postSell = new Post(key, "ask", post.getVolume(), null, "market", uuid);
+                        Log.d(TAG, "[DEBUG] buyingSimulation real SELL - !!!! : " + key);
                         registerProcess(UPDATE_POST_ORDER_INFO, postSell);
                     }
                 }
@@ -436,6 +436,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("bid")) {
             Log.d(TAG, "[DEBUG] monitoringBuyList real BUY - !!!! marketId: " + key+" buy price: "+ coinInfo.getToBuyPrice());
             removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
+            if (!mBuyingItemKeyList.add(key)) {
+                mBuyingItemKeyList.add(key);
+            }
             coinInfo.setStatus(CoinInfo.BUY);
 //            coinInfo.setBuyingTime(orderInfo.getPrice().doubleValue());
             mBuyingItemMapInfo.put(key, coinInfo);
@@ -549,12 +552,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
     }
 
-    private void registerPeriodicUpdate(String monitorKey) {
-        mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, monitorKey);
+    private void registerPeriodicUpdate(int type, String key) {
+        if (!key.equals("KRW-KRW")) {
+            mActivity.getProcessor().registerPeriodicUpdate(type, key);
+        }
     }
 
-    private void removeMonitoringPeriodicUpdate(int type, String monitorKey) {
-        mActivity.getProcessor().removePeriodicUpdate(type, monitorKey);
+    private void removeMonitoringPeriodicUpdate(int type, String key) {
+        mActivity.getProcessor().removePeriodicUpdate(type, key);
     }
 
     private class CoinHolder extends RecyclerView.ViewHolder {
