@@ -420,7 +420,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     private void buyingSimulation(String key, Ticker ticker) {
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
-        if (mBuyingItemKeyList.contains(key) && coinInfo.getStatus().equals(CoinInfo.WAITING)) {
+        if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.WAITING)) {
             // Request to Cancel.
             double toBuyPrice = coinInfo.getToBuyPrice();
             if (toBuyPrice > ticker.getTradePrice().doubleValue()) {
@@ -436,7 +436,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
             }
-        } else if (mBuyingItemKeyList.contains(key) && coinInfo.getStatus().equals(CoinInfo.BUY)) {
+        } else if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.BUY)) {
             // Post to Sell
             coinInfo.setProfitRate(ticker.getTradePrice().doubleValue());
             double toBuyPrice = coinInfo.getToBuyPrice();
@@ -481,7 +481,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         Post postOrder = mCurrentOrderInfoMap.get(key);
         CoinInfo coinInfo = postOrder != null ? postOrder.getCoinInfo() : null;
-        if (coinInfo == null) {
+        if (coinInfo == null || coinInfo == null) {
             return;
         }
 
@@ -614,16 +614,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     }
 
     private void registerPeriodicUpdate(int type, String key, String identifier) {
-        mActivity.getProcessor().registerPeriodicUpdate(type, key, identifier);
-    }
-
-    private void registerPeriodicUpdate(List<String> monitorKeyList) {
-        Iterator<String> monitorIterator = monitorKeyList.iterator();
-        while (monitorIterator.hasNext()) {
-            String key = monitorIterator.next();
-            if (!key.equals("KRW-KRW")) {
-                mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
-            }
+        if (!key.equals("KRW-KRW")) {
+            mActivity.getProcessor().registerPeriodicUpdate(type, key, identifier);
         }
     }
 
