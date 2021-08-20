@@ -506,29 +506,29 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (!response.isSuccessful()) {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse getTradeInfo -toString: " + call.toString()
-                                + " code: " + response.code()
-                                + " headers: " + response.headers()
-                                + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
-                        );
-                        if (mActivity != null) {
-                            mActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch(IOException e){
-                        e.printStackTrace();
-                    }
-                }
+//                if (!response.isSuccessful()) {
+//                    try {
+//                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+//                        Log.d(TAG, "[DEBUG] onResponse getTradeInfo -toString: " + call.toString()
+//                                + " code: " + response.code()
+//                                + " headers: " + response.headers()
+//                                + " raw: " + response.raw()
+//                                + " jObjError: " + jObjError
+//                        );
+//                        if (mActivity != null) {
+//                            mActivity.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+//                                }
+//                            });
+//                        }
+//                    } catch(JSONException e){
+//                        e.printStackTrace();
+//                    } catch(IOException e){
+//                        e.printStackTrace();
+//                    }
+//                }
             }
 
             @Override

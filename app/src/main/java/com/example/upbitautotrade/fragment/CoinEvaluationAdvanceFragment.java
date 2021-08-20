@@ -1,5 +1,6 @@
 package com.example.upbitautotrade.fragment;
 
+import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -57,7 +59,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
 
     private final double PRICE_AMOUNT = 6000;
-    private final double MONITORING_PERIOD_TIME = 1;
+    private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
     private final int TICK_COUNTS = 300;
     private final double CHANGED_RATE = 0.01;
     private final int TRADE_COUNTS = 1000;
@@ -164,14 +166,15 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             startButton.setBackgroundTintList(ColorStateList.valueOf(Color.LTGRAY));
         });
 
-        EditText buyingPriceEditText = mView.findViewById(R.id.trade_input_buying_price);
-        EditText monitorTimeEditText = mView.findViewById(R.id.trade_input_monitor_time);
-        EditText monitorRateEditText = mView.findViewById(R.id.trade_input_monitor_rate);
-        EditText monitorTickEditText = mView.findViewById(R.id.trade_input_monitor_tick);
         TextView buyingPriceText = mView.findViewById(R.id.trade_buying_price);
         TextView monitorTimeText = mView.findViewById(R.id.trade_monitor_time);
         TextView monitorRateText = mView.findViewById(R.id.trade_monitor_rate);
         TextView monitorTickText = mView.findViewById(R.id.trade_monitor_tick);
+        EditText buyingPriceEditText = mView.findViewById(R.id.trade_input_buying_price);
+        EditText monitorTimeEditText = mView.findViewById(R.id.trade_input_monitor_time);
+        EditText monitorRateEditText = mView.findViewById(R.id.trade_input_monitor_rate);
+        EditText monitorTickEditText = mView.findViewById(R.id.trade_input_monitor_tick);
+
 
 
         buyingPriceEditText.addTextChangedListener(new NumberWatcher(buyingPriceEditText));
@@ -183,6 +186,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         monitorTimeText.setText(nonZeroFormat.format(mMonitorTime));
         monitorRateText.setText(percentFormat.format(mMonitorRate));
         monitorTickText.setText(nonZeroFormat.format(mMonitorTick));
+        buyingPriceEditText.setText(nonZeroFormat.format(mPriceAmount));
+        monitorTimeEditText.setText(nonZeroFormat.format(mMonitorTime));
+        monitorRateEditText.setText(percentFormat.format(mMonitorRate));
+        monitorTickEditText.setText(nonZeroFormat.format(mMonitorTick));
 
         Button applyButton = mView.findViewById(R.id.trade_input_button);
         applyButton.setOnClickListener(new View.OnClickListener() {
@@ -209,6 +216,13 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 monitorTimeText.setText(nonZeroFormat.format(mMonitorTime / (60 * 1000)));
                 monitorRateText.setText(percentFormat.format(mMonitorRate));
                 monitorTickText.setText(nonZeroFormat.format(mMonitorTick));
+
+
+                InputMethodManager inputMethodManager = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                inputMethodManager.hideSoftInputFromWindow(buyingPriceEditText.getWindowToken(), 0);
+                inputMethodManager.hideSoftInputFromWindow(monitorTimeEditText.getWindowToken(), 0);
+                inputMethodManager.hideSoftInputFromWindow(monitorRateEditText.getWindowToken(), 0);
+                inputMethodManager.hideSoftInputFromWindow(monitorTickEditText.getWindowToken(), 0);
             }
         });
 
