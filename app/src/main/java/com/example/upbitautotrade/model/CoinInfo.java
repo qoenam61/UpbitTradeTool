@@ -1,8 +1,6 @@
 package com.example.upbitautotrade.model;
 
 
-import android.util.Log;
-
 import java.text.DecimalFormat;
 
 public class CoinInfo {
@@ -15,12 +13,14 @@ public class CoinInfo {
     double sellPrice;
 
     double profitRate;
+    double buyingAmount;
 
     private String status = "Waiting";
 
     public static final String WAITING = "Waiting";
     public static final String BUY = "Buy";
     public static final String SELL = "Sell";
+    private double mVolume;
 
     public CoinInfo(double openPrice, double closePrice, double highPrice, double lowPrice) {
         this.openPrice = openPrice;
@@ -57,6 +57,10 @@ public class CoinInfo {
         this.sellPrice = sellPrice;
     }
 
+    public void setVolume(double mVolume) {
+        this.mVolume = mVolume;
+    }
+
     public void setProfitRate(double currentPrice) {
         double changedPrice = currentPrice - getToBuyPrice();
         double changedRate = changedPrice / getToBuyPrice();
@@ -78,6 +82,18 @@ public class CoinInfo {
 
     public String getMarketId() {
         return marketId;
+    }
+
+    public double getBuyAmount() {
+        return getToBuyPrice() * mVolume;
+    }
+
+    public double getSellAmount() {
+        return getSellPrice() * mVolume;
+    }
+
+    public double getProfitAmount() {
+        return getSellAmount() - getBuyAmount();
     }
 
     private double convertPrice(double price) {
