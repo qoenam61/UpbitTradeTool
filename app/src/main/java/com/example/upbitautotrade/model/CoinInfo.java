@@ -20,6 +20,8 @@ public class CoinInfo {
 
     private String status = "Waiting";
 
+    private boolean isPartialBuy = false;
+
     public static final String WAITING = "Waiting";
     public static final String BUY = "Buy";
     public static final String SELL = "Sell";
@@ -113,6 +115,14 @@ public class CoinInfo {
 
     public double getProfitAmount() {
         return getSellAmount() - getBuyAmount();
+    }
+
+    public void setPartialBuy(boolean partialBuy) {
+        isPartialBuy = partialBuy;
+    }
+
+    public boolean isPartialBuy() {
+        return isPartialBuy;
     }
 
     private double convertPrice(double price) {

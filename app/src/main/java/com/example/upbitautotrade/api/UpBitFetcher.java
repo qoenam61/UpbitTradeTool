@@ -26,6 +26,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -49,6 +50,7 @@ public class UpBitFetcher {
 
     public interface ConnectionState {
         void onConnection(boolean isConnect);
+        void postError(String uuid);
     }
 
     private AccountsRetrofit mAccountsRetrofit;
@@ -153,29 +155,29 @@ public class UpBitFetcher {
                 if (response.body() != null) {
                     result.setValue(response.body());
                 }
-                if (!response.isSuccessful()) {
-                    try {
-                        JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse getTicker -toString: " + call.toString()
-                                + " code: " + response.code()
-                                + " headers: " + response.headers()
-                                + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
-                        );
-                        if (mActivity != null) {
-                            mActivity.runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                        }
-                    } catch(JSONException e){
-                        e.printStackTrace();
-                    } catch(IOException e){
-                        e.printStackTrace();
-                    }
-                }
+//                if (!response.isSuccessful()) {
+//                    try {
+//                        JSONObject jObjError = new JSONObject(response.errorBody().string());
+//                        Log.d(TAG, "[DEBUG] onResponse getTicker -toString: " + call.toString()
+//                                + " code: " + response.code()
+//                                + " headers: " + response.headers()
+//                                + " raw: " + response.raw()
+//                                + " jObjError: " + jObjError
+//                        );
+//                        if (mActivity != null) {
+//                            mActivity.runOnUiThread(new Runnable() {
+//                                @Override
+//                                public void run() {
+//                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+//                                }
+//                            });
+//                        }
+//                    } catch(JSONException e){
+//                        e.printStackTrace();
+//                    } catch(IOException e){
+//                        e.printStackTrace();
+//                    }
+//                }
             }
 
             @Override
@@ -699,6 +701,9 @@ public class UpBitFetcher {
                                     + " raw: " + response.raw()
                                     + " jObjError: " + jObjError
                             );
+                            if (response.code() == 404 && jObjError.get("name").equals("order_not_found")) {
+                                mListener.postError(uuid);
+                            }
                             if (mActivity != null) {
                                 mActivity.runOnUiThread(new Runnable() {
                                     @Override

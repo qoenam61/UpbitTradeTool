@@ -38,11 +38,16 @@ public class UpBitViewModel extends AndroidViewModel {
     private String mSecretKey = null;
 
     private LoginState mListener;
+    private PostErrorListener mPostErrorListener;
 
     protected Activity mActivity;
 
     public interface LoginState {
         void onLoginState(boolean isLogin);
+    }
+
+    public interface PostErrorListener {
+        void postError(String uuid);
     }
 
     public UpBitViewModel(Application application) {
@@ -72,6 +77,11 @@ public class UpBitViewModel extends AndroidViewModel {
                 }
                 mListener.onLoginState(isConnect);
             }
+
+            @Override
+            public void postError(String uuid) {
+                mPostErrorListener.postError(uuid);
+            }
         });
     }
 
@@ -90,6 +100,10 @@ public class UpBitViewModel extends AndroidViewModel {
 
     public void setOnListener(LoginState listener) {
         mListener = listener;
+    }
+
+    public void setOnPostErrorListener(PostErrorListener listener) {
+        mPostErrorListener = listener;
     }
 
     public void searchAccountsInfo(boolean isLogIn) {

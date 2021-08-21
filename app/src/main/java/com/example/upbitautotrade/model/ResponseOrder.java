@@ -115,4 +115,24 @@ public class ResponseOrder {
     public Integer getTradesCount() {
         return tradesCount;
     }
+
+    public void setVolume(Number volume) {
+        this.volume = volume;
+    }
+
+    public void setRemainingVolume(Number remainingVolume) {
+        this.remainingVolume = remainingVolume;
+    }
+
+    public void setLocked(String locked) {
+        this.locked = locked;
+    }
+
+    public void setExecutedVolume(String executedVolume) {
+        this.executedVolume = executedVolume;
+    }
+
+    public void setTradesCount(Integer tradesCount) {
+        this.tradesCount = tradesCount;
+    }
 }
