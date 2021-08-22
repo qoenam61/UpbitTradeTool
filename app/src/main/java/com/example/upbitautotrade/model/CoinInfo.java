@@ -177,6 +177,6 @@ public class CoinInfo {
             priceResult = Math.floor(price / 10000) * 10000 + extra;
             result = mFormatUnder100_000_000.format(priceResult) + extra;
         }
-        return Double.parseDouble(result);
+        return result != null ? Double.parseDouble(result) : null;
     }
 }

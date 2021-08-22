@@ -117,7 +117,7 @@ public class UpBitFetcher {
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
+                                + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                         );
                         if (mActivity != null) {
                                 mActivity.runOnUiThread(new Runnable() {
@@ -215,7 +215,7 @@ public class UpBitFetcher {
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
+                                + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                         );
                         if (mActivity != null) {
                             mActivity.runOnUiThread(new Runnable() {
@@ -261,7 +261,7 @@ public class UpBitFetcher {
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
+                                + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                         );
                         if (mActivity != null) {
                             mActivity.runOnUiThread(new Runnable() {
@@ -309,7 +309,7 @@ public class UpBitFetcher {
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
+                                + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                         );
                         if (mActivity != null) {
                             mActivity.runOnUiThread(new Runnable() {
@@ -357,7 +357,7 @@ public class UpBitFetcher {
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
+                                + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                         );
                         if (mActivity != null) {
                             mActivity.runOnUiThread(new Runnable() {
@@ -405,7 +405,7 @@ public class UpBitFetcher {
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
+                                + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                         );
                         if (mActivity != null) {
                             mActivity.runOnUiThread(new Runnable() {
@@ -453,7 +453,7 @@ public class UpBitFetcher {
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
-                                + " jObjError: " + jObjError
+                                + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                         );
                         if (mActivity != null) {
                             mActivity.runOnUiThread(new Runnable() {
@@ -593,7 +593,7 @@ public class UpBitFetcher {
                                     + " code: " + response.code()
                                     + " headers: " + response.headers()
                                     + " raw: " + response.raw()
-                                    + " jObjError: " + jObjError
+                                    + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                             );
                             if (mActivity != null) {
                                 mActivity.runOnUiThread(new Runnable() {
@@ -648,7 +648,7 @@ public class UpBitFetcher {
                                     + " code: " + response.code()
                                     + " headers: " + response.headers()
                                     + " raw: " + response.raw()
-                                    + " jObjError: " + jObjError
+                                    + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                             );
                             if (mActivity != null) {
                                 mActivity.runOnUiThread(new Runnable() {
@@ -699,25 +699,27 @@ public class UpBitFetcher {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            JSONObject errorObj = (JSONObject) jObjError.get("error");
-                            if (response.code() == 404 && errorObj.get("name") != null && errorObj.get("name").equals("order_not_found")) {
-                                Log.w(TAG, "[DEBUG] onResponse deleteOrderInfo -toString: " + call.toString()
-                                        + " code: " + response.code()
-                                        + " headers: " + response.headers()
-                                        + " raw: " + response.raw()
-                                        + " jObjError: " + jObjError
-                                );
-                                if (mListener != null) {
-                                    mListener.postError(uuid);
-                                }
-                            }
-                            if (mActivity != null) {
-                                mActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                            if (jObjError != null) {
+                                JSONObject errorObj = (JSONObject) jObjError.get("error");
+                                if (response.code() == 404 && errorObj != null && errorObj.get("name") != null && errorObj.get("name").equals("order_not_found")) {
+                                    Log.w(TAG, "[DEBUG] onResponse deleteOrderInfo -toString: " + call.toString()
+                                            + " code: " + response.code()
+                                            + " headers: " + response.headers()
+                                            + " raw: " + response.raw()
+                                            + " jObjError: " + (jObjError != null ? jObjError : "NULL")
+                                    );
+                                    if (mListener != null) {
+                                        mListener.postError(uuid);
                                     }
-                                });
+                                }
+                                if (mActivity != null) {
+                                    mActivity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
                             }
                         } catch(JSONException e){
                             e.printStackTrace();

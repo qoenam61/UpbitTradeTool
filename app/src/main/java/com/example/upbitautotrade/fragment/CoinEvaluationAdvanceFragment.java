@@ -442,11 +442,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 //        }
 
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+        if (coinInfo == null) {
+            return;
+        }
 
         // WAIT
         if (orderInfo.getState().equals(Post.WAIT) && orderInfo.getSide().equals("bid")) {
 
-            if (coinInfo != null && orderInfo.getVolume() != null && orderInfo.getRemainingVolume() != null &&
+            if (orderInfo.getVolume() != null && orderInfo.getRemainingVolume() != null &&
                     orderInfo.getVolume().doubleValue() != orderInfo.getRemainingVolume().doubleValue()) {
                 coinInfo.setPartialBuy(true);
             }
@@ -496,7 +499,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             coinInfo.setStatus(CoinInfo.SELL);
             coinInfo.setSellTime(System.currentTimeMillis());
             Ticker ticker = mTickerMapInfo.get(key);
-            coinInfo.setSellPrice(ticker != null ? ticker.getTradePrice().doubleValue() : 0);
+            coinInfo.setSellPrice(ticker != null &&  ticker.getTradePrice() != null ? ticker.getTradePrice().doubleValue() : 0);
 
             mResultListInfo.add(coinInfo);
             mResultListAdapter.setResultItems(mResultListInfo);
