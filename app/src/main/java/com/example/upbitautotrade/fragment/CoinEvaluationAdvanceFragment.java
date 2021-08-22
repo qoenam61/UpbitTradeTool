@@ -566,7 +566,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
             double changedRate = changedPrice / toBuyPrice;
             Log.d(TAG, "buyingSimulation - getMaxProfitRate: "+coinInfo.getMaxProfitRate()+" changedRate: "+changedRate);
-            if (changedRate - coinInfo.getMaxProfitRate() < mMonitorRate * -0.5) {
+            if (changedRate - coinInfo.getMaxProfitRate() < mMonitorRate * -1) {
                 if (mViewModel != null) {
                     ResponseOrder order = mResponseOrderInfoMap.get(key);
                     if (order != null && key.equals(order.getMarket())
