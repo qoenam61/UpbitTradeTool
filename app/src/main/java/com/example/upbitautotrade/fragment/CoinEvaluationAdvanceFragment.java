@@ -62,7 +62,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private final double PRICE_AMOUNT = 6000;
     private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
     private final int TICK_COUNTS = 300;
-    private final double CHANGED_RATE = 0.015;
+    private final double CHANGED_RATE = 0.01;
     private final int TRADE_COUNTS = 600;
 
     private View mView;
@@ -237,8 +237,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
 
-                Log.d(TAG, "[DEBUG] postError delete : "+uuid+" key: "+key);
                 if (key != null) {
+                    Log.d(TAG, "[DEBUG] postError key : " + key +" uuid: " + uuid);
                     removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
                     removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
                     mResponseOrderInfoMap.remove(key);

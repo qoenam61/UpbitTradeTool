@@ -98,18 +98,22 @@ public class UpBitFetcher {
                 Log.d(TAG, "onResponse: ");
                 if (response.body() != null) {
                     if (isLogIn) {
-                        mListener.onConnection(true);
+                        if (mListener != null) {
+                            mListener.onConnection(true);
+                        }
                     }
                     result.setValue(response.body());
                 } else {
                     if (isLogIn) {
-                        mListener.onConnection(false);
+                        if (mListener != null) {
+                            mListener.onConnection(false);
+                        }
                     }
                 }
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse getAccounts -toString: " + call.toString()
+                        Log.w(TAG, "[DEBUG] onResponse getAccounts -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -136,7 +140,9 @@ public class UpBitFetcher {
                 Log.w(TAG, "onFailure: "+t);
                 mErrorLiveData.setValue(t);
                 if (isLogIn) {
-                    mListener.onConnection(false);
+                    if (mListener != null) {
+                        mListener.onConnection(false);
+                    }
                 }
             }
         });
@@ -205,7 +211,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse getOrdersChance -toString: " + call.toString()
+                        Log.w(TAG, "[DEBUG] onResponse getOrdersChance -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -251,7 +257,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse getMarketInfo -toString: " + call.toString()
+                        Log.w(TAG, "[DEBUG] onResponse getMarketInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -299,7 +305,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse getMinCandleInfo -toString: " + call.toString()
+                        Log.w(TAG, "[DEBUG] onResponse getMinCandleInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -347,7 +353,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse getDayCandleInfo -toString: " + call.toString()
+                        Log.w(TAG, "[DEBUG] onResponse getDayCandleInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -395,7 +401,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse getWeekCandleInfo -toString: " + call.toString()
+                        Log.w(TAG, "[DEBUG] onResponse getWeekCandleInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -443,7 +449,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.d(TAG, "[DEBUG] onResponse getMonthCandleInfo -toString: " + call.toString()
+                        Log.w(TAG, "[DEBUG] onResponse getMonthCandleInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -578,13 +584,12 @@ public class UpBitFetcher {
             public void onResponse(Call<ResponseOrder> call, Response<ResponseOrder> response) {
                 if(response.isSuccessful()) {
                     result.setValue(response.body());
-                    Log.d(TAG, "[DEBUG] onResponse postOrderInfo - body: "+response.body());
                 }
                 else {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            Log.d(TAG, "[DEBUG] onResponse postOrderInfo -toString: " + call.toString()
+                            Log.w(TAG, "[DEBUG] onResponse postOrderInfo -toString: " + call.toString()
                                     + " code: " + response.code()
                                     + " headers: " + response.headers()
                                     + " raw: " + response.raw()
@@ -639,7 +644,7 @@ public class UpBitFetcher {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            Log.d(TAG, "[DEBUG] onResponse searchOrderInfo -toString: " + call.toString()
+                            Log.w(TAG, "[DEBUG] onResponse searchOrderInfo -toString: " + call.toString()
                                     + " code: " + response.code()
                                     + " headers: " + response.headers()
                                     + " raw: " + response.raw()
@@ -690,19 +695,21 @@ public class UpBitFetcher {
             public void onResponse(Call<ResponseOrder> call, Response<ResponseOrder> response) {
                 if (response.isSuccessful()) {
                     result.setValue(response.body());
-                    Log.d(TAG, "[DEBUG] onResponse deleteOrderInfo - body: " + response.body());
                 } else {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            Log.d(TAG, "[DEBUG] onResponse deleteOrderInfo -toString: " + call.toString()
-                                    + " code: " + response.code()
-                                    + " headers: " + response.headers()
-                                    + " raw: " + response.raw()
-                                    + " jObjError: " + jObjError
-                            );
-                            if (response.code() == 404 && jObjError.get("name").equals("order_not_found")) {
-                                mListener.postError(uuid);
+                            JSONObject errorObj = (JSONObject) jObjError.get("error");
+                            if (response.code() == 404 && errorObj.get("name") != null && errorObj.get("name").equals("order_not_found")) {
+                                Log.w(TAG, "[DEBUG] onResponse deleteOrderInfo -toString: " + call.toString()
+                                        + " code: " + response.code()
+                                        + " headers: " + response.headers()
+                                        + " raw: " + response.raw()
+                                        + " jObjError: " + jObjError
+                                );
+                                if (mListener != null) {
+                                    mListener.postError(uuid);
+                                }
                             }
                             if (mActivity != null) {
                                 mActivity.runOnUiThread(new Runnable() {

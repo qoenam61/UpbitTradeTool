@@ -2,6 +2,7 @@ package com.example.upbitautotrade.viewmodel;
 
 import android.app.Application;
 import android.content.Context;
+import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -134,7 +135,17 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
 
     @Override
     protected void initFetcher(Context context) {
-        mUpBitFetcher = new UpBitFetcher(null);
+        mUpBitFetcher = new UpBitFetcher(new UpBitFetcher.ConnectionState() {
+            @Override
+            public void onConnection(boolean isConnect) {
+
+            }
+
+            @Override
+            public void postError(String uuid) {
+                mPostErrorListener.postError(uuid);
+            }
+        });
     }
 
     public void setKey(String accessKey, String secretKey) {

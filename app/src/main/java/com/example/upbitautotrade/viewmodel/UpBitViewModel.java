@@ -38,7 +38,7 @@ public class UpBitViewModel extends AndroidViewModel {
     private String mSecretKey = null;
 
     private LoginState mListener;
-    private PostErrorListener mPostErrorListener;
+    public PostErrorListener mPostErrorListener;
 
     protected Activity mActivity;
 
@@ -80,7 +80,7 @@ public class UpBitViewModel extends AndroidViewModel {
 
             @Override
             public void postError(String uuid) {
-                mPostErrorListener.postError(uuid);
+
             }
         });
     }
