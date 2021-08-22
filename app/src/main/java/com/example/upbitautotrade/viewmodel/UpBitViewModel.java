@@ -3,7 +3,6 @@ package com.example.upbitautotrade.viewmodel;
 import android.app.Activity;
 import android.app.Application;
 import android.content.Context;
-import android.util.Log;
 
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -13,11 +12,7 @@ import androidx.lifecycle.Transformations;
 import com.example.upbitautotrade.UpBitLogInPreferences;
 import com.example.upbitautotrade.api.UpBitFetcher;
 import com.example.upbitautotrade.model.Accounts;
-import com.example.upbitautotrade.model.Candle;
-import com.example.upbitautotrade.model.Chance;
-import com.example.upbitautotrade.model.Market;
 import com.example.upbitautotrade.model.MarketInfo;
-import com.example.upbitautotrade.model.Price;
 
 import java.util.List;
 
@@ -38,7 +33,7 @@ public class UpBitViewModel extends AndroidViewModel {
     private String mSecretKey = null;
 
     private LoginState mListener;
-    public PostErrorListener mPostErrorListener;
+    public RequestErrorListener mRequestErrorListener;
 
     protected Activity mActivity;
 
@@ -46,8 +41,9 @@ public class UpBitViewModel extends AndroidViewModel {
         void onLoginState(boolean isLogin);
     }
 
-    public interface PostErrorListener {
-        void postError(String uuid);
+    public interface RequestErrorListener {
+        void shortMoney(String uuid);
+        void deleteError(String uuid);
     }
 
     public UpBitViewModel(Application application) {
@@ -79,7 +75,12 @@ public class UpBitViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void postError(String uuid) {
+            public void deleteError(String uuid) {
+
+            }
+
+            @Override
+            public void shortMoney(String uuid) {
 
             }
         });
@@ -102,8 +103,8 @@ public class UpBitViewModel extends AndroidViewModel {
         mListener = listener;
     }
 
-    public void setOnPostErrorListener(PostErrorListener listener) {
-        mPostErrorListener = listener;
+    public void setOnPostErrorListener(RequestErrorListener listener) {
+        mRequestErrorListener = listener;
     }
 
     public void searchAccountsInfo(boolean isLogIn) {

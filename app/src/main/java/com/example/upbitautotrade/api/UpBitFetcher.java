@@ -1,7 +1,6 @@
 package com.example.upbitautotrade.api;
 
 import android.app.Activity;
-import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -26,7 +25,6 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
-import java.util.UUID;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,7 +48,8 @@ public class UpBitFetcher {
 
     public interface ConnectionState {
         void onConnection(boolean isConnect);
-        void postError(String uuid);
+        void deleteError(String uuid);
+        void shortMoney(String uuid);
     }
 
     private AccountsRetrofit mAccountsRetrofit;
@@ -589,19 +588,31 @@ public class UpBitFetcher {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            Log.w(TAG, "[DEBUG] onResponse postOrderInfo -toString: " + call.toString()
-                                    + " code: " + response.code()
-                                    + " headers: " + response.headers()
-                                    + " raw: " + response.raw()
-                                    + " jObjError: " + (jObjError != null ? jObjError : "NULL")
-                            );
-                            if (mActivity != null) {
-                                mActivity.runOnUiThread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                            if (jObjError != null) {
+                                Log.w(TAG, "[DEBUG] onResponse postOrderInfo -toString: " + call.toString()
+                                        + " code: " + response.code()
+                                        + " headers: " + response.headers()
+                                        + " raw: " + response.raw()
+                                        + " jObjError: " + (jObjError != null ? jObjError : "NULL")
+                                );
+                                JSONObject errorObj = (JSONObject) jObjError.get("error");
+                                if (response.code() == 400
+                                        && errorObj != null
+                                        && (errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_bid")
+                                        || errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_ask"))) {
+                                    if (mListener != null) {
+                                        Log.d(TAG, "[DEBUG] onResponse -postOrderInfo : "+identifier);
+                                        mListener.shortMoney(identifier);
                                     }
-                                });
+                                }
+                                if (mActivity != null) {
+                                    mActivity.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
                             }
                         } catch(JSONException e){
                             e.printStackTrace();
@@ -702,14 +713,24 @@ public class UpBitFetcher {
                             if (jObjError != null) {
                                 JSONObject errorObj = (JSONObject) jObjError.get("error");
                                 if (response.code() == 404 && errorObj != null && errorObj.get("name") != null && errorObj.get("name").equals("order_not_found")) {
-                                    Log.w(TAG, "[DEBUG] onResponse deleteOrderInfo -toString: " + call.toString()
+                                    Log.w(TAG, "[DEBUG] onResponse deleteOrderInfo -deleteError: " + call.toString()
                                             + " code: " + response.code()
                                             + " headers: " + response.headers()
                                             + " raw: " + response.raw()
                                             + " jObjError: " + (jObjError != null ? jObjError : "NULL")
                                     );
                                     if (mListener != null) {
-                                        mListener.postError(uuid);
+                                        mListener.deleteError(uuid);
+                                    }
+                                } else if (response.code() == 400 && errorObj != null && errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_ask")) {
+                                    Log.w(TAG, "[DEBUG] onResponse deleteOrderInfo -shortMoney: " + call.toString()
+                                            + " code: " + response.code()
+                                            + " headers: " + response.headers()
+                                            + " raw: " + response.raw()
+                                            + " jObjError: " + (jObjError != null ? jObjError : "NULL")
+                                    );
+                                    if (mListener != null) {
+                                        mListener.shortMoney(uuid);
                                     }
                                 }
                                 if (mActivity != null) {

@@ -56,6 +56,10 @@ public class ResponseOrder {
         return uuid;
     }
 
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
     public String getSide() {
         return side;
     }

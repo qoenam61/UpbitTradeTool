@@ -90,9 +90,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private Map<String, Deque<TradeInfo>> mTradeMapInfo;
     private List<String> mMonitorKeyList;
 
-    // Delete Error
-    private Map<String, String> mDeleteItemMapInfo;
-
     // Parameter
     private double mPriceAmount = PRICE_AMOUNT;
     private double mMonitorTime = MONITORING_PERIOD_TIME / (60 * 1000);
@@ -123,8 +120,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         mMonitorKeyList = new ArrayList<>();
         mTradeMapInfo = new HashMap<>();
-
-        mDeleteItemMapInfo = new HashMap<>();
     }
 
 
@@ -229,9 +224,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             }
         });
 
-        mViewModel.setOnPostErrorListener(new UpBitViewModel.PostErrorListener() {
+        mViewModel.setOnPostErrorListener(new UpBitViewModel.RequestErrorListener() {
             @Override
-            public void postError(String uuid) {
+            public void shortMoney(String uuid) {
                 String key = null;
                 Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
                 while (iterator.hasNext()) {
@@ -243,10 +238,34 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 }
 
                 if (key != null) {
-                    Log.d(TAG, "[DEBUG] postError key : " + key +" uuid: " + uuid);
+                    Log.d(TAG, "[DEBUG] shortMoney key : " + key +" uuid: " + uuid);
                     removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
                     removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
-                    
+
+                    mResponseOrderInfoMap.remove(key);
+                    mBuyingItemKeyList.remove(key);
+                    mBuyingItemMapInfo.remove(key);
+                    mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+                }
+            }
+
+            @Override
+            public void deleteError(String uuid) {
+                String key = null;
+                Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
+                while (iterator.hasNext()) {
+                    ResponseOrder order = iterator.next();
+                    if (order.getUuid().equals(uuid)) {
+                        key = order.getMarket();
+                        break;
+                    }
+                }
+
+                if (key != null) {
+                    Log.d(TAG, "[DEBUG] deleteError key : " + key +" uuid: " + uuid);
+                    removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
+                    removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
+
                     mResponseOrderInfoMap.remove(key);
                     mBuyingItemKeyList.remove(key);
                     mBuyingItemMapInfo.remove(key);
@@ -411,16 +430,16 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (priceChangedRate >= mMonitorRate) {
                 registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
 
-                CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice);
-                mBuyingItemMapInfo.put(key, coinInfo);
+                CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice, tickCount);
 
                 // Post to Buy
-                double toBuyPrice = coinInfo.getToBuyPrice();
-                double volume = (mPriceAmount / toBuyPrice);
-                String uuid = UUID.randomUUID().toString();
-                Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
-                registerProcess(UPDATE_POST_ORDER_INFO, post);
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo Wait - !!!! marketId: " + key+" price: "+toBuyPrice + " priceAmount: "+mPriceAmount);
+                tacticalToBuy(key, coinInfo);
+//                double toBuyPrice = coinInfo.getToBuyPrice();
+//                double volume = (mPriceAmount / toBuyPrice);
+//                String uuid = UUID.randomUUID().toString();
+//                Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
+//                registerProcess(UPDATE_POST_ORDER_INFO, post);
+//                Log.d(TAG, "[DEBUG] makeTradeMapInfo Wait - !!!! marketId: " + key+" price: "+toBuyPrice + " priceAmount: "+mPriceAmount);
             }
         } else {
             mMonitorKeyList.remove(key);
@@ -429,6 +448,68 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mTradeMapInfo.put(key, tradeInfoQueue);
     }
 
+    private void tacticalToBuy(String key, CoinInfo coinInfo) {
+        if (key == null || coinInfo == null) {
+            return;
+        }
+
+        double openPrice = coinInfo.getOpenPrice();
+        double closePrice = coinInfo.getClosePrice();
+        double highPrice = coinInfo.getHighPrice();
+        double lowPrice = coinInfo.getLowPrice();
+
+        double upperTailGap = Math.abs(highPrice - closePrice);
+        double lowerTailGap = Math.abs(openPrice - lowPrice);
+        double bodyGap = Math.abs(closePrice - openPrice);
+        double upperTailRate = upperTailGap / bodyGap;
+        double lowerTailRate = lowerTailGap / bodyGap;
+        double tailRate = (lowerTailRate - upperTailGap) / lowerTailGap;
+
+        double toBuyPrice = 0;
+        double volume = 0;
+        double priceChangedRate = openPrice != 0 ? (closePrice - openPrice) / openPrice : 0;
+        double properPrice = Math.min((openPrice + closePrice) / 2, (highPrice + lowPrice) / 2);
+
+        boolean isBuy = false;
+        if (priceChangedRate >= mMonitorRate && priceChangedRate < (mMonitorRate * 2)) {
+            if (upperTailGap <= 0.2) {
+                toBuyPrice = closePrice;
+                volume = (mPriceAmount / toBuyPrice);
+                isBuy = true;
+            } else if (upperTailGap > 0.2 && upperTailGap < 0.5) {
+                toBuyPrice = properPrice;
+                volume = (mPriceAmount / toBuyPrice);
+                isBuy = true;
+            } else if (tailRate >= 0.5) {
+                toBuyPrice = (closePrice + lowPrice) / 2;
+                volume = (mPriceAmount / toBuyPrice);
+                isBuy = true;
+            }
+        } else if (priceChangedRate > (mMonitorRate * 2)) {
+            if (upperTailGap <= 0.2) {
+                toBuyPrice = properPrice;
+                volume = (mPriceAmount / toBuyPrice);
+                isBuy = true;
+            } else if (upperTailGap > 0.2 && upperTailGap < 0.5) {
+                toBuyPrice = (closePrice + lowPrice) / 2;
+                volume = (mPriceAmount / toBuyPrice);
+                isBuy = true;
+            } else if (tailRate >= 0.5) {
+                toBuyPrice = (closePrice + lowPrice) / 2;
+                volume = (mPriceAmount / toBuyPrice);
+                isBuy = true;
+            }
+        }
+
+        if (isBuy) {
+            String uuid = UUID.randomUUID().toString();
+            Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
+            registerProcess(UPDATE_POST_ORDER_INFO, post);
+            coinInfo.setBuyPrice(toBuyPrice);
+            mBuyingItemMapInfo.put(key, coinInfo);
+            Log.d(TAG, "[DEBUG] tacticalToBuy Wait - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
+        }
+    }
 
     private void monitoringBuyList(ResponseOrder orderInfo) {
         if (orderInfo == null) {
@@ -436,12 +517,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
 
         String key = orderInfo.getMarket();
-
-//        Post post = mResponseOrderInfoMap.get(key);
-//        CoinInfo coinInfo = post != null ? post.getCoinInfo() : null;
-//        if (coinInfo == null || coinInfo == null) {
-//            return;
-//        }
 
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
         if (coinInfo == null) {
@@ -468,7 +543,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mMonitorKeyList.remove(key);
                 mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                 Log.d(TAG, "[DEBUG] monitoringBuyList WAIT - !!!! marketId: " + key
-                        +" price: " + coinInfo.getToBuyPrice()
+                        +" price: " + coinInfo.getBuyPrice()
                         + " uuid: "+ orderInfo.getUuid()
                 );
             }
@@ -489,7 +564,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
 
             Log.d(TAG, "[DEBUG] monitoringBuyList BUY - !!!! marketId: " + key
-                    +" buy price: "+ coinInfo.getToBuyPrice()
+                    +" buy price: "+ coinInfo.getBuyPrice()
                     + " uuid: "+ orderInfo.getUuid()
             );
         }
@@ -544,7 +619,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
         if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.WAITING)) {
             // Request to Cancel.
-            double toBuyPrice = coinInfo.getToBuyPrice();
+            double toBuyPrice = coinInfo.getBuyPrice();
             long duration = System.currentTimeMillis() - coinInfo.getWaitTime();
             if (toBuyPrice > ticker.getTradePrice().doubleValue() || duration > mMonitorTime * 3) {
                 double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
@@ -563,7 +638,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         } else if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.BUY)) {
             // Post to Sell
             coinInfo.setProfitRate(ticker.getTradePrice().doubleValue());
-            double toBuyPrice = coinInfo.getToBuyPrice();
+            double toBuyPrice = coinInfo.getBuyPrice();
             double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
             double changedRate = changedPrice / toBuyPrice;
             Log.d(TAG, "buyingSimulation - getMaxProfitRate: "+coinInfo.getMaxProfitRate()+" changedRate: "+changedRate);
@@ -576,7 +651,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         String uuid = UUID.randomUUID().toString();
                         Post postSell = new Post(key, "ask", order.getVolume().toString(), null, "market", uuid);
                         registerProcess(UPDATE_POST_ORDER_INFO, postSell);
-                        Log.d(TAG, "[DEBUG] buyingSimulation SELL - !!!! : " + key + " uuid: " + order.getUuid());
+                        order.setUuid(uuid);
+                        mResponseOrderInfoMap.put(key, order);
+                        Log.d(TAG, "[DEBUG] buyingSimulation SELL - !!!! : " + key + " uuid: " + uuid);
                     }
                 }
             }
@@ -851,9 +928,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         && (buyingItem.getStatus().equals(CoinInfo.WAITING)
                         || buyingItem.getStatus().equals(CoinInfo.BUY)
                         || buyingItem.getStatus().equals(CoinInfo.SELL))) {
-                    holder.mBuyPrice.setText(mNonZeroFormat.format(buyingItem.getToBuyPrice()));
-                    double changedPrice = currentPrice - buyingItem.getToBuyPrice();
-                    double prevPrice = buyingItem.getToBuyPrice();
+                    holder.mBuyPrice.setText(mNonZeroFormat.format(buyingItem.getBuyPrice()));
+                    double changedPrice = currentPrice - buyingItem.getBuyPrice();
+                    double prevPrice = buyingItem.getBuyPrice();
                     double rate = prevPrice != 0 ? (changedPrice / (double) prevPrice) : 0;
                     holder.mCoinStatus.setText(buyingItem.getStatus());
                     if (!buyingItem.getStatus().equals(CoinInfo.WAITING)) {
@@ -884,9 +961,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 CoinInfo resultItem = mResultListInfo.get(position);
                 if (resultItem != null
                         && (resultItem.getStatus().equals(CoinInfo.SELL))) {
-                    holder.mBuyPrice.setText(mNonZeroFormat.format(resultItem.getToBuyPrice()));
-                    double changedPrice = resultItem.getSellPrice() - resultItem.getToBuyPrice();
-                    double prevPrice = resultItem.getToBuyPrice();
+                    holder.mBuyPrice.setText(mNonZeroFormat.format(resultItem.getBuyPrice()));
+                    double changedPrice = resultItem.getSellPrice() - resultItem.getBuyPrice();
+                    double prevPrice = resultItem.getBuyPrice();
                     double rate = prevPrice != 0 ? (changedPrice / (double) prevPrice) : 0;
                     holder.mCoinStatus.setText(resultItem.getStatus());
                     holder.mChangeRate.setText(mPercentFormat.format(rate));

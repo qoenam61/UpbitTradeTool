@@ -13,10 +13,14 @@ public class CoinInfo {
     long waitTime;
     long buyTime;
     long sellTime;
+
+    double buyPrice;
     double sellPrice;
 
     double profitRate;
     double buyingAmount;
+
+    int tickCounts;
 
     private String status = "Waiting";
 
@@ -27,11 +31,12 @@ public class CoinInfo {
     public static final String SELL = "Sell";
     private double mVolume;
 
-    public CoinInfo(double openPrice, double closePrice, double highPrice, double lowPrice) {
+    public CoinInfo(double openPrice, double closePrice, double highPrice, double lowPrice, int tickCounts) {
         this.openPrice = openPrice;
         this.closePrice = closePrice;
         this.highPrice = highPrice;
         this.lowPrice = lowPrice;
+        this.tickCounts = tickCounts;
     }
 
     public void setStatus(String status) {
@@ -42,8 +47,12 @@ public class CoinInfo {
         return status;
     }
 
-    public double getToBuyPrice() {
-        return convertPrice(Math.min((openPrice + closePrice) / 2, (highPrice + lowPrice) / 2));
+    public void setBuyPrice(double buyPrice) {
+        this.buyPrice = buyPrice;
+    }
+
+    public double getBuyPrice() {
+        return convertPrice(buyPrice);
     }
 
     public void setWaitTime(long waitTime) {
@@ -83,8 +92,8 @@ public class CoinInfo {
     }
 
     public void setProfitRate(double currentPrice) {
-        double changedPrice = currentPrice - getToBuyPrice();
-        double changedRate = changedPrice / getToBuyPrice();
+        double changedPrice = currentPrice - getBuyPrice();
+        double changedRate = changedPrice / getBuyPrice();
 
         if (profitRate == 0) {
             profitRate = changedRate;
@@ -106,7 +115,7 @@ public class CoinInfo {
     }
 
     public double getBuyAmount() {
-        return getToBuyPrice() * mVolume;
+        return getBuyPrice() * mVolume;
     }
 
     public double getSellAmount() {
@@ -123,6 +132,26 @@ public class CoinInfo {
 
     public boolean isPartialBuy() {
         return isPartialBuy;
+    }
+
+    public double getOpenPrice() {
+        return convertPrice(openPrice);
+    }
+
+    public double getClosePrice() {
+        return convertPrice(closePrice);
+    }
+
+    public double getHighPrice() {
+        return convertPrice(highPrice);
+    }
+
+    public double getLowPrice() {
+        return convertPrice(lowPrice);
+    }
+
+    public int getTickCounts() {
+        return tickCounts;
     }
 
     private double convertPrice(double price) {

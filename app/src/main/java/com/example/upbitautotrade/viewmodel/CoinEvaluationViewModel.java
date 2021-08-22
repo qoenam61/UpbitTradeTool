@@ -2,7 +2,6 @@ package com.example.upbitautotrade.viewmodel;
 
 import android.app.Application;
 import android.content.Context;
-import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -12,7 +11,6 @@ import com.example.upbitautotrade.api.UpBitFetcher;
 import com.example.upbitautotrade.model.Candle;
 import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MonthCandle;
-import com.example.upbitautotrade.model.OrderInfo;
 import com.example.upbitautotrade.model.Post;
 import com.example.upbitautotrade.model.ResponseOrder;
 import com.example.upbitautotrade.model.Ticker;
@@ -20,8 +18,6 @@ import com.example.upbitautotrade.model.TradeInfo;
 import com.example.upbitautotrade.model.WeekCandle;
 
 import java.util.List;
-
-import retrofit2.http.Query;
 
 public class CoinEvaluationViewModel extends UpBitViewModel{
     private final String TAG = "CoinEvaluationViewModel";
@@ -142,8 +138,13 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
             }
 
             @Override
-            public void postError(String uuid) {
-                mPostErrorListener.postError(uuid);
+            public void deleteError(String uuid) {
+                mRequestErrorListener.deleteError(uuid);
+            }
+
+            @Override
+            public void shortMoney(String uuid) {
+                mRequestErrorListener.shortMoney(uuid);
             }
         });
     }
