@@ -241,11 +241,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     Log.d(TAG, "[DEBUG] shortMoney key : " + key +" uuid: " + uuid);
                     removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
                     removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
-
                     mResponseOrderInfoMap.remove(key);
-                    mBuyingItemKeyList.remove(key);
-                    mBuyingItemMapInfo.remove(key);
-                    mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                 }
             }
 
