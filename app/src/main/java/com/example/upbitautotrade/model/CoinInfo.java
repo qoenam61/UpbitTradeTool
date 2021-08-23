@@ -91,14 +91,15 @@ public class CoinInfo {
         this.mVolume = mVolume;
     }
 
-    public void setProfitRate(double currentPrice) {
+    public void setMaxProfitRate(double currentPrice) {
         double changedPrice = currentPrice - getBuyPrice();
         double changedRate = changedPrice / getBuyPrice();
 
-        if (profitRate == 0) {
+        double prevProfitRate = profitRate;
+        if (prevProfitRate == 0) {
             profitRate = changedRate;
         } else {
-            profitRate = Math.max(profitRate, changedRate);
+            profitRate = Math.max(prevProfitRate, changedRate);
         }
     }
 
