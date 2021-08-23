@@ -60,10 +60,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
 
     private final double PRICE_AMOUNT = 6000;
-    private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
-    private final int TICK_COUNTS = 300;
+    private final double MONITORING_PERIOD_TIME = 3 * 60 * 1000;
+    private final int TICK_COUNTS = 1000;
     private final double CHANGED_RATE = 0.01;
-    private final int TRADE_COUNTS = 600;
+    private final int TRADE_COUNTS = 1000;
 
     private View mView;
 
@@ -238,10 +238,27 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 }
 
                 if (key != null) {
+                    CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+                    if (coinInfo == null) {
+                        return;
+                    }
                     Log.d(TAG, "[DEBUG] shortMoney key : " + key +" uuid: " + uuid);
+                    coinInfo.setMarketId(key);
+                    coinInfo.setStatus(CoinInfo.SELL);
+                    coinInfo.setSellTime(System.currentTimeMillis());
+                    Ticker ticker = mTickerMapInfo.get(key);
+                    coinInfo.setSellPrice(ticker != null &&  ticker.getTradePrice() != null ? ticker.getTradePrice().doubleValue() : 0);
+
+                    mResultListInfo.add(coinInfo);
+                    mResultListAdapter.setResultItems(mResultListInfo);
+
                     removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
                     removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
+
                     mResponseOrderInfoMap.remove(key);
+                    mBuyingItemKeyList.remove(key);
+                    mBuyingItemMapInfo.remove(key);
+                    mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                 }
             }
 
@@ -468,29 +485,29 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         boolean isBuy = false;
         if (priceChangedRate >= mMonitorRate && priceChangedRate < (mMonitorRate * 2)) {
-            if (upperTailGap <= 0.2) {
+            if (upperTailRate <= 0.1 && lowerTailRate < 0.1) {
                 toBuyPrice = closePrice;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
-            } else if (upperTailGap > 0.2 && upperTailGap < 0.5) {
+            } else if (upperTailRate > 0.1 && upperTailRate <= 0.3) {
                 toBuyPrice = properPrice;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
-            } else if (tailRate >= 0.5) {
+            } else if (tailRate >= 0.8) {
                 toBuyPrice = (closePrice + lowPrice) / 2;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
             }
         } else if (priceChangedRate > (mMonitorRate * 2)) {
-            if (upperTailGap <= 0.2) {
+            if (upperTailRate <= 0.1) {
                 toBuyPrice = properPrice;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
-            } else if (upperTailGap > 0.2 && upperTailGap < 0.5) {
+            } else if (upperTailRate > 0.1 && upperTailRate <= 0.3) {
                 toBuyPrice = (closePrice + lowPrice) / 2;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
-            } else if (tailRate >= 0.5) {
+            } else if (tailRate >= 0.8) {
                 toBuyPrice = (closePrice + lowPrice) / 2;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
@@ -621,7 +638,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
                 double changedRate = changedPrice / toBuyPrice;
 
-                if (changedRate < mMonitorRate * -0.5 || duration > mMonitorTime * 3) {
+                if (changedRate < mMonitorRate * -0.5 || duration > mMonitorTime * 2) {
                     ResponseOrder order = mResponseOrderInfoMap.get(key);
                     if (order != null && order.getMarket().equals(key)
                             && order.getSide().equals("bid")
@@ -638,7 +655,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
             double changedRate = changedPrice / toBuyPrice;
             Log.d(TAG, "buyingSimulation - getMaxProfitRate: "+coinInfo.getMaxProfitRate()+" changedRate: "+changedRate);
-            if (changedRate - coinInfo.getMaxProfitRate() < mMonitorRate * -0.75) {
+            if ((coinInfo.getMaxProfitRate() - changedRate >= mMonitorRate)
+                    || changedRate < mMonitorRate * -0.75) {
                 if (mViewModel != null) {
                     ResponseOrder order = mResponseOrderInfoMap.get(key);
                     if (order != null && key.equals(order.getMarket())
