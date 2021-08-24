@@ -387,7 +387,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         String key = tradesInfo.get(0).getMarketId();
 
-        if (mBuyingItemKeyList.contains(key)) {
+        if (mBuyingItemKeyList.contains(key) || mBuyingItemMapInfo.get(key) != null) {
             return;
         }
 
@@ -688,7 +688,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
             } else {
-                if (changedRate <= mMonitorRate * -2) {
+                if (changedRate <= mMonitorRate * -1.5) {
                     Log.d(TAG, "[DEBUG] buyingSimulation SELL 3 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
                     isSell = true;
                 }
