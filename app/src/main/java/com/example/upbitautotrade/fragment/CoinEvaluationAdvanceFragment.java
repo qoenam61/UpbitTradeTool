@@ -485,35 +485,38 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         boolean isBuy = false;
         if (priceChangedRate >= mMonitorRate && priceChangedRate < (mMonitorRate * 2)) {
-            if (upperTailRate <= 0.1 && lowerTailRate < 0.1) {
-                toBuyPrice = closePrice;
+            if (upperTailRate == 0 && lowerTailRate == 0 && bodyGap > 0) {
+//                toBuyPrice = CoinInfo.convertPrice(closePrice);
+                toBuyPrice = CoinInfo.convertPrice(properPrice);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 1 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
-            } else if (upperTailRate > 0.1 && upperTailRate <= 0.3) {
-                toBuyPrice = properPrice;
+            } else if (upperTailRate > 0 && upperTailRate <= 0.2 && bodyGap > 0) {
+//                toBuyPrice = CoinInfo.convertPrice(properPrice);
+                toBuyPrice = CoinInfo.convertPrice((openPrice + lowPrice) / 2);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 2 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
-            } else if (tailRate >= 0.8) {
-                toBuyPrice = (closePrice + lowPrice) / 2;
+            } else if (tailRate >= 0.8 && upperTailRate <= 0.2 && bodyGap > 0) {
+//                toBuyPrice = CoinInfo.convertPrice((openPrice + lowPrice) / 2);
+                toBuyPrice = CoinInfo.convertPrice(lowPrice);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 3 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
             }
         } else if (priceChangedRate > (mMonitorRate * 2)) {
-            if (upperTailRate <= 0.1) {
-                toBuyPrice = properPrice;
+            if (upperTailRate <= 0.1 && bodyGap > 0) {
+                toBuyPrice = CoinInfo.convertPrice(properPrice);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 4 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
-            } else if (upperTailRate > 0.1 && upperTailRate <= 0.3) {
-                toBuyPrice = (closePrice + lowPrice) / 2;
+            } else if (upperTailRate > 0.1 && upperTailRate <= 0.2 && bodyGap > 0) {
+                toBuyPrice = CoinInfo.convertPrice((openPrice + lowPrice) / 2);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 5 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
-            } else if (tailRate >= 0.8) {
-                toBuyPrice = (closePrice + lowPrice) / 2;
+            } else if (tailRate >= 0.8 && upperTailRate <= 0.2 && bodyGap > 0) {
+                toBuyPrice = CoinInfo.convertPrice(lowPrice);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 6 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
@@ -592,8 +595,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             );
         }
 
-        // SELL
-        if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("ask") && orderInfo.getRemainingVolume().doubleValue() == 0) {
+          if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("ask") && orderInfo.getRemainingVolume().doubleValue() == 0) {
             coinInfo.setMarketId(key);
             coinInfo.setStatus(CoinInfo.SELL);
             coinInfo.setSellTime(System.currentTimeMillis());
@@ -668,22 +670,37 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             Log.d(TAG, "buyingSimulation - key: " + key +" getMaxProfitRate: "+coinInfo.getMaxProfitRate()+" changedRate: "+changedRate);
             double profitRate = changedRate - coinInfo.getMaxProfitRate();
 
+//            if (changedRate <= mMonitorRate * -1.5) {
+//                ResponseOrder order = mResponseOrderInfoMap.get(key);
+//                if (order != null && key.equals(order.getMarket())
+//                        && order.getSide().equals("bid")
+//                        && order.getState().equals(Post.DONE)) {
+//                    String uuid = UUID.randomUUID().toString();
+//                    Post postSell = new Post(key, "ask", order.getVolume().toString(), Double.toString(toBuyPrice), "limit", uuid);
+//                    registerProcess(UPDATE_POST_ORDER_INFO, postSell);
+//                    order.setUuid(uuid);
+//                    mResponseOrderInfoMap.put(key, order);
+//                    Log.d(TAG, "[DEBUG] buyingSimulation SELL 0- !!!! : " + key + " uuid: " + uuid);
+//                }
+//                return;
+//            }
+
             boolean isSell = false;
             if (coinInfo.getMaxProfitRate() >= mMonitorRate * 2) {
                 if ((profitRate <= mMonitorRate * -1)) {
-                    Log.d(TAG, "[DEBUG] buyingSimulation SELL 0 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
+                    Log.d(TAG, "[DEBUG] buyingSimulation SELL 1 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
                     isSell = true;
                 }
             } else if (coinInfo.getMaxProfitRate() < mMonitorRate * 2
                     && coinInfo.getMaxProfitRate() >= mMonitorRate * 0.5) {
                 if (coinInfo.getMaxProfitRate() >= mMonitorRate) {
                     if ((profitRate <= mMonitorRate * -0.75)) {
-                        Log.d(TAG, "[DEBUG] buyingSimulation SELL 1 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
+                        Log.d(TAG, "[DEBUG] buyingSimulation SELL 2 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
                         isSell = true;
                     }
                 } else {
                     if ((profitRate <= mMonitorRate * -0.5)) {
-                        Log.d(TAG, "[DEBUG] buyingSimulation SELL 2 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
+                        Log.d(TAG, "[DEBUG] buyingSimulation SELL 3 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
                         isSell = true;
                     }
                 }

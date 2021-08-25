@@ -155,7 +155,7 @@ public class CoinInfo {
         return tickCounts;
     }
 
-    private double convertPrice(double price) {
+    public static double convertPrice(double price) {
         DecimalFormat mFormatUnder10 = new DecimalFormat("#.##");
         DecimalFormat mFormatUnder100 = new DecimalFormat("##.#");
         DecimalFormat mFormatUnder1_000 = new DecimalFormat("###");
