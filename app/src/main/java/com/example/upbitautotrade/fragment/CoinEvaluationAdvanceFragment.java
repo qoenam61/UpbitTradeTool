@@ -59,9 +59,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
 
-    private final double PRICE_AMOUNT = 6000;
-    private final double MONITORING_PERIOD_TIME = 3 * 60 * 1000;
-    private final int TICK_COUNTS = 1800;
+    private final double PRICE_AMOUNT = 10000;
+    private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
+    private final int TICK_COUNTS = 600;
     private final double CHANGED_RATE = 0.01;
     private final int TRADE_COUNTS = TICK_COUNTS;
 
@@ -435,13 +435,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         if (mBuyingItemKeyList.contains(key)) {
             CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
-            if (coinInfo != null) {
+            if (coinInfo != null && coinInfo.getStatus().equals(CoinInfo.BUY)) {
                 coinInfo.setMaxProfitRate(highPrice);
                 coinInfo.setOpenPrice(openPrice);
                 coinInfo.setClosePrice(openPrice);
                 coinInfo.setHighPrice(openPrice);
                 coinInfo.setLowPrice(openPrice);
                 mBuyingItemMapInfo.put(key, coinInfo);
+                Log.d(TAG, "[DEBUG] makeTradeMapInfo open: "+coinInfo.getOpenPrice()+" close: "+coinInfo.getClosePrice()+" high: "+coinInfo.getHighPrice()+" low: "+coinInfo.getLowPrice() + " maxPriceRate: "+coinInfo.getMaxProfitRate());
             }
             return;
         } else {
@@ -531,6 +532,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
             registerProcess(UPDATE_POST_ORDER_INFO, post);
             coinInfo.setBuyPrice(toBuyPrice);
+            Log.d(TAG, "[DEBUG] tacticalToBuy open: "+coinInfo.getOpenPrice()+" close: "+coinInfo.getClosePrice()+" high: "+coinInfo.getHighPrice()+" low: "+coinInfo.getLowPrice());
             mBuyingItemMapInfo.put(key, coinInfo);
             Log.d(TAG, "[DEBUG] tacticalToBuy Wait - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
         }
@@ -591,6 +593,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
             mResponseOrderInfoMap.put(key, orderInfo);
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+            mMonitorKeyList.remove(key);
 
             Log.d(TAG, "[DEBUG] monitoringBuyList BUY - !!!! marketId: " + key
                     +" buy price: "+ coinInfo.getBuyPrice()
@@ -646,8 +649,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
         if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.WAITING)) {
             // Request to Cancel.
-            coinInfo.setMaxProfitRate(ticker.getTradePrice().doubleValue());
-            mBuyingItemMapInfo.put(key, coinInfo);
             double toBuyPrice = coinInfo.getBuyPrice();
             long duration = System.currentTimeMillis() - coinInfo.getWaitTime();
             if (toBuyPrice > ticker.getTradePrice().doubleValue() || duration > mMonitorTime * 3) {
