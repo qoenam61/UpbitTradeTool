@@ -139,16 +139,32 @@ public class CoinInfo {
         return convertPrice(openPrice);
     }
 
+    public void setOpenPrice(double openPrice) {
+        this.openPrice = openPrice;
+    }
+
     public double getClosePrice() {
         return convertPrice(closePrice);
+    }
+
+    public void setClosePrice(double closePrice) {
+        this.closePrice = closePrice;
     }
 
     public double getHighPrice() {
         return convertPrice(highPrice);
     }
 
+    public void setHighPrice(double highPrice) {
+        this.highPrice = highPrice;
+    }
+
     public double getLowPrice() {
         return convertPrice(lowPrice);
+    }
+
+    public void setLowPrice(double lowPrice) {
+        this.lowPrice = lowPrice;
     }
 
     public int getTickCounts() {

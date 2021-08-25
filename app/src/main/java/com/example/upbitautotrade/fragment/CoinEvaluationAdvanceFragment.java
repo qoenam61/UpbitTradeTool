@@ -434,9 +434,13 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         int tickCount = tradeInfoQueue.size();
 
         if (mBuyingItemKeyList.contains(key)) {
-            if (mBuyingItemMapInfo.get(key) != null) {
-                CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice, tickCount);
+            CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+            if (coinInfo != null) {
                 coinInfo.setMaxProfitRate(highPrice);
+                coinInfo.setOpenPrice(openPrice);
+                coinInfo.setClosePrice(openPrice);
+                coinInfo.setHighPrice(openPrice);
+                coinInfo.setLowPrice(openPrice);
                 mBuyingItemMapInfo.put(key, coinInfo);
             }
             return;
@@ -707,7 +711,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
             } else {
-                if (changedRate <= mMonitorRate * -1.5) {
+                if (changedRate <= mMonitorRate * -1.5 && coinInfo.getTickCounts() >= TICK_COUNTS * 0.5) {
                     Log.d(TAG, "[DEBUG] buyingSimulation SELL 3 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
                     isSell = true;
                 }
