@@ -490,37 +490,43 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         boolean isBuy = false;
         if (priceChangedRate >= mMonitorRate && priceChangedRate < (mMonitorRate * 2)) {
             if (upperTailRate == 0 && lowerTailRate == 0 && bodyGap > 0) {
-//                toBuyPrice = CoinInfo.convertPrice(closePrice);
-                toBuyPrice = CoinInfo.convertPrice(properPrice);
+                toBuyPrice = CoinInfo.convertPrice((2 * closePrice + openPrice) / 3);
+//                toBuyPrice = CoinInfo.convertPrice(properPrice);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 1 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
             } else if (upperTailRate > 0 && upperTailRate <= 0.2 && bodyGap > 0) {
-//                toBuyPrice = CoinInfo.convertPrice(properPrice);
-                toBuyPrice = CoinInfo.convertPrice((openPrice + lowPrice) / 2);
+                toBuyPrice = CoinInfo.convertPrice(properPrice);
+//                toBuyPrice = CoinInfo.convertPrice((openPrice + lowPrice) / 2);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 2 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
             } else if (tailRate >= 0.8 && upperTailRate <= 0.2 && bodyGap > 0) {
-//                toBuyPrice = CoinInfo.convertPrice((openPrice + lowPrice) / 2);
-                toBuyPrice = CoinInfo.convertPrice(lowPrice);
+                toBuyPrice = CoinInfo.convertPrice((closePrice + openPrice + lowPrice) / 3);
+//                toBuyPrice = CoinInfo.convertPrice(lowPrice);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 3 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
             }
         } else if (priceChangedRate > (mMonitorRate * 2)) {
-            if (upperTailRate <= 0.1 && bodyGap > 0) {
+            if (upperTailRate == 0 && lowerTailRate == 0 && bodyGap > 0) {
+                toBuyPrice = CoinInfo.convertPrice( (2 * closePrice + openPrice) / 3);
+//                toBuyPrice = CoinInfo.convertPrice(properPrice);
+                volume = (mPriceAmount / toBuyPrice);
+                isBuy = true;
+                Log.d(TAG, "[DEBUG] tacticalToBuy 1 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
+            } else if (upperTailRate <= 0.1 && bodyGap > 0) {
                 toBuyPrice = CoinInfo.convertPrice(properPrice);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 4 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
             } else if (upperTailRate > 0.1 && upperTailRate <= 0.2 && bodyGap > 0) {
-                toBuyPrice = CoinInfo.convertPrice((openPrice + lowPrice) / 2);
+                toBuyPrice = CoinInfo.convertPrice((closePrice + openPrice + lowPrice) / 3);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 5 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
             } else if (tailRate >= 0.8 && upperTailRate <= 0.2 && bodyGap > 0) {
-                toBuyPrice = CoinInfo.convertPrice(lowPrice);
+                toBuyPrice = CoinInfo.convertPrice((closePrice + openPrice + lowPrice + lowPrice) / 4);
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 6 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount);
@@ -706,14 +712,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         isSell = true;
                     }
                 } else {
-                    if ((profitRate <= mMonitorRate * -0.5)) {
+                    if ((profitRate <= mMonitorRate * -0.5) && changedPrice > 0) {
                         Log.d(TAG, "[DEBUG] buyingSimulation SELL 3 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
                         isSell = true;
                     }
                 }
             } else {
                 if (changedRate <= mMonitorRate * -1.5 && coinInfo.getTickCounts() >= TICK_COUNTS * 0.5) {
-                    Log.d(TAG, "[DEBUG] buyingSimulation SELL 3 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
+                    Log.d(TAG, "[DEBUG] buyingSimulation SELL 4 key: " + key + " profitRate : " + profitRate + " changedRate: " + changedRate);
                     isSell = true;
                 }
             }
