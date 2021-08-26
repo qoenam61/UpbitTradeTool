@@ -438,11 +438,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (coinInfo != null && coinInfo.getStatus().equals(CoinInfo.BUY)) {
                 coinInfo.setMaxProfitRate(highPrice);
                 coinInfo.setOpenPrice(openPrice);
-                coinInfo.setClosePrice(openPrice);
-                coinInfo.setHighPrice(openPrice);
-                coinInfo.setLowPrice(openPrice);
+                coinInfo.setClosePrice(closePrice);
+                coinInfo.setHighPrice(highPrice);
+                coinInfo.setLowPrice(lowPrice);
+                coinInfo.setTickCounts(tickCount);
                 mBuyingItemMapInfo.put(key, coinInfo);
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo open: "+coinInfo.getOpenPrice()+" close: "+coinInfo.getClosePrice()+" high: "+coinInfo.getHighPrice()+" low: "+coinInfo.getLowPrice() + " maxPriceRate: "+coinInfo.getMaxProfitRate());
+                Log.d(TAG, "[DEBUG] makeTradeMapInfo open: "+coinInfo.getOpenPrice()+" close: "+coinInfo.getClosePrice()+" high: "+coinInfo.getHighPrice()+" low: "+coinInfo.getLowPrice() + " maxPriceRate: "+coinInfo.getMaxProfitRate()+ " getTickCounts: "+coinInfo.getTickCounts());
             }
             return;
         } else {
@@ -475,9 +476,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double highPrice = coinInfo.getHighPrice();
         double lowPrice = coinInfo.getLowPrice();
 
-        double upperTailGap = Math.abs(highPrice - closePrice);
-        double lowerTailGap = Math.abs(openPrice - lowPrice);
-        double bodyGap = Math.abs(closePrice - openPrice);
+        double upperTailGap = highPrice - closePrice;
+        double lowerTailGap = openPrice - lowPrice;
+        double bodyGap = closePrice - openPrice;
         double upperTailRate = upperTailGap / bodyGap;
         double lowerTailRate = lowerTailGap / bodyGap;
         double tailRate = (lowerTailRate - upperTailGap) / lowerTailGap;
@@ -661,7 +662,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
                 double changedRate = changedPrice / toBuyPrice;
 
-                if (changedRate < mMonitorRate * -0.5 || duration > mMonitorTime * 2) {
+                if (changedRate > mMonitorRate * 2 || duration > mMonitorTime) {
                     ResponseOrder order = mResponseOrderInfoMap.get(key);
                     if (order != null && order.getMarket().equals(key)
                             && order.getSide().equals("bid")

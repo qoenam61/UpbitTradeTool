@@ -171,6 +171,10 @@ public class CoinInfo {
         return tickCounts;
     }
 
+    public void setTickCounts(int tickCounts) {
+        this.tickCounts = tickCounts;
+    }
+
     public static double convertPrice(double price) {
         DecimalFormat mFormatUnder10 = new DecimalFormat("#.##");
         DecimalFormat mFormatUnder100 = new DecimalFormat("##.#");
