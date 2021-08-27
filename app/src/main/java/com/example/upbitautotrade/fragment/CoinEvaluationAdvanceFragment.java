@@ -60,9 +60,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
 
     private final double PRICE_AMOUNT = 10000;
-    private final double MONITORING_PERIOD_TIME = 1 * 60 * 1000;
+    private final double MONITORING_PERIOD_TIME = 1;
     private final int TICK_COUNTS = 300;
-    private final double CHANGED_RATE = 0.015;
+    private final double TRADE_RATE = 0.015;
     private final int TRADE_COUNTS = TICK_COUNTS;
 
     private View mView;
@@ -92,8 +92,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     // Parameter
     private double mPriceAmount = PRICE_AMOUNT;
-    private double mMonitorTime = MONITORING_PERIOD_TIME / (60 * 1000);
-    private double mMonitorRate = CHANGED_RATE;
+    private double mMonitorTime = MONITORING_PERIOD_TIME * (60 * 1000);
+    private double mMonitorRate = TRADE_RATE;
     private double mMonitorTick = TICK_COUNTS;
 
     boolean mIsStarting = false;
@@ -181,14 +181,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         DecimalFormat nonZeroFormat = new DecimalFormat("###,###,###,###");
         DecimalFormat percentFormat = new DecimalFormat("###.##" + "%");
 
-        buyingPriceText.setText(nonZeroFormat.format(mPriceAmount));
-        monitorTimeText.setText(nonZeroFormat.format(mMonitorTime));
-        monitorRateText.setText(percentFormat.format(mMonitorRate));
-        monitorTickText.setText(nonZeroFormat.format(mMonitorTick));
-        buyingPriceEditText.setText(nonZeroFormat.format(mPriceAmount));
-        monitorTimeEditText.setText(nonZeroFormat.format(mMonitorTime));
-        monitorRateEditText.setText(Double.toString(mMonitorRate * 100));
-        monitorTickEditText.setText(nonZeroFormat.format(mMonitorTick));
+        buyingPriceText.setText(nonZeroFormat.format(PRICE_AMOUNT));
+        monitorTimeText.setText(nonZeroFormat.format(MONITORING_PERIOD_TIME));
+        monitorRateText.setText(percentFormat.format(TRADE_RATE));
+        monitorTickText.setText(nonZeroFormat.format(TICK_COUNTS));
+        buyingPriceEditText.setText(nonZeroFormat.format(PRICE_AMOUNT));
+        monitorTimeEditText.setText(nonZeroFormat.format(MONITORING_PERIOD_TIME));
+        monitorRateEditText.setText(Double.toString(TRADE_RATE * 100));
+        monitorTickEditText.setText(nonZeroFormat.format(TICK_COUNTS));
 
         Button applyButton = mView.findViewById(R.id.trade_input_button);
         applyButton.setOnClickListener(new View.OnClickListener() {
@@ -201,8 +201,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
                 try {
                     mPriceAmount = (buyingPrice != null || !buyingPrice.isEmpty()) ? Double.parseDouble(buyingPrice.replace(",","")) : PRICE_AMOUNT;
-                    mMonitorTime = (monitorTime != null || !monitorTime.isEmpty()) ? Double.parseDouble(monitorTime) * 60 * 1000 : MONITORING_PERIOD_TIME;
-                    mMonitorRate = (monitorRate != null || !monitorRate.isEmpty()) ? Double.parseDouble(monitorRate.replace("%", "")) / 100 : CHANGED_RATE;
+                    mMonitorTime = (monitorTime != null || !monitorTime.isEmpty()) ? Double.parseDouble(monitorTime) * 60 * 1000 : MONITORING_PERIOD_TIME * 60 * 1000;
+                    mMonitorRate = (monitorRate != null || !monitorRate.isEmpty()) ? Double.parseDouble(monitorRate.replace("%", "")) / 100 : TRADE_RATE;
                     mMonitorTick = (monitorTick != null || !monitorTick.isEmpty()) ? Double.parseDouble(monitorTick.replace(",","")) : TICK_COUNTS;
                 } catch (NumberFormatException e) {
                     Log.e(TAG, "Error NumberFormatException");
@@ -396,7 +396,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         Deque<TradeInfo> prevTradeInfo = mTradeMapInfo.get(key);
         Deque<TradeInfo> tradeInfoQueue = prevTradeInfo != null ? prevTradeInfo : new LinkedList<>();
         long prevTradeInfoSeqId = prevTradeInfo != null ? prevTradeInfo.getLast().getSequentialId() : 0;
-        long prevTradeInfoFirstTime = prevTradeInfo != null ? prevTradeInfo.getLast().getTimestamp() : 0;
+        long prevTradeInfoTime = prevTradeInfo != null ? prevTradeInfo.getLast().getTimestamp() : 0;
 
         while (!tradeInfoStack.isEmpty()) {
             TradeInfo tradeInfo= tradeInfoStack.pop();
@@ -414,10 +414,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         while (removeIterator.hasNext()) {
             TradeInfo tradeInfo = removeIterator.next();
             if (tradeInfoQueue.peekLast().getTimestamp() - tradeInfo.getTimestamp() > mMonitorTime) {
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo remove - key: "+key+" getTimestamp: "+format.format(tradeInfo.getTimestamp()));
                 removeIterator.remove();
             } else {
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo - key: "+key+" getTimestamp: "+format.format(tradeInfo.getTimestamp()));
                 double price = tradeInfo.getTradePrice().doubleValue();
                 lowPrice = Math.min(lowPrice, price);
                 highPrice = Math.max(highPrice, price);
@@ -429,7 +427,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double openPrice = tradeInfoQueue.getFirst().getTradePrice().doubleValue();
         double closePrice = tradeInfoQueue.getLast().getTradePrice().doubleValue();
         double priceChangedRate = openPrice != 0 ? (closePrice - openPrice) / openPrice : 0;
-        int tickCount = tradeInfoQueue.size();
+        double tickCount = tradeInfoQueue.size();
 
         if (mBuyingItemKeyList.contains(key)) {
             CoinInfo coinInfo = mBuyingItemMapInfo.get(key);

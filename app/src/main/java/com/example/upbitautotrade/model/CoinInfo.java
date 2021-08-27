@@ -20,7 +20,7 @@ public class CoinInfo {
     double profitRate;
     double buyingAmount;
 
-    int tickCounts;
+    double tickCounts;
 
     private String status = "Waiting";
 
@@ -31,7 +31,7 @@ public class CoinInfo {
     public static final String SELL = "Sell";
     private double mVolume;
 
-    public CoinInfo(double openPrice, double closePrice, double highPrice, double lowPrice, int tickCounts) {
+    public CoinInfo(double openPrice, double closePrice, double highPrice, double lowPrice, double tickCounts) {
         this.openPrice = openPrice;
         this.closePrice = closePrice;
         this.highPrice = highPrice;
@@ -167,11 +167,11 @@ public class CoinInfo {
         this.lowPrice = lowPrice;
     }
 
-    public int getTickCounts() {
+    public double getTickCounts() {
         return tickCounts;
     }
 
-    public void setTickCounts(int tickCounts) {
+    public void setTickCounts(double tickCounts) {
         this.tickCounts = tickCounts;
     }
 
