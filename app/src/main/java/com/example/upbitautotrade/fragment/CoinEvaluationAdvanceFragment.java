@@ -339,6 +339,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             mTickerMapInfo.put(key, tick);
                             buyingSimulation(key, tick);
                         }
+                        mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                         mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                         mResultListAdapter.setResultItems(mResultListInfo);
                     }
@@ -450,6 +451,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " getTickCounts: " + coinInfo.getTickCounts()
                 );
             }
+            mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
+            mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+            mResultListAdapter.setResultItems(mResultListInfo);
             return;
         } else {
             if (tickCount >= TICK_COUNTS) {
@@ -646,7 +650,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double currentPrice = 0;
         if (coinInfo != null) {
             currentPrice = ticker.getTradePrice().doubleValue();
-            coinInfo.setClosePrice(currentPrice);
+            coinInfo.updateHighLowClosePrice(currentPrice);
             coinInfo.setMaxProfitRate(currentPrice);
             mBuyingItemMapInfo.put(key, coinInfo);
 

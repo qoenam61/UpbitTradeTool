@@ -159,6 +159,12 @@ public class CoinInfo {
         this.highPrice = highPrice;
     }
 
+    public void updateHighLowClosePrice(double currentPrice) {
+        this.highPrice = Math.max(highPrice, currentPrice);
+        this.lowPrice = Math.min(lowPrice, currentPrice);
+        this.closePrice = currentPrice;
+    }
+
     public double getLowPrice() {
         return convertPrice(lowPrice);
     }
