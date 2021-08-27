@@ -658,7 +658,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             // Request to Cancel.
             double toBuyPrice = coinInfo.getBuyPrice();
             long duration = System.currentTimeMillis() - coinInfo.getWaitTime();
-            if (toBuyPrice > ticker.getTradePrice().doubleValue() || duration > mMonitorTime * 3) {
+            if (toBuyPrice > ticker.getTradePrice().doubleValue() || duration > mMonitorTime) {
                 double changedPrice = ticker.getTradePrice().doubleValue() - toBuyPrice;
                 double changedRate = changedPrice / toBuyPrice;
 
