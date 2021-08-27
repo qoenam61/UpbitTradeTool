@@ -748,11 +748,21 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                                 + " profitRate: " + profitRate
                         );
                     }
+                } else {
+                    if ((profitRate < mMonitorRate * -0.75 && diffPriceRate < -mMonitorRate * -0.75)) {
+                        isSell = true;
+                        Log.d(TAG, "[DEBUG] buyingSimulation SELL - 3 : " + key
+                                + " price: " + currentPrice
+                                + " changedRate: " + changedRate
+                                + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                                + " profitRate: " + profitRate
+                        );
+                    }
                 }
             } else {
                 if (changedRate <= mMonitorRate * -1.5 && coinInfo.getTickCounts() >= TICK_COUNTS * 0.5) {
                     isSell = true;
-                    Log.d(TAG, "[DEBUG] buyingSimulation SELL - 3 : " + key
+                    Log.d(TAG, "[DEBUG] buyingSimulation SELL - 4 : " + key
                             + " price: " + currentPrice
                             + " changedRate: " + changedRate
                             + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
