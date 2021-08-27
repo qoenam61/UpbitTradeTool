@@ -508,6 +508,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double type2 = (Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2)) / 3;
         double buyPriceType2 = CoinInfo.convertPrice(Math.sqrt(type2));
 
+        Log.d(TAG, "[DEBUG] tacticalToBuy calc - !!!! marketId: " + key
+                + " price: " + toBuyPrice
+                + " priceAmount: " + mPriceAmount
+                + " candleRate: " + candleRate
+                + " upperTailRate: " + upperTailRate
+                + " lowerTailRate: " + lowerTailRate
+                + " tailRate: " + tailRate
+        );
 
         boolean isBuy = false;
         if (candleRate >= mMonitorRate) {
@@ -516,7 +524,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 1 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount + " candleRate: " + candleRate);
-            } else if (upperTailRate <= 0.3 && lowerTailGap <= 0.3) {
+            } else if (upperTailRate <= 0.3 && lowerTailRate <= 0.3) {
                 toBuyPrice = buyPriceType1;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
@@ -648,15 +656,19 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private void buyingSimulation(String key, Ticker ticker) {
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
         double currentPrice = 0;
+        double diffPrice = 0;
+        double diffPriceRate = 0;
         if (coinInfo != null) {
             currentPrice = ticker.getTradePrice().doubleValue();
+            diffPrice = currentPrice - coinInfo.getClosePrice();
+            diffPriceRate = diffPrice / coinInfo.getClosePrice();
             coinInfo.updateHighLowClosePrice(currentPrice);
             coinInfo.setMaxProfitRate(currentPrice);
             mBuyingItemMapInfo.put(key, coinInfo);
 
             double priceChangedRate = coinInfo.getOpenPrice() != 0 ? (coinInfo.getClosePrice() - coinInfo.getOpenPrice()) / coinInfo.getOpenPrice() : 0;
 
-            Log.d(TAG, "[DEBUG] makeTradeMapInfo 0 - key: " + key
+            Log.d(TAG, "[DEBUG] makeTradeMapInfo update - key: " + key
                     + " open: " + coinInfo.getOpenPrice()
                     + " close: " + coinInfo.getClosePrice()
                     + " high: " + coinInfo.getHighPrice()
@@ -665,6 +677,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     + " priceChangedRate: " + priceChangedRate
                     + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
                     + " getTickCounts: " + coinInfo.getTickCounts()
+                    + " diffPrice: " + diffPrice
+                    + " diffPriceRate: " + diffPriceRate
             );
         }
         if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.WAITING)) {
