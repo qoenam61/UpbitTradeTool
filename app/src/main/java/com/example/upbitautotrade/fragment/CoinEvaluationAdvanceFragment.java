@@ -490,7 +490,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double bodyGap = closePrice - openPrice;
         double upperTailRate = upperTailGap / bodyGap;
         double lowerTailRate = lowerTailGap / bodyGap;
-        double tailRate = (upperTailGap - lowerTailGap) / lowerTailGap;
+        double tailRate = lowerTailGap != 0 ? (upperTailGap - lowerTailGap) / lowerTailGap : 0;
 
         double toBuyPrice = 0;
         double volume = 0;
