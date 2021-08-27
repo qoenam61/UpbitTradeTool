@@ -418,7 +418,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 removeIterator.remove();
             } else {
                 double price = tradeInfo.getTradePrice().doubleValue();
-                lowPrice = Math.min(lowPrice, price);
+                lowPrice = lowPrice == 0 ? price : Math.min(lowPrice, price);
                 highPrice = Math.max(highPrice, price);
             }
         }
@@ -490,7 +490,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double bodyGap = closePrice - openPrice;
         double upperTailRate = upperTailGap / bodyGap;
         double lowerTailRate = lowerTailGap / bodyGap;
-        double tailRate = (upperTailGap - lowerTailRate) / lowerTailGap;
+        double tailRate = (upperTailGap - lowerTailGap) / lowerTailGap;
 
         double toBuyPrice = 0;
         double volume = 0;
