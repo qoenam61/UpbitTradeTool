@@ -60,7 +60,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
 
     private final double PRICE_AMOUNT = 10000;
-    private final double MONITORING_PERIOD_TIME = 1;
+    private final double MONITORING_PERIOD_TIME = 1.5;
     private final int TICK_COUNTS = 300;
     private final double TRADE_RATE = 0.015;
     private final int TRADE_COUNTS = TICK_COUNTS;
