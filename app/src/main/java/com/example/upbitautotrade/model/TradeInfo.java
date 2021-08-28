@@ -35,6 +35,19 @@ public class TradeInfo implements Serializable {
     @SerializedName("sequential_id")
     long sequentialId;
 
+    public TradeInfo(String market, String tradeDateUtc, String tradeTimeUtc, long timestamp, Number tradePrice, Number tradeVolume, Number prevClosingPrice, Number changePrice, String askBid, long sequentialId) {
+        this.market = market;
+        this.tradeDateUtc = tradeDateUtc;
+        this.tradeTimeUtc = tradeTimeUtc;
+        this.timestamp = timestamp;
+        this.tradePrice = tradePrice;
+        this.tradeVolume = tradeVolume;
+        this.prevClosingPrice = prevClosingPrice;
+        this.changePrice = changePrice;
+        this.askBid = askBid;
+        this.sequentialId = sequentialId;
+    }
+
     public String getMarketId() {
         return market;
     }
