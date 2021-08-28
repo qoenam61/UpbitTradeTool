@@ -294,6 +294,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public void onStart() {
         super.onStart();
         if (mViewModel != null) {
+            DateFormat format = new SimpleDateFormat("HH:mm:ss.sss", Locale.KOREA);
+            format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
+
             mViewModel.getMarketsInfo().observe(
                     getViewLifecycleOwner(),
                     marketsInfo -> {
@@ -338,6 +341,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             String key = tick.getMarketId();
                             mTickerMapInfo.put(key, tick);
                             buyingSimulation(key, tick);
+                            Log.d(TAG, "[DEBUG] onStart key: "+key+" getTradePrice: "+tick.getTradePrice()+" getTimestamp: "+format.format(tick.getTimestamp()));
                         }
                         mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                         mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
@@ -454,6 +458,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
             mResultListAdapter.setResultItems(mResultListInfo);
+            buyingSimulation(key, null);
             return;
         } else {
             if (tickCount >= TICK_COUNTS) {
@@ -509,7 +514,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double buyPriceType2 = CoinInfo.convertPrice(Math.sqrt(type2));
 
         Log.d(TAG, "[DEBUG] tacticalToBuy calc - !!!! marketId: " + key
-                + " price: " + toBuyPrice
                 + " priceAmount: " + mPriceAmount
                 + " candleRate: " + candleRate
                 + " upperTailRate: " + upperTailRate
@@ -667,68 +671,75 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double priceChangedRate = 0;
         double tickCount = 0;
 
-        Deque<TradeInfo> tradeInfoQueue = mTradeMapInfo.get(key);
-        if (tradeInfoQueue != null) {
-            TradeInfo newTradeInfo = new TradeInfo(key,
-                    tradeInfoQueue.getLast().getTradeDateUtc(),
-                    tradeInfoQueue.getLast().getTradeTimeUtc(),
-                    ticker.getTimestamp(),
-                    ticker.getTradePrice(),
-                    ticker.getTradeVolume(),
-                    ticker.getPrevClosingPrice(),
-                    ticker.getChangePrice(),
-                    tradeInfoQueue.getLast().getAskBid(),
-                    tradeInfoQueue.getLast().getSequentialId()
-            );
-            tradeInfoQueue.offer(newTradeInfo);
-            Iterator<TradeInfo> removeIterator = tradeInfoQueue.iterator();
-            while (removeIterator.hasNext()) {
-                TradeInfo tradeInfo = removeIterator.next();
-                if (tradeInfoQueue.peekLast().getTimestamp() - tradeInfo.getTimestamp() > mMonitorTime) {
-                    removeIterator.remove();
-                } else {
-                    double price = tradeInfo.getTradePrice().doubleValue();
-                    lowPrice = lowPrice == 0 ? price : Math.min(lowPrice, price);
-                    highPrice = Math.max(highPrice, price);
+        if (ticker != null) {
+            Deque<TradeInfo> tradeInfoQueue = mTradeMapInfo.get(key);
+            if (tradeInfoQueue != null) {
+                TradeInfo newTradeInfo = new TradeInfo(key,
+                        tradeInfoQueue.getLast().getTradeDateUtc(),
+                        tradeInfoQueue.getLast().getTradeTimeUtc(),
+                        ticker.getTimestamp(),
+                        ticker.getTradePrice(),
+                        ticker.getTradeVolume(),
+                        ticker.getPrevClosingPrice(),
+                        ticker.getChangePrice(),
+                        tradeInfoQueue.getLast().getAskBid(),
+                        tradeInfoQueue.getLast().getSequentialId()
+                );
+                tradeInfoQueue.offer(newTradeInfo);
+                Iterator<TradeInfo> removeIterator = tradeInfoQueue.iterator();
+                while (removeIterator.hasNext()) {
+                    TradeInfo tradeInfo = removeIterator.next();
+                    if (tradeInfoQueue.peekLast().getTimestamp() - tradeInfo.getTimestamp() > mMonitorTime) {
+                        removeIterator.remove();
+                    } else {
+                        double price = tradeInfo.getTradePrice().doubleValue();
+                        lowPrice = lowPrice == 0 ? price : Math.min(lowPrice, price);
+                        highPrice = Math.max(highPrice, price);
+                    }
+                }
+                mTradeMapInfo.put(key, tradeInfoQueue);
+
+                openPrice = tradeInfoQueue.getFirst().getTradePrice().doubleValue();
+                closePrice = tradeInfoQueue.getLast().getTradePrice().doubleValue();
+                priceChangedRate = openPrice != 0 ? (closePrice - openPrice) / openPrice : 0;
+                tickCount = tradeInfoQueue.size();
+
+                CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+                if (coinInfo != null) {
+                    currentPrice = ticker.getTradePrice().doubleValue();
+                    diffPrice = currentPrice - coinInfo.getClosePrice();
+                    diffPriceRate = diffPrice / coinInfo.getClosePrice();
+
+                    coinInfo.setMaxProfitRate(highPrice);
+                    coinInfo.setOpenPrice(openPrice);
+                    coinInfo.setClosePrice(closePrice);
+                    coinInfo.setHighPrice(highPrice);
+                    coinInfo.setLowPrice(lowPrice);
+                    coinInfo.setTickCounts(tickCount);
+
+                    mBuyingItemMapInfo.put(key, coinInfo);
+
+                    mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
+                    mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+                    mResultListAdapter.setResultItems(mResultListInfo);
+                    Log.d(TAG, "[DEBUG] makeTradeMapInfo update - key: " + key
+                            + " open: " + coinInfo.getOpenPrice()
+                            + " close: " + coinInfo.getClosePrice()
+                            + " high: " + coinInfo.getHighPrice()
+                            + " low: " + coinInfo.getLowPrice()
+                            + " getBuyPrice: " + coinInfo.getBuyPrice()
+                            + " priceChangedRate: " + priceChangedRate
+                            + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                            + " getTickCounts: " + coinInfo.getTickCounts()
+                            + " diffPrice: " + diffPrice
+                            + " diffPriceRate: " + diffPriceRate
+                    );
                 }
             }
-            mTradeMapInfo.put(key, tradeInfoQueue);
-
-            openPrice = tradeInfoQueue.getFirst().getTradePrice().doubleValue();
-            closePrice = tradeInfoQueue.getLast().getTradePrice().doubleValue();
-            priceChangedRate = openPrice != 0 ? (closePrice - openPrice) / openPrice : 0;
-            tickCount = tradeInfoQueue.size();
-
+        } else {
             CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
             if (coinInfo != null) {
-                currentPrice = ticker.getTradePrice().doubleValue();
-                diffPrice = currentPrice - coinInfo.getClosePrice();
-                diffPriceRate = diffPrice / coinInfo.getClosePrice();
-
-                coinInfo.setMaxProfitRate(highPrice);
-                coinInfo.setOpenPrice(openPrice);
-                coinInfo.setClosePrice(closePrice);
-                coinInfo.setHighPrice(highPrice);
-                coinInfo.setLowPrice(lowPrice);
-                coinInfo.setTickCounts(tickCount);
-
-                mBuyingItemMapInfo.put(key, coinInfo);
-
-                mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
-                mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
-                mResultListAdapter.setResultItems(mResultListInfo);
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo update - key: " + key
-                        + " open: " + coinInfo.getOpenPrice()
-                        + " close: " + coinInfo.getClosePrice()
-                        + " high: " + coinInfo.getHighPrice()
-                        + " low: " + coinInfo.getLowPrice()
-                        + " getBuyPrice: " + coinInfo.getBuyPrice()
-                        + " priceChangedRate: " + priceChangedRate
-                        + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
-                        + " getTickCounts: " + coinInfo.getTickCounts()
-                        + " diffPrice: " + diffPrice
-                        + " diffPriceRate: " + diffPriceRate
-                );
+                currentPrice = coinInfo.getClosePrice();
             }
         }
 
@@ -765,8 +776,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
             boolean isSell = false;
             if (coinInfo.getMaxProfitRate() > mMonitorRate * 2) {
-                isSell = true;
                 if ((profitRate < mMonitorRate * -1)) {
+                    isSell = true;
                     Log.d(TAG, "[DEBUG] buyingSimulation SELL - 1 : " + key
                             + " price: " + currentPrice
                             + " changedRate: " + changedRate
@@ -786,7 +797,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         );
                     }
                 } else {
-                    if ((profitRate < mMonitorRate * -0.75 && diffPriceRate < -mMonitorRate * -0.75)) {
+                    if ((profitRate < mMonitorRate * -0.75 && diffPriceRate < mMonitorRate * -0.75)) {
                         isSell = true;
                         Log.d(TAG, "[DEBUG] buyingSimulation SELL - 3 : " + key
                                 + " price: " + currentPrice
@@ -797,7 +808,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
             } else {
-                if (changedRate <= mMonitorRate * -1.5 && coinInfo.getTickCounts() >= TICK_COUNTS * 0.5) {
+                if (changedRate <= mMonitorRate * -1.5
+                        && coinInfo.getTickCounts() >= TICK_COUNTS * 0.5
+                        && diffPriceRate > 0) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] buyingSimulation SELL - 4 : " + key
                             + " price: " + currentPrice
