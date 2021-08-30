@@ -179,14 +179,15 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         buyingPriceEditText.addTextChangedListener(new NumberWatcher(buyingPriceEditText));
 
         DecimalFormat nonZeroFormat = new DecimalFormat("###,###,###,###");
+        DecimalFormat zeroFormat = new DecimalFormat("###,###,###,###.#");
         DecimalFormat percentFormat = new DecimalFormat("###.##" + "%");
 
         buyingPriceText.setText(nonZeroFormat.format(PRICE_AMOUNT));
-        monitorTimeText.setText(nonZeroFormat.format(MONITORING_PERIOD_TIME));
+        monitorTimeText.setText(zeroFormat.format(MONITORING_PERIOD_TIME));
         monitorRateText.setText(percentFormat.format(TRADE_RATE));
         monitorTickText.setText(nonZeroFormat.format(TICK_COUNTS));
         buyingPriceEditText.setText(nonZeroFormat.format(PRICE_AMOUNT));
-        monitorTimeEditText.setText(nonZeroFormat.format(MONITORING_PERIOD_TIME));
+        monitorTimeEditText.setText(zeroFormat.format(MONITORING_PERIOD_TIME));
         monitorRateEditText.setText(Double.toString(TRADE_RATE * 100));
         monitorTickEditText.setText(nonZeroFormat.format(TICK_COUNTS));
 
@@ -211,7 +212,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 Log.d(TAG, "onClick -mPriceAmount: "+mPriceAmount +" mMonitorTime: "+mMonitorTime+" mMonitorRate: "+mMonitorRate+" mMonitorTick: "+mMonitorTick);
 
                 buyingPriceText.setText(nonZeroFormat.format(mPriceAmount));
-                monitorTimeText.setText(nonZeroFormat.format(mMonitorTime / (60 * 1000)));
+                monitorTimeText.setText(zeroFormat.format(mMonitorTime / (60 * 1000)));
                 monitorRateText.setText(percentFormat.format(mMonitorRate));
                 monitorTickText.setText(nonZeroFormat.format(mMonitorTick));
 
@@ -341,7 +342,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             String key = tick.getMarketId();
                             mTickerMapInfo.put(key, tick);
                             buyingSimulation(key, tick);
-                            Log.d(TAG, "[DEBUG] onStart key: "+key+" getTradePrice: "+tick.getTradePrice()+" getTimestamp: "+format.format(tick.getTimestamp()));
                         }
                         mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                         mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
@@ -527,17 +527,17 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 toBuyPrice = buyPriceType0;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
-                Log.d(TAG, "[DEBUG] tacticalToBuy 1 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount + " candleRate: " + candleRate);
+                Log.d(TAG, "[DEBUG] tacticalToBuy 1 - !!!! marketId: " + key + " price: " + toBuyPrice + " volume: " + volume + " priceAmount: " + mPriceAmount + " candleRate: " + candleRate);
             } else if (upperTailRate <= 0.3 && lowerTailRate <= 0.3) {
                 toBuyPrice = buyPriceType1;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
-                Log.d(TAG, "[DEBUG] tacticalToBuy 2 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount + " candleRate: " + candleRate);
+                Log.d(TAG, "[DEBUG] tacticalToBuy 2 - !!!! marketId: " + key + " price: " + toBuyPrice + " volume: " + volume + " priceAmount: " + mPriceAmount + " candleRate: " + candleRate);
             } else if (tailRate < -0.75) {
                 toBuyPrice = buyPriceType2;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
-                Log.d(TAG, "[DEBUG] tacticalToBuy 3 - !!!! marketId: " + key + " price: " + toBuyPrice + " priceAmount: " + mPriceAmount + " candleRate: " + candleRate);
+                Log.d(TAG, "[DEBUG] tacticalToBuy 3 - !!!! marketId: " + key + " price: " + toBuyPrice + " volume: " + volume + " priceAmount: " + mPriceAmount + " candleRate: " + candleRate);
             }
         }
 
@@ -722,17 +722,20 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
                     mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                     mResultListAdapter.setResultItems(mResultListInfo);
+
+                    DecimalFormat format = new DecimalFormat("###,###,###,###.##");
+
                     Log.d(TAG, "[DEBUG] makeTradeMapInfo update - key: " + key
                             + " open: " + coinInfo.getOpenPrice()
                             + " close: " + coinInfo.getClosePrice()
                             + " high: " + coinInfo.getHighPrice()
                             + " low: " + coinInfo.getLowPrice()
                             + " getBuyPrice: " + coinInfo.getBuyPrice()
-                            + " priceChangedRate: " + priceChangedRate
-                            + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                            + " priceChangedRate: " + format.format(priceChangedRate)
+                            + " getMaxProfitRate: " + format.format(coinInfo.getMaxProfitRate())
                             + " getTickCounts: " + coinInfo.getTickCounts()
                             + " diffPrice: " + diffPrice
-                            + " diffPriceRate: " + diffPriceRate
+                            + " diffPriceRate: " + format.format(diffPriceRate)
                     );
                 }
             }
