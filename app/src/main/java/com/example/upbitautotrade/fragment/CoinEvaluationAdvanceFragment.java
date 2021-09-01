@@ -799,7 +799,17 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             }
 
             boolean isSell = false;
-            if (coinInfo.getMaxProfitRate() > mMonitorRate * 2) {
+            if (coinInfo.getMaxProfitRate() > mMonitorRate * 4) {
+                if ((profitRate < mMonitorRate * -1.75)) {
+                    isSell = true;
+                    Log.d(TAG, "[DEBUG] buyingSimulation SELL - 0 : " + key
+                            + " price: " + currentPrice
+                            + " changedRate: " + changedRate
+                            + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                            + " profitRate: " + profitRate
+                    );
+                }
+            } else if (coinInfo.getMaxProfitRate() > mMonitorRate * 2) {
                 if ((profitRate < mMonitorRate * -1)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] buyingSimulation SELL - 1 : " + key
