@@ -784,11 +784,19 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
 
         if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.BUY)) {
+            long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
+
+
+
             // Post to Sell
             double toBuyPrice = coinInfo.getBuyPrice();
             double changedPrice = currentPrice - toBuyPrice;
             double changedRate = changedPrice / toBuyPrice;
             double profitRate = changedRate - coinInfo.getMaxProfitRate();
+
+            if (duration < mMonitorTime && changedPrice <= 0) {
+                return;
+            }
 
             boolean isSell = false;
             if (coinInfo.getMaxProfitRate() > mMonitorRate * 2) {
