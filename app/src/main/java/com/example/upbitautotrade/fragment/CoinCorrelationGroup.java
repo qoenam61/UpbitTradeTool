@@ -232,7 +232,7 @@ public class CoinCorrelationGroup extends Fragment {
 
                 double colValue = correlation(basePriceList.stream().mapToDouble(Double::doubleValue).toArray(),
                         comparePriceList.stream().mapToDouble(Double::doubleValue).toArray());
-                Log.d(TAG, "[DEBUG] correlationCheck -marketId: "+compareMarketId + " value: "+colValue);
+                Log.d(TAG, "correlationCheck -marketId: "+compareMarketId + " value: "+colValue);
                 if (colValue >= 0.95) {
                     mCorrelationResultSet.put(compareMarketId, new CorrelationCoin(compareMarketId, colValue));
                 } else {

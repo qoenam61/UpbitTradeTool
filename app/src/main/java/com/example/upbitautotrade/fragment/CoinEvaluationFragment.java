@@ -419,7 +419,7 @@ public class CoinEvaluationFragment extends Fragment {
                     newTradeInfo.setTickCount(0);
                     newTradeInfo.setTickTurn(tickTurn + 1);
                 }
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo - "
+                Log.d(TAG, "makeTradeMapInfo - "
                         + " getMarketId: " + newTradeInfo.getMarketId()
                         + " getSequentialId: " + newTradeInfo.getSequentialId()
                         + " getMinPrice: " + newTradeInfo.getMinPrice()
@@ -446,7 +446,7 @@ public class CoinEvaluationFragment extends Fragment {
             if (tickNumber == 0) {
                 DateFormat format = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
                 format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-                Log.d(TAG, "[DEBUG] makeTradeMapInfo - checking to evaluationToBuy "
+                Log.d(TAG, "makeTradeMapInfo - checking to evaluationToBuy "
                         + " getMarketId: " + newTradeInfo.getMarketId()
                         + " endToStart: " + endToStart
                         + " endToStartFirst: " + endToStartFirst
@@ -499,7 +499,7 @@ public class CoinEvaluationFragment extends Fragment {
 
         DateFormat format = new SimpleDateFormat("HH:mm:ss.sss", Locale.KOREA);
         format.setTimeZone(TimeZone.getTimeZone("Asia/Seoul"));
-        Log.d(TAG, "[DEBUG] Candidate to BUY - market: " + newTradeInfo.getMarketId()
+        Log.d(TAG, "Candidate to BUY - market: " + newTradeInfo.getMarketId()
                 + " BuyPrice: " + tradePrice
                 + " changed: " + changed
                 + " evalTime: " + evalTime

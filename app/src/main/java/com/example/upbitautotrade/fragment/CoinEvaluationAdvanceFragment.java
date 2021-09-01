@@ -452,7 +452,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 coinInfo.setLowPrice(lowPrice);
                 coinInfo.setTickCounts(tickCount);
                 mBuyingItemMapInfo.put(key, coinInfo);
-                Log.d(TAG, "[DEBUG] updateTradeMapInfoAndTacticalToBuy - key: " + key
+                mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
+                mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+                mResultListAdapter.setResultItems(mResultListInfo);
+                updateTradeMapInfoAndTacticalToSell(key, null);
+                Log.d(TAG, "updateTradeMapInfoAndTacticalToBuy - key: " + key
                         + " open: " + coinInfo.getOpenPrice()
                         + " close: " + coinInfo.getClosePrice()
                         + " high: " + coinInfo.getHighPrice()
@@ -462,12 +466,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
                         + " getTickCounts: " + coinInfo.getTickCounts()
                 );
+                return;
             }
-            mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
-            mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
-            mResultListAdapter.setResultItems(mResultListInfo);
-            updateTradeMapInfoAndTacticalToSell(key, null);
-            return;
         } else {
             if (tickCount >= TICK_COUNTS) {
                 if (!mMonitorKeyList.contains(key)) {
@@ -521,7 +521,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double type2 = (Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2)) / 3;
         double buyPriceType2 = CoinInfo.convertPrice(Math.sqrt(type2));
 
-        Log.d(TAG, "[DEBUG] tacticalToBuy calc - !!!! marketId: " + key
+        Log.d(TAG, "tacticalToBuy calc - !!!! marketId: " + key
                 + " priceAmount: " + mPriceAmount
                 + " candleRate: " + candleRate
                 + " upperTailRate: " + upperTailRate
@@ -575,10 +575,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (!mBuyingItemKeyList.contains(key)) {
                 if (orderInfo.getVolume() != null && orderInfo.getRemainingVolume() != null &&
                         orderInfo.getVolume().doubleValue() != orderInfo.getRemainingVolume().doubleValue()) {
-                    Log.d(TAG, "[DEBUG] updateBuyItemInfo: WAIT setPartialBuy true");
+                    Log.d(TAG, "updateBuyItemInfo: WAIT setPartialBuy true");
                     coinInfo.setPartialBuy(true);
                 } else {
-                    Log.d(TAG, "[DEBUG] updateBuyItemInfo: WAIT setPartialBuy false");
+                    Log.d(TAG, "updateBuyItemInfo: WAIT setPartialBuy false");
                     coinInfo.setPartialBuy(false);
                 }
                 coinInfo.setStatus(CoinInfo.WAITING);
@@ -605,10 +605,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mBuyingItemKeyList.add(key);
             }
             if (orderInfo.getVolume() != null && orderInfo.getRemainingVolume().doubleValue() != 0) {
-                Log.d(TAG, "[DEBUG] updateBuyItemInfo: DONE setPartialBuy true");
+                Log.d(TAG, "updateBuyItemInfo: DONE setPartialBuy true");
                 coinInfo.setPartialBuy(true);
             } else {
-                Log.d(TAG, "[DEBUG] updateBuyItemInfo: DONE setPartialBuy false");
+                Log.d(TAG, "updateBuyItemInfo: DONE setPartialBuy false");
                 coinInfo.setPartialBuy(false);
             }
             coinInfo.setStatus(CoinInfo.BUY);
@@ -616,7 +616,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             coinInfo.setBuyTime(System.currentTimeMillis());
             Ticker ticker = mTickerMapInfo.get(key);
             if (ticker != null) {
-                coinInfo.setMaxProfitRate(ticker.getTradePrice().doubleValue());
+                coinInfo.setMaxProfitRate(coinInfo.getBuyPrice());
             }
             mBuyingItemMapInfo.put(key, coinInfo);
 
@@ -746,7 +746,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
                     DecimalFormat format = new DecimalFormat("###,###,###,###.##");
 
-                    Log.d(TAG, "[DEBUG] updateTradeMapInfoAndTacticalToSell - key: " + key
+                    Log.d(TAG, "updateTradeMapInfoAndTacticalToSell - key: " + key
                             + " open: " + coinInfo.getOpenPrice()
                             + " close: " + coinInfo.getClosePrice()
                             + " high: " + coinInfo.getHighPrice()
@@ -813,6 +813,13 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
 
             if (duration < mMonitorTime && changedRate >= mMonitorRate * -1.5) {
+                Log.d(TAG, "[DEBUG] tacticalToSell SELL - skip : " + key
+                        + " price: " + currentPrice
+                        + " changedRate: " + changedRate
+                        + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                        + " profitRate: " + profitRate
+                        + " duration: " + duration
+                );
                 return;
             }
 
@@ -892,6 +899,27 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     order.setUuid(uuid);
                     mResponseOrderInfoMap.put(key, order);
                 }
+            } else if (duration > mMonitorTime * 3
+                    && coinInfo.getMaxProfitRate() <= mMonitorRate * 0.5
+                    && (profitRate < mMonitorRate * -0.75 || changedRate < mMonitorRate * -0.75)) {
+                ResponseOrder order = mResponseOrderInfoMap.get(key);
+                if (order != null && key.equals(order.getMarket())
+                        && order.getSide().equals("bid")
+                        && order.getState().equals(Post.DONE)) {
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - expired : " + key
+                            + " price: " + currentPrice
+                            + " changedRate: " + changedRate
+                            + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                            + " profitRate: " + profitRate
+                            + " duration: " + duration
+                    );
+                    String uuid = UUID.randomUUID().toString();
+                    Post postSell = new Post(key, "ask", order.getVolume().toString(), null, "market", uuid);
+                    registerProcess(UPDATE_POST_ORDER_INFO, postSell);
+                    order.setUuid(uuid);
+                    mResponseOrderInfoMap.put(key, order);
+                }
+
             }
         }
     }

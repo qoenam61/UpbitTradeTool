@@ -112,7 +112,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.w(TAG, "[DEBUG] onResponse getAccounts -toString: " + call.toString()
+                        Log.w(TAG, "onResponse getAccounts -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -256,7 +256,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.w(TAG, "[DEBUG] onResponse getMarketInfo -toString: " + call.toString()
+                        Log.w(TAG, "onResponse getMarketInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -304,7 +304,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.w(TAG, "[DEBUG] onResponse getMinCandleInfo -toString: " + call.toString()
+                        Log.w(TAG, "onResponse getMinCandleInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -352,7 +352,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.w(TAG, "[DEBUG] onResponse getDayCandleInfo -toString: " + call.toString()
+                        Log.w(TAG, "onResponse getDayCandleInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -400,7 +400,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.w(TAG, "[DEBUG] onResponse getWeekCandleInfo -toString: " + call.toString()
+                        Log.w(TAG, "onResponse getWeekCandleInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -448,7 +448,7 @@ public class UpBitFetcher {
                 if (!response.isSuccessful()) {
                     try {
                         JSONObject jObjError = new JSONObject(response.errorBody().string());
-                        Log.w(TAG, "[DEBUG] onResponse getMonthCandleInfo -toString: " + call.toString()
+                        Log.w(TAG, "onResponse getMonthCandleInfo -toString: " + call.toString()
                                 + " code: " + response.code()
                                 + " headers: " + response.headers()
                                 + " raw: " + response.raw()
@@ -601,7 +601,6 @@ public class UpBitFetcher {
                                         && (errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_bid")
                                         || errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_ask"))) {
                                     if (mListener != null) {
-                                        Log.d(TAG, "[DEBUG] onResponse -postOrderInfo : "+identifier);
                                         mListener.shortMoney(identifier);
                                     }
                                 }
@@ -655,7 +654,7 @@ public class UpBitFetcher {
                     if (!response.isSuccessful()) {
                         try {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
-                            Log.w(TAG, "[DEBUG] onResponse searchOrderInfo -toString: " + call.toString()
+                            Log.w(TAG, "onResponse searchOrderInfo -toString: " + call.toString()
                                     + " code: " + response.code()
                                     + " headers: " + response.headers()
                                     + " raw: " + response.raw()
@@ -712,23 +711,17 @@ public class UpBitFetcher {
                             JSONObject jObjError = new JSONObject(response.errorBody().string());
                             if (jObjError != null) {
                                 JSONObject errorObj = (JSONObject) jObjError.get("error");
+                                Log.w(TAG, "[DEBUG] onResponse deleteOrderInfo -deleteError: " + call.toString()
+                                        + " code: " + response.code()
+                                        + " headers: " + response.headers()
+                                        + " raw: " + response.raw()
+                                        + " jObjError: " + (jObjError != null ? jObjError : "NULL")
+                                );
                                 if (response.code() == 404 && errorObj != null && errorObj.get("name") != null && errorObj.get("name").equals("order_not_found")) {
-                                    Log.w(TAG, "[DEBUG] onResponse deleteOrderInfo -deleteError: " + call.toString()
-                                            + " code: " + response.code()
-                                            + " headers: " + response.headers()
-                                            + " raw: " + response.raw()
-                                            + " jObjError: " + (jObjError != null ? jObjError : "NULL")
-                                    );
                                     if (mListener != null) {
                                         mListener.deleteError(uuid);
                                     }
                                 } else if (response.code() == 400 && errorObj != null && errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_ask")) {
-                                    Log.w(TAG, "[DEBUG] onResponse deleteOrderInfo -shortMoney: " + call.toString()
-                                            + " code: " + response.code()
-                                            + " headers: " + response.headers()
-                                            + " raw: " + response.raw()
-                                            + " jObjError: " + (jObjError != null ? jObjError : "NULL")
-                                    );
                                     if (mListener != null) {
                                         mListener.shortMoney(uuid);
                                     }
