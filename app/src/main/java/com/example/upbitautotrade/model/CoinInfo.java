@@ -17,7 +17,7 @@ public class CoinInfo {
     double buyPrice;
     double sellPrice;
 
-    double profitRate;
+    double profitRate = 0;
     double buyingAmount;
 
     double tickCounts;

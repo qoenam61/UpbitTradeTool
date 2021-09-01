@@ -437,7 +437,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         if (mBuyingItemKeyList.contains(key)) {
             CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
             if (coinInfo != null) {
-                coinInfo.setMaxProfitRate(highPrice);
+                if (coinInfo.getStatus().equals(CoinInfo.BUY)) {
+                    long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
+                    if (duration >= mMonitorTime) {
+                        coinInfo.setMaxProfitRate(highPrice);
+                    }
+                }
                 coinInfo.setOpenPrice(openPrice);
                 coinInfo.setClosePrice(closePrice);
                 coinInfo.setHighPrice(highPrice);
@@ -719,7 +724,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     diffPrice = currentPrice - coinInfo.getClosePrice();
                     diffPriceRate = diffPrice / coinInfo.getClosePrice();
 
-                    coinInfo.setMaxProfitRate(highPrice);
+                    if (coinInfo.getStatus().equals(CoinInfo.BUY)) {
+                        long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
+                        if (duration >= mMonitorTime) {
+                            coinInfo.setMaxProfitRate(highPrice);
+                        }
+                    }
                     coinInfo.setOpenPrice(openPrice);
                     coinInfo.setClosePrice(closePrice);
                     coinInfo.setHighPrice(highPrice);
@@ -784,17 +794,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
 
         if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.BUY)) {
-            long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
-
-
-
             // Post to Sell
             double toBuyPrice = coinInfo.getBuyPrice();
             double changedPrice = currentPrice - toBuyPrice;
             double changedRate = changedPrice / toBuyPrice;
             double profitRate = changedRate - coinInfo.getMaxProfitRate();
+            long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
 
-            if (duration < mMonitorTime && changedPrice <= 0) {
+            if (duration < mMonitorTime && changedRate >= mMonitorRate * -1.5) {
                 return;
             }
 
