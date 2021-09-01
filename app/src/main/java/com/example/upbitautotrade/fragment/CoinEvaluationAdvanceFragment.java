@@ -564,13 +564,15 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         // WAIT
         if (orderInfo.getState().equals(Post.WAIT) && orderInfo.getSide().equals("bid")) {
-
-            if (orderInfo.getVolume() != null && orderInfo.getRemainingVolume() != null &&
-                    orderInfo.getVolume().doubleValue() != orderInfo.getRemainingVolume().doubleValue()) {
-                coinInfo.setPartialBuy(true);
-            }
-
             if (!mBuyingItemKeyList.contains(key)) {
+                if (orderInfo.getVolume() != null && orderInfo.getRemainingVolume() != null &&
+                        orderInfo.getVolume().doubleValue() != orderInfo.getRemainingVolume().doubleValue()) {
+                    Log.d(TAG, "[DEBUG] monitoringBuyList: WAIT setPartialBuy true");
+                    coinInfo.setPartialBuy(true);
+                } else {
+                    Log.d(TAG, "[DEBUG] monitoringBuyList: WAIT setPartialBuy false");
+                    coinInfo.setPartialBuy(false);
+                }
                 coinInfo.setStatus(CoinInfo.WAITING);
                 coinInfo.setVolume(orderInfo.getVolume().doubleValue());
                 coinInfo.setWaitTime(System.currentTimeMillis());
@@ -594,6 +596,13 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (!mBuyingItemKeyList.contains(key)) {
                 mBuyingItemKeyList.add(key);
             }
+            if (orderInfo.getVolume() != null && orderInfo.getRemainingVolume().doubleValue() != 0) {
+                Log.d(TAG, "[DEBUG] monitoringBuyList: DONE setPartialBuy true");
+                coinInfo.setPartialBuy(true);
+            } else {
+                Log.d(TAG, "[DEBUG] monitoringBuyList: DONE setPartialBuy false");
+                coinInfo.setPartialBuy(false);
+            }
             coinInfo.setStatus(CoinInfo.BUY);
             coinInfo.setVolume(orderInfo.getVolume().doubleValue());
             coinInfo.setBuyTime(System.currentTimeMillis());
@@ -606,6 +615,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             mResponseOrderInfoMap.put(key, orderInfo);
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
             mMonitorKeyList.remove(key);
+            mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
 
             Log.d(TAG, "[DEBUG] monitoringBuyList BUY - !!!! marketId: " + key
                     +" buy price: "+ coinInfo.getBuyPrice()
@@ -636,7 +646,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     + " uuid: " + orderInfo.getUuid()
             );
         }
-        mBuyingListAdapter.notifyDataSetChanged();
 //        Log.d(TAG, "[DEBUG] monitoringBuyList - "
 //                + " getMarket: "+orderInfo.getMarket()
 //                + " getSide: "+orderInfo.getSide()
@@ -747,7 +756,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
 
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
-        if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.WAITING)) {
+        if (mBuyingItemKeyList.contains(key)
+                && coinInfo != null && (coinInfo.getStatus().equals(CoinInfo.WAITING)
+                || (coinInfo.getStatus().equals(CoinInfo.BUY) && coinInfo.isPartialBuy()))) {
             // Request to Cancel.
             double toBuyPrice = coinInfo.getBuyPrice();
             long duration = System.currentTimeMillis() - coinInfo.getWaitTime();
@@ -770,7 +781,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
             }
-        } else if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.BUY)) {
+        }
+
+        if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.BUY)) {
             // Post to Sell
             double toBuyPrice = coinInfo.getBuyPrice();
             double changedPrice = currentPrice - toBuyPrice;
@@ -852,6 +865,13 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         String key = orderInfo.getMarket();
         ResponseOrder order = mResponseOrderInfoMap.get(key);
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+        if (orderInfo.getVolume() != null && orderInfo.getRemainingVolume() != null &&
+                orderInfo.getVolume().doubleValue() != orderInfo.getRemainingVolume().doubleValue()) {
+            coinInfo.setPartialBuy(true);
+        } else {
+            coinInfo.setPartialBuy(false);
+        }
+        mBuyingItemMapInfo.put(key, coinInfo);
 
         if (order != null) {
             if (coinInfo != null) {
@@ -862,6 +882,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " uuid: " + orderInfo.getUuid());
 
                 if (!coinInfo.isPartialBuy()) {
+                    Log.d(TAG, "[DEBUG] deleteOrderInfo setPartialBuy false");
                     if (orderInfo.getState().equals(Post.DONE)) {
                         removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
                         removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
@@ -872,6 +893,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                     }
                 } else {
+                    Log.d(TAG, "[DEBUG] deleteOrderInfo setPartialBuy true");
                     coinInfo.setStatus(CoinInfo.BUY);
                     order.setVolume(order.getVolume());
                     order.setExecutedVolume(orderInfo.getExecutedVolume());

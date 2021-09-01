@@ -10,7 +10,7 @@ public class CoinInfo {
     double highPrice;
     double lowPrice;
 
-    long waitTime;
+    long waitTime = -1;
     long buyTime;
     long sellTime;
 
@@ -26,10 +26,12 @@ public class CoinInfo {
 
     private boolean isPartialBuy = false;
 
+    private double mVolume = -1;
+
+
     public static final String WAITING = "Waiting";
     public static final String BUY = "Buy";
     public static final String SELL = "Sell";
-    private double mVolume;
 
     public CoinInfo(double openPrice, double closePrice, double highPrice, double lowPrice, double tickCounts) {
         this.openPrice = openPrice;
