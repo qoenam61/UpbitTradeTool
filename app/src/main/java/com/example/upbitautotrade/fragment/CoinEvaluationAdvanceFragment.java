@@ -1057,7 +1057,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         Thread resetMonitorItemList = new Thread(() -> {
             while (true) {
                 long currentTime = System.currentTimeMillis();
-                if (mBuyingItemKeyList.size() == 0 && currentTime - mLastResetTime >= RESET_TIMER) {
+                if (mBuyingItemKeyList.isEmpty() && currentTime - mLastResetTime >= RESET_TIMER) {
                     mLastResetTime = System.currentTimeMillis();
                     Log.d(TAG, "[DEBUG] Reset Coin Item List");
                     if (mCoinItemList != null) {
