@@ -1,5 +1,6 @@
 package com.example.upbitautotrade.fragment;
 
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
 import android.graphics.Color;
@@ -25,6 +26,7 @@ import com.example.upbitautotrade.model.Post;
 import com.example.upbitautotrade.model.ResponseOrder;
 import com.example.upbitautotrade.model.Ticker;
 import com.example.upbitautotrade.model.TradeInfo;
+import com.example.upbitautotrade.model.WeekCandle;
 import com.example.upbitautotrade.utils.NumberWatcher;
 import com.example.upbitautotrade.viewmodel.CoinEvaluationViewModel;
 import com.example.upbitautotrade.viewmodel.UpBitViewModel;
@@ -34,6 +36,7 @@ import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,12 +55,14 @@ import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_POST_O
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_SEARCH_ORDER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TICKER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_TRADE_INFO;
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_WEEK_CANDLE_INFO;
 
 public class CoinEvaluationAdvanceFragment extends Fragment {
     public static final String TAG = "CoinEvaluationFragment";
 
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
+    private final int RESET_TIMER = 60 * 60 * 1000;
 
     private final double PRICE_AMOUNT = 10000;
     private final double MONITORING_PERIOD_TIME = 1.5;
@@ -73,6 +78,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     private ArrayList mDeadMarketList;
     private Map<String, MarketInfo> mMarketsMapInfo;
+    private Map<String, WeekCandle> mWeekCandleMapInfo;
+    private List<String> mCoinItemList;
+    private ProgressDialog mProgressDialog;
+    private long mLastResetTime = 0;
 
     // Result View
     private CoinListAdapter mResultListAdapter;
@@ -110,6 +119,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public CoinEvaluationAdvanceFragment() {
         mDeadMarketList = new ArrayList(Arrays.asList(deadMarket));
         mMarketsMapInfo = new HashMap<>();
+        mWeekCandleMapInfo = new HashMap<>();
 
         mResultListInfo = new ArrayList<>();
         mResponseOrderInfoMap = new HashMap<>();
@@ -137,6 +147,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         RecyclerView resultList = mView.findViewById(R.id.coin_result_list);
         RecyclerView coinList = mView.findViewById(R.id.coin_evaluation_list);
         RecyclerView buyingList = mView.findViewById(R.id.coin_buying_list);
+
+        mProgressDialog = new ProgressDialog(getContext());
+        mProgressDialog.setCancelable(false);
+        mProgressDialog.setProgressStyle(android.R.style.Widget_ProgressBar_Horizontal);
 
         LinearLayoutManager layoutResultManager = new LinearLayoutManager(getContext());
         resultList.setLayoutManager(layoutResultManager);
@@ -310,13 +324,47 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             MarketInfo marketInfo = iterator.next();
                             if (marketInfo.getMarketId().contains(MARKET_NAME+"-")
                                     && !marketInfo.getMarket_warning().contains(MARKET_WARNING)) {
-                                if (mDeadMarketList.contains(marketInfo.getMarketId())) {
+//                                if (mDeadMarketList.contains(marketInfo.getMarketId())) {
+//                                    continue;
+//                                }
+                                if (marketInfo.getMarketId().contains(MARKET_NAME+"-"+MARKET_NAME)) {
                                     continue;
                                 }
                                 mMarketsMapInfo.put(marketInfo.getMarketId(), marketInfo);
                             }
                         }
-                        registerPeriodicUpdate(mMarketsMapInfo.keySet());
+                        if (!mMarketsMapInfo.keySet().equals(mWeekCandleMapInfo.keySet())) {
+                            registerProcess(UPDATE_WEEK_CANDLE_INFO, mMarketsMapInfo.keySet());
+                            mProgressDialog.setMessage("Updating Coin List...");
+                            mProgressDialog.show();
+                        } else {
+                            if (mCoinItemList != null && mCoinItemList.size() >= 30) {
+                                registerPeriodicUpdate(mCoinItemList.subList(0, 30));
+                            }
+                        }
+                    }
+            );
+
+            mViewModel.getWeekCandleInfo().observe(
+                    getViewLifecycleOwner(),
+                    weekCandles -> {
+                        if (!mIsActive) {
+                            return;
+                        }
+                        String key = null;
+                        Iterator<WeekCandle> iterator = weekCandles.iterator();
+                        while (iterator.hasNext()) {
+                            WeekCandle candle = iterator.next();
+                            key = candle.getMarketId();
+                            mWeekCandleMapInfo.put(candle.getMarketId(), candle);
+                        }
+
+                        if (mMarketsMapInfo.keySet().equals(mWeekCandleMapInfo.keySet())) {
+                            mCoinItemList = new ArrayList<>(mWeekCandleMapInfo.keySet());
+                            Collections.sort(mCoinItemList, (value1, value2) -> mWeekCandleMapInfo.get(value1).compareTo(mWeekCandleMapInfo.get(value2)));
+                            registerPeriodicUpdate(mCoinItemList.subList(0, 30));
+                            mProgressDialog.dismiss();
+                        }
                     }
             );
 
@@ -1005,8 +1053,38 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mActivity.getProcessor().setViewModel(mActivity.getCoinEvaluationViewModel(), mActivity.getAccessKey(), mActivity.getSecretKey());
         mViewModel =  mActivity.getCoinEvaluationViewModel();
         mIsActive = true;
-        mActivity.getProcessor().startBackgroundProcessor();
-        mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
+
+        Thread resetMonitorItemList = new Thread(() -> {
+            while (true) {
+                long currentTime = System.currentTimeMillis();
+                if (mBuyingItemKeyList.size() == 0 && currentTime - mLastResetTime >= RESET_TIMER) {
+                    mLastResetTime = System.currentTimeMillis();
+                    Log.d(TAG, "[DEBUG] Reset Coin Item List");
+                    if (mCoinItemList != null) {
+                        mCoinItemList.clear();
+                    }
+                    mMonitorKeyList.clear();
+                    mWeekCandleMapInfo.clear();
+
+                    mActivity.getProcessor().stopBackgroundProcessor();
+                    mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
+                    mActivity.getProcessor().startBackgroundProcessor();
+
+                    try {
+                        Thread.sleep(RESET_TIMER);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    try {
+                        Thread.sleep(RESET_TIMER / 4);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+        resetMonitorItemList.start();
     }
 
     private void registerProcess(int type, Post post) {
@@ -1030,11 +1108,23 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mActivity.getProcessor().registerProcess(type, null, null, null, null, null, uuid);
     }
 
-    private void registerPeriodicUpdate(Set<String> keySet) {
+    private void registerProcess(int type, Set<String> keySet) {
         Iterator<String> regIterator = keySet.iterator();
         while (regIterator.hasNext()) {
             String key = regIterator.next();
             if (!key.equals("KRW-KRW")) {
+                mActivity.getProcessor().registerPeriodicUpdate(type, key, 1);
+            }
+        }
+
+    }
+
+    private void registerPeriodicUpdate(List<String> keyList) {
+        Iterator<String> regIterator = keyList.iterator();
+        while (regIterator.hasNext()) {
+            String key = regIterator.next();
+            if (!key.equals("KRW-KRW")) {
+                Log.d(TAG, "UPDATE_TRADE_INFO - add key: " + key);
                 mActivity.getProcessor().registerPeriodicUpdate(UPDATE_TRADE_INFO, key, TRADE_COUNTS);
             }
         }

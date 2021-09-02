@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-public class Candle implements Serializable {
+public class Candle implements Serializable, Comparable<Candle> {
     @SerializedName("market")
     String market;
 
@@ -101,5 +101,16 @@ public class Candle implements Serializable {
 
     public void setChangedRate(double changedRate) {
         this.changedRate = changedRate;
+    }
+
+    @Override
+    public int compareTo(Candle o) {
+        if (this.getCandleAccTradePrice().doubleValue() < o.getCandleAccTradePrice().doubleValue()) {
+            return 1;
+        } else if (this.getCandleAccTradePrice().doubleValue() > o.getCandleAccTradePrice().doubleValue()) {
+            return -1;
+        } else {
+            return 0;
+        }
     }
 }

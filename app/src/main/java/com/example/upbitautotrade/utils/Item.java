@@ -23,6 +23,8 @@ public class Item {
     private final long PERIODIC_TIME_65 = 65;
     private final long PERIODIC_TIME_70 = 70;
     private final long PERIODIC_TIME_80 = 80;
+    private final long PERIODIC_TIME_100 = 100;
+    private final long PERIODIC_TIME_150 = 150;
     private final long PERIODIC_TIME_500 = 500;
     private final long PERIODIC_TIME_1000 = 1000;
 
@@ -86,14 +88,19 @@ public class Item {
             case UPDATE_TICKER_INFO:
             case UPDATE_TRADE_INFO:
             case UPDATE_ACCOUNTS_INFO:
+
+            case UPDATE_POST_ORDER_INFO:
+            case UPDATE_SEARCH_ORDER_INFO:
+            case UPDATE_DELETE_ORDER_INFO:
+//                sleepTime = PERIODIC_TIME_100;
+////                sleepTime = PERIODIC_TIME_80;
+////                sleepTime = PERIODIC_TIME_65;
+//                break;
             case UPDATE_MIN_CANDLE_INFO:
             case UPDATE_DAY_CANDLE_INFO:
             case UPDATE_WEEK_CANDLE_INFO:
             case UPDATE_MONTH_CANDLE_INFO:
-            case UPDATE_POST_ORDER_INFO:
-            case UPDATE_SEARCH_ORDER_INFO:
-            case UPDATE_DELETE_ORDER_INFO:
-                sleepTime = PERIODIC_TIME_65;
+                sleepTime = PERIODIC_TIME_150;
                 break;
             default:
                 sleepTime = PERIODIC_TIME_70;

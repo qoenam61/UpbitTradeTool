@@ -155,7 +155,7 @@ public class BackgroundProcessor {
     }
 
     private void makeThreadPoolExecutor() {
-        mThreadPool = new ThreadPoolExecutor(2, 4, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
+        mThreadPool = new ThreadPoolExecutor(1, 4, 10, TimeUnit.SECONDS, new LinkedBlockingDeque<>());
     }
 
     private void sendMessage(Item item) {
@@ -213,21 +213,21 @@ public class BackgroundProcessor {
                 if (item == null) {
                     continue;
                 }
-//                Log.d(TAG, "[DEBUG] TaskList -type: "+item.type+" marketId: "+item.key);
+//                Log.d(TAG, "[DEBUG] TaskList -type: "+item.type+" marketId: "+item.key+" sleepTime: "+item.getSleepTime());
                 switch (item.type) {
                     case UPDATE_MARKETS_INFO:
                     case UPDATE_POST_ORDER_INFO:
                     case UPDATE_DELETE_ORDER_INFO:
+                    case UPDATE_MIN_CANDLE_INFO:
+                    case UPDATE_DAY_CANDLE_INFO:
+                    case UPDATE_WEEK_CANDLE_INFO:
+                    case UPDATE_MONTH_CANDLE_INFO:
                         sendMessage(item);
                         clear();
                         break;
                     case UPDATE_ACCOUNTS_INFO:
                     case UPDATE_CHANCE_INFO:
                     case UPDATE_TICKER_INFO:
-                    case UPDATE_MIN_CANDLE_INFO:
-                    case UPDATE_DAY_CANDLE_INFO:
-                    case UPDATE_WEEK_CANDLE_INFO:
-                    case UPDATE_MONTH_CANDLE_INFO:
                     case UPDATE_TRADE_INFO:
                     case UPDATE_SEARCH_ORDER_INFO:
                         sendMessage(item);
@@ -236,7 +236,7 @@ public class BackgroundProcessor {
                         break;
                 }
                 try {
-                    Thread.sleep(getSleepTime());
+                    Thread.sleep(item.getSleepTime());
                 } catch (InterruptedException e) {
                     Log.w(TAG, "Exception to Thread sleep");
                 }
@@ -357,6 +357,11 @@ public class BackgroundProcessor {
                                 if (!mThreadPool.getQueue().contains(taskList) && mThreadPool.getQueue().size() < (mThreadPool.getMaximumPoolSize() * 2)) {
 //                                    Log.d(TAG, "[DEBUG] startBackgroundProcessor -type: "+taskList.getType()+" marketId: "+taskList.getMarketId());
                                     mThreadPool.execute(taskList);
+                                    try {
+                                        Thread.sleep(taskList.getSleepTime());
+                                    } catch (InterruptedException e) {
+                                        e.printStackTrace();
+                                    }
                                 } else {
                                     try {
                                         Thread.sleep(taskList.getSleepTime());
