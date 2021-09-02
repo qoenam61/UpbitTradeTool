@@ -148,6 +148,7 @@ public class BackgroundProcessor {
             }
         }
     };
+    private boolean mIsRunningBackgroundProcessor = false;
 
     public BackgroundProcessor() {
         mProcessTaskMap = new HashMap<>();
@@ -335,6 +336,10 @@ public class BackgroundProcessor {
         }
     }
 
+    public boolean isRunningBackgroundProcessor() {
+        return mIsRunningBackgroundProcessor;
+    }
+
     public void startBackgroundProcessor() {
         if (mProcessThread == null) {
             mProcessThread = new Thread(new Runnable() {
@@ -366,7 +371,7 @@ public class BackgroundProcessor {
                                     try {
                                         Thread.sleep(taskList.getSleepTime());
                                     } catch (InterruptedException e) {
-                                        e.printStackTrace();
+                                        Log.w(TAG, "InterruptedException sleep timer");
                                     }
                                 }
                             }
@@ -380,6 +385,7 @@ public class BackgroundProcessor {
                 }
             });
             mProcessThread.start();
+            mIsRunningBackgroundProcessor = true;
         }
     }
 
@@ -387,6 +393,7 @@ public class BackgroundProcessor {
         if (mProcessThread != null) {
             mProcessThread.interrupt();
             mProcessThread = null;
+            mIsRunningBackgroundProcessor = false;
         }
         clearProcess();
     }

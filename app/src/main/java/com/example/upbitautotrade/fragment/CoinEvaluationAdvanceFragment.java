@@ -21,6 +21,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.upbitautotrade.R;
 import com.example.upbitautotrade.appinterface.UpBitTradeActivity;
 import com.example.upbitautotrade.model.CoinInfo;
+import com.example.upbitautotrade.model.DayCandle;
 import com.example.upbitautotrade.model.MarketInfo;
 import com.example.upbitautotrade.model.Post;
 import com.example.upbitautotrade.model.ResponseOrder;
@@ -49,6 +50,7 @@ import java.util.Stack;
 import java.util.TimeZone;
 import java.util.UUID;
 
+import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_DAY_CANDLE_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_DELETE_ORDER_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_MARKETS_INFO;
 import static com.example.upbitautotrade.utils.BackgroundProcessor.UPDATE_POST_ORDER_INFO;
@@ -62,7 +64,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
-    private final int RESET_TIMER = 60 * 60 * 1000;
+    private final long RESET_TIMER = 60 * 60 * 1000;
+    private final long RESET_TIMER_GAP = 1 * 60 * 1000;
+    private final int COIN_LIST_NUM = 30;
 
     private final double PRICE_AMOUNT = 10000;
     private final double MONITORING_PERIOD_TIME = 1.5;
@@ -78,7 +82,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     private ArrayList mDeadMarketList;
     private Map<String, MarketInfo> mMarketsMapInfo;
-    private Map<String, WeekCandle> mWeekCandleMapInfo;
+    private Map<String, DayCandle> mDayCandleMapInfo;
     private List<String> mCoinItemList;
     private ProgressDialog mProgressDialog;
     private long mLastResetTime = 0;
@@ -115,11 +119,13 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             "KRW-HUN", "KRW-AHT", "KRW-FCT", "KRW-TON", "KRW-CBK", "KRW-PLA", "KRW-BTG", "KRW-SC ", "KRW-ICX", "KRW-ANK",
             "KRW-IOS", "KRW-LSK", "KRW-KNC", "KRW-PUN", "KRW-STO"
     };
+    private boolean mForceReset = false;
 
     public CoinEvaluationAdvanceFragment() {
         mDeadMarketList = new ArrayList(Arrays.asList(deadMarket));
         mMarketsMapInfo = new HashMap<>();
-        mWeekCandleMapInfo = new HashMap<>();
+        mDayCandleMapInfo = new HashMap<>();
+        mCoinItemList = new ArrayList<>();
 
         mResultListInfo = new ArrayList<>();
         mResponseOrderInfoMap = new HashMap<>();
@@ -333,36 +339,35 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                                 mMarketsMapInfo.put(marketInfo.getMarketId(), marketInfo);
                             }
                         }
-                        if (!mMarketsMapInfo.keySet().equals(mWeekCandleMapInfo.keySet())) {
-                            registerProcess(UPDATE_WEEK_CANDLE_INFO, mMarketsMapInfo.keySet());
+                        if (!mMarketsMapInfo.keySet().equals(mDayCandleMapInfo.keySet())) {
+                            registerProcess(UPDATE_DAY_CANDLE_INFO, mMarketsMapInfo.keySet());
                             mProgressDialog.setMessage("Updating Coin List...");
                             mProgressDialog.show();
                         } else {
-                            if (mCoinItemList != null && mCoinItemList.size() >= 30) {
-                                registerPeriodicUpdate(mCoinItemList.subList(0, 30));
+                            if (mCoinItemList != null && mCoinItemList.size() >= COIN_LIST_NUM) {
+                                registerPeriodicUpdate(mCoinItemList);
                             }
                         }
                     }
             );
 
-            mViewModel.getWeekCandleInfo().observe(
+            mViewModel.getDayCandleInfo().observe(
                     getViewLifecycleOwner(),
                     weekCandles -> {
                         if (!mIsActive) {
                             return;
                         }
-                        String key = null;
-                        Iterator<WeekCandle> iterator = weekCandles.iterator();
+                        Iterator<DayCandle> iterator = weekCandles.iterator();
                         while (iterator.hasNext()) {
-                            WeekCandle candle = iterator.next();
-                            key = candle.getMarketId();
-                            mWeekCandleMapInfo.put(candle.getMarketId(), candle);
+                            DayCandle candle = iterator.next();
+                            mDayCandleMapInfo.put(candle.getMarketId(), candle);
                         }
 
-                        if (mMarketsMapInfo.keySet().equals(mWeekCandleMapInfo.keySet())) {
-                            mCoinItemList = new ArrayList<>(mWeekCandleMapInfo.keySet());
-                            Collections.sort(mCoinItemList, (value1, value2) -> mWeekCandleMapInfo.get(value1).compareTo(mWeekCandleMapInfo.get(value2)));
-                            registerPeriodicUpdate(mCoinItemList.subList(0, 30));
+                        if (mMarketsMapInfo.keySet().equals(mDayCandleMapInfo.keySet())) {
+                            List<String> coinItemList = new ArrayList<>(mDayCandleMapInfo.keySet());
+                            Collections.sort(coinItemList, (value1, value2) -> mDayCandleMapInfo.get(value1).compareTo(mDayCandleMapInfo.get(value2)));
+                            mCoinItemList.addAll(coinItemList.subList(0, COIN_LIST_NUM));
+                            registerPeriodicUpdate(mCoinItemList);
                             mProgressDialog.dismiss();
                         }
                     }
@@ -1057,29 +1062,49 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         Thread resetMonitorItemList = new Thread(() -> {
             while (true) {
                 long currentTime = System.currentTimeMillis();
-                if (mBuyingItemKeyList.isEmpty() && currentTime - mLastResetTime >= RESET_TIMER) {
+                if (mForceReset || mBuyingItemKeyList.isEmpty() && (mLastResetTime == 0 || currentTime - mLastResetTime >= RESET_TIMER - RESET_TIMER_GAP)) {
+                    Log.d(TAG, "Reset Coin Item List");
+
+                    if (!mForceReset) {
+                        mDayCandleMapInfo.clear();
+                    }
+                    mForceReset = false;
                     mLastResetTime = System.currentTimeMillis();
-                    Log.d(TAG, "[DEBUG] Reset Coin Item List");
+
+                    mMonitorKeyList.clear();
                     if (mCoinItemList != null) {
                         mCoinItemList.clear();
                     }
-                    mMonitorKeyList.clear();
-                    mWeekCandleMapInfo.clear();
 
                     mActivity.getProcessor().stopBackgroundProcessor();
                     mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
                     mActivity.getProcessor().startBackgroundProcessor();
 
                     try {
-                        Thread.sleep(RESET_TIMER);
+                        Thread.sleep(RESET_TIMER_GAP);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Log.w(TAG, "InterruptedException sleep timer");
+                    }
+
+                    if (mCoinItemList.size() < COIN_LIST_NUM) {
+                        mForceReset = true;
+                        continue;
+                    }
+
+                    try {
+                        Thread.sleep(RESET_TIMER - RESET_TIMER_GAP);
+                    } catch (InterruptedException e) {
+                        Log.w(TAG, "InterruptedException sleep timer");
                     }
                 } else {
+                    if (!mActivity.getProcessor().isRunningBackgroundProcessor()) {
+                        mActivity.getProcessor().startBackgroundProcessor();
+                        mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
+                    }
                     try {
                         Thread.sleep(RESET_TIMER / 4);
                     } catch (InterruptedException e) {
-                        e.printStackTrace();
+                        Log.w(TAG, "InterruptedException sleep timer");
                     }
                 }
             }
