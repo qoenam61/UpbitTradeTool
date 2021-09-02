@@ -1101,6 +1101,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         mActivity.getProcessor().startBackgroundProcessor();
                         mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
                     }
+                    Log.d(TAG, "Delay Reset Coin Item List");
                     try {
                         Thread.sleep(RESET_TIMER / 4);
                     } catch (InterruptedException e) {
