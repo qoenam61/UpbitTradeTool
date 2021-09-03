@@ -509,14 +509,16 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                 mResultListAdapter.setResultItems(mResultListInfo);
                 updateTradeMapInfoAndTacticalToSell(key, null);
+
+                DecimalFormat format = new DecimalFormat("###,###,###,###.##");
                 Log.d(TAG, "updateTradeMapInfoAndTacticalToBuy - key: " + key
                         + " open: " + coinInfo.getOpenPrice()
                         + " close: " + coinInfo.getClosePrice()
                         + " high: " + coinInfo.getHighPrice()
                         + " low: " + coinInfo.getLowPrice()
                         + " getBuyPrice: " + coinInfo.getBuyPrice()
-                        + " priceChangedRate: " + priceChangedRate
-                        + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                        + " priceChangedRate: " + format.format(priceChangedRate)
+                        + " getMaxProfitRate: " + format.format(coinInfo.getMaxProfitRate())
                         + " getTickCounts: " + coinInfo.getTickCounts()
                 );
                 return;
@@ -797,7 +799,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mResultListAdapter.setResultItems(mResultListInfo);
 
                     DecimalFormat format = new DecimalFormat("###,###,###,###.##");
-
                     Log.d(TAG, "updateTradeMapInfoAndTacticalToSell - key: " + key
                             + " open: " + coinInfo.getOpenPrice()
                             + " close: " + coinInfo.getClosePrice()
