@@ -868,7 +868,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 }
             } else if (duration > mMonitorTime * 3
                     && coinInfo.getMaxProfitRate() <= mMonitorRate * 0.5
-                    && (profitRate < mMonitorRate * -0.75 || changedRate < mMonitorRate * -0.75)) {
+                    && profitRate < mMonitorRate * -0.5) {
                 ResponseOrder order = mResponseOrderInfoMap.get(key);
                 if (order != null && key.equals(order.getMarket())
                         && order.getSide().equals("bid")
