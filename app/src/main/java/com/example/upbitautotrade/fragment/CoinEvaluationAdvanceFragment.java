@@ -214,6 +214,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         applyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mIsShortMoney = false;
+                
                 String buyingPrice = buyingPriceEditText.getText().toString();
                 String monitorTime = monitorTimeEditText.getText().toString();
                 String monitorRate = monitorRateEditText.getText().toString();
