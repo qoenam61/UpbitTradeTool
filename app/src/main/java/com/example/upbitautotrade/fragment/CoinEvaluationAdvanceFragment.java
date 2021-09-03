@@ -970,6 +970,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 coinInfo.setPartialBuy(false);
             }
             coinInfo.setStatus(CoinInfo.BUY);
+            coinInfo.setVolume(orderInfo.getVolume().doubleValue());
             coinInfo.setBuyTime(System.currentTimeMillis());
             Ticker ticker = mTickerMapInfo.get(key);
             if (ticker != null) {
