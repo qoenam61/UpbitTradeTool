@@ -109,6 +109,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     boolean mIsStarting = false;
     boolean mIsActive = false;
+    boolean mIsShortMoney = false;
 
     private String[] deadMarket = {
             "KRW-GLM", "KRW-WAX", "KRW-STR", "KRW-STM", "KRW-STE", "KRW-ARD", "KRW-MVL", "KRW-ORB", "KRW-HIV", "KRW-STR",
@@ -245,7 +246,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         mViewModel.setOnPostErrorListener(new UpBitViewModel.RequestErrorListener() {
             @Override
-            public void shortMoney(String uuid) {
+            public void shortMoney(String uuid, String type) {
                 String key = null;
                 Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
                 while (iterator.hasNext()) {
@@ -261,7 +262,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     if (coinInfo == null) {
                         return;
                     }
-                    Log.d(TAG, "[DEBUG] shortMoney key : " + key +" uuid: " + uuid);
+                    if (type.equals("bid")) {
+                        mIsShortMoney = true;
+                    }
+                    Log.d(TAG, "[DEBUG] shortMoney key : " + key +" mIsShortMoney: " + mIsShortMoney + " uuid: " + uuid);
+
                     coinInfo.setMarketId(key);
                     coinInfo.setStatus(CoinInfo.SELL);
                     coinInfo.setSellTime(System.currentTimeMillis());
@@ -524,7 +529,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mMonitorKeyList.add(key);
                 }
 
-                if (priceChangedRate >= mMonitorRate) {
+                if (mIsShortMoney) {
+                    Log.d(TAG, "[DEBUG] updateTradeMapInfoByTradeInfo: not Enough money !!!");
+                }
+
+                if (priceChangedRate >= mMonitorRate && !mIsShortMoney) {
                     registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
 
                     CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice, tickCount);
@@ -989,6 +998,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
 
         if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("ask") && orderInfo.getRemainingVolume().doubleValue() == 0) {
+            mIsShortMoney = false;
             coinInfo.setMarketId(key);
             coinInfo.setStatus(CoinInfo.SELL);
             coinInfo.setSellTime(System.currentTimeMillis());
@@ -1053,6 +1063,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 if (!coinInfo.isPartialBuy()) {
                     Log.d(TAG, "[DEBUG] deleteOrderInfo setPartialBuy false");
                     if (orderInfo.getState().equals(Post.DONE)) {
+                        mIsShortMoney = false;
+
                         removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
                         removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
 

@@ -49,7 +49,7 @@ public class UpBitFetcher {
     public interface ConnectionState {
         void onConnection(boolean isConnect);
         void deleteError(String uuid);
-        void shortMoney(String uuid);
+        void shortMoney(String uuid, String type);
     }
 
     private AccountsRetrofit mAccountsRetrofit;
@@ -598,10 +598,15 @@ public class UpBitFetcher {
                                 JSONObject errorObj = (JSONObject) jObjError.get("error");
                                 if (response.code() == 400
                                         && errorObj != null
-                                        && (errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_bid")
-                                        || errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_ask"))) {
+                                        && errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_ask")) {
                                     if (mListener != null) {
-                                        mListener.shortMoney(identifier);
+                                        mListener.shortMoney(identifier, "ask");
+                                    }
+                                } else if (response.code() == 400
+                                        && errorObj != null
+                                        && errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_bid")) {
+                                    if (mListener != null) {
+                                        mListener.shortMoney(identifier, "bid");
                                     }
                                 }
                                 if (mActivity != null) {
@@ -723,7 +728,11 @@ public class UpBitFetcher {
                                     }
                                 } else if (response.code() == 400 && errorObj != null && errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_ask")) {
                                     if (mListener != null) {
-                                        mListener.shortMoney(uuid);
+                                        mListener.shortMoney(uuid, "ask");
+                                    }
+                                } else if (response.code() == 400 && errorObj != null && errorObj.get("name") != null && errorObj.get("name").equals("insufficient_funds_bid")) {
+                                    if (mListener != null) {
+                                        mListener.shortMoney(uuid, "bid");
                                     }
                                 }
                                 if (mActivity != null) {

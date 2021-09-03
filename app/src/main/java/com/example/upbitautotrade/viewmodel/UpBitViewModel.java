@@ -42,7 +42,7 @@ public class UpBitViewModel extends AndroidViewModel {
     }
 
     public interface RequestErrorListener {
-        void shortMoney(String uuid);
+        void shortMoney(String uuid, String type);
         void deleteError(String uuid);
     }
 
@@ -80,7 +80,7 @@ public class UpBitViewModel extends AndroidViewModel {
             }
 
             @Override
-            public void shortMoney(String uuid) {
+            public void shortMoney(String uuid, String type) {
 
             }
         });

@@ -143,8 +143,8 @@ public class CoinEvaluationViewModel extends UpBitViewModel{
             }
 
             @Override
-            public void shortMoney(String uuid) {
-                mRequestErrorListener.shortMoney(uuid);
+            public void shortMoney(String uuid, String type) {
+                mRequestErrorListener.shortMoney(uuid, type);
             }
         });
     }
