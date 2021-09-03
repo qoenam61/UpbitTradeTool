@@ -122,7 +122,7 @@ public class UpBitFetcher {
                                 mActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }
@@ -220,7 +220,7 @@ public class UpBitFetcher {
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -266,7 +266,7 @@ public class UpBitFetcher {
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -314,7 +314,7 @@ public class UpBitFetcher {
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -362,7 +362,7 @@ public class UpBitFetcher {
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -410,7 +410,7 @@ public class UpBitFetcher {
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -458,7 +458,7 @@ public class UpBitFetcher {
                             mActivity.runOnUiThread(new Runnable() {
                                 @Override
                                 public void run() {
-                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                 }
                             });
                         }
@@ -613,7 +613,7 @@ public class UpBitFetcher {
                                     mActivity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                         }
                                     });
                                 }
@@ -669,7 +669,7 @@ public class UpBitFetcher {
                                 mActivity.runOnUiThread(new Runnable() {
                                     @Override
                                     public void run() {
-                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                     }
                                 });
                             }
@@ -739,7 +739,7 @@ public class UpBitFetcher {
                                     mActivity.runOnUiThread(new Runnable() {
                                         @Override
                                         public void run() {
-                                            Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_SHORT).show();
+                                            Toast.makeText(mActivity, jObjError.toString(), Toast.LENGTH_LONG).show();
                                         }
                                     });
                                 }

@@ -258,7 +258,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         activity.runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                Toast.makeText(getContext(), "매수 금액이 부족합니다.", Toast.LENGTH_SHORT).show();
+                                Toast.makeText(getContext(), "매수 금액이 부족합니다.", Toast.LENGTH_LONG).show();
                             }
                         });
                     }

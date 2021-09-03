@@ -161,7 +161,7 @@ public class MyCoinsAssetsFragment extends Fragment {
                                     return;
                                 }
                                 Toast.makeText(getContext(),
-                                        t.getLocalizedMessage(), Toast.LENGTH_SHORT).show();
+                                        t.getLocalizedMessage(), Toast.LENGTH_LONG).show();
                             }
                     );
         }
