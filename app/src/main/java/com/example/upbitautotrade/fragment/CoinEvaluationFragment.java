@@ -611,17 +611,17 @@ public class CoinEvaluationFragment extends Fragment {
             if (isMonitor) {
                 mCoinName = itemView.findViewById(R.id.coin_name);
                 mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
-                mRate = itemView.findViewById(R.id.coin_change_rate);
-                mRatePerMin = itemView.findViewById(R.id.coin_1min_change_rate);
-                mTickAmount = itemView.findViewById(R.id.buying_price);
-                mAmountPerMin = itemView.findViewById(R.id.buy_time);
+                mRate = itemView.findViewById(R.id.change_rate);
+                mRatePerMin = itemView.findViewById(R.id.change_rate);
+                mTickAmount = itemView.findViewById(R.id.buy_price);
+                mAmountPerMin = itemView.findViewById(R.id.sell_price);
             } else {
                 mCoinName = itemView.findViewById(R.id.coin_name);
-                mCoinStatus = itemView.findViewById(R.id.coin_status);
+                mCoinStatus = itemView.findViewById(R.id.status);
                 mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
-                mChangeRate = itemView.findViewById(R.id.coin_1min_change_rate);
-                mBuyingPrice = itemView.findViewById(R.id.buying_price);
-                mBuyingTime = itemView.findViewById(R.id.buy_time);
+                mChangeRate = itemView.findViewById(R.id.change_rate);
+                mBuyingPrice = itemView.findViewById(R.id.buy_price);
+                mBuyingTime = itemView.findViewById(R.id.sell_price);
             }
         }
     }

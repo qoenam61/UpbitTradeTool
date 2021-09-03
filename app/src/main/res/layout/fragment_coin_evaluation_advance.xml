@@ -217,7 +217,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="상태"/>
@@ -232,11 +232,11 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="수익률"/>
-                    </LinearLayout>
+                     </LinearLayout>
                     <LinearLayout
                         android:layout_width="0dp"
                         android:layout_height="match_parent"
@@ -247,7 +247,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="매수가"/>
@@ -262,7 +262,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="매도가"/>
@@ -277,19 +277,17 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textStyle="bold"
                             android:textSize="@dimen/coin_list_text_size"
                             android:text="수익금"/>
                     </LinearLayout>
                 </LinearLayout>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/coin_result_list"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/default_margin"
-                    android:layout_marginEnd="@dimen/default_margin">
-                </androidx.recyclerview.widget.RecyclerView>
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
 
             <View
@@ -342,7 +340,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="상태"/>
@@ -357,7 +355,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textStyle="bold"
                             android:textSize="@dimen/coin_list_text_size"
                             android:text="현재가"/>
@@ -372,7 +370,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="수익률"/>
@@ -387,34 +385,17 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="매수가"/>
                     </LinearLayout>
-                    <LinearLayout
-                        android:layout_width="0dp"
-                        android:layout_height="match_parent"
-                        android:layout_weight="1"
-                        android:layout_margin="@dimen/coin_list_item_margin"
-                        android:orientation="vertical">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="0dp"
-                            android:layout_weight="1"
-                            android:gravity="left|center_vertical"
-                            android:textSize="@dimen/coin_list_text_size"
-                            android:textStyle="bold"
-                            android:text="매도가"/>
-                    </LinearLayout>
                 </LinearLayout>
+
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/coin_buying_list"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="@dimen/default_margin"
-                    android:layout_marginEnd="@dimen/default_margin">
-                </androidx.recyclerview.widget.RecyclerView>
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
 
             <View
@@ -468,7 +449,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textStyle="bold"
                             android:textSize="@dimen/coin_list_text_size"
                             android:text="현재가"/>
@@ -483,7 +464,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="전일대비"/>
@@ -498,7 +479,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="분당상승"/>
@@ -513,7 +494,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
                             android:text="틱거래수"/>
@@ -528,19 +509,16 @@
                             android:layout_width="match_parent"
                             android:layout_height="0dp"
                             android:layout_weight="1"
-                            android:gravity="left|center_vertical"
+                            android:gravity="center"
                             android:textSize="@dimen/coin_list_text_size"
                             android:textStyle="bold"
-                            android:text="분당거래\n(백만)"/>
+                            android:text="분당거래"/>
                     </LinearLayout>
                 </LinearLayout>
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/coin_evaluation_list"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="@dimen/default_margin"
-                    android:layout_marginEnd="@dimen/default_margin">
-                </androidx.recyclerview.widget.RecyclerView>
+                    android:layout_height="match_parent"/>
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>

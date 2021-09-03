@@ -326,7 +326,7 @@ public class CoinCorrelationGroup extends Fragment {
             super(itemView);
             mCoinName = itemView.findViewById(R.id.coin_name);
             mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
-            mChangedRate = itemView.findViewById(R.id.coin_change_rate);
+            mChangedRate = itemView.findViewById(R.id.change_rate);
             mChangedPrice = itemView.findViewById(R.id.coin_changed_price);
             mCorValue = itemView.findViewById(R.id.coin_corrValue);
         }

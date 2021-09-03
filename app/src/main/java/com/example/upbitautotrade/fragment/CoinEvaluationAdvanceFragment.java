@@ -183,7 +183,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         LinearLayoutManager layoutBuyManager = new LinearLayoutManager(getContext());
         buyingList.setLayoutManager(layoutBuyManager);
-        mBuyingListAdapter = new CoinListAdapter(mBuyingListAdapter.MODE_WAITING_FOR_BUYING);
+        mBuyingListAdapter = new CoinListAdapter(mBuyingListAdapter.MODE_WAITING_OR_BUY);
         buyingList.setAdapter(mBuyingListAdapter);
 
         Button startButton = mView.findViewById(R.id.start_button);
@@ -1011,7 +1011,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mBuyingItemKeyList.add(key);
                 mPreventReset = false;
             }
-            if (orderInfo.getVolume() != null && orderInfo.getRemainingVolume().doubleValue() != 0) {
+            if (orderInfo.getRemainingVolume() != null && orderInfo.getRemainingVolume().doubleValue() != 0) {
                 Log.d(TAG, "updateBuyItemInfo: DONE setPartialBuy true");
                 coinInfo.setPartialBuy(true);
             } else {
@@ -1019,7 +1019,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 coinInfo.setPartialBuy(false);
             }
             coinInfo.setStatus(CoinInfo.BUY);
-            coinInfo.setVolume(orderInfo.getVolume().doubleValue());
+            coinInfo.setVolume(orderInfo.getVolume() != null ? orderInfo.getVolume().doubleValue() : 0);
             coinInfo.setBuyTime(System.currentTimeMillis());
             Ticker ticker = mTickerMapInfo.get(key);
             if (ticker != null) {
@@ -1034,13 +1034,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
             Log.d(TAG, "[DEBUG] updateBuyItemInfo BUY - !!!! marketId: " + key
                     + " buy price: " + mZeroFormat.format(coinInfo.getBuyPrice())
-                    + " order price: " + mZeroFormat.format(orderInfo.getPrice().doubleValue())
-                    + " avg price: " + mZeroFormat.format(orderInfo.getAvgPrice().doubleValue())
+                    + " order price: " + mZeroFormat.format(orderInfo.getPrice() != null ? orderInfo.getPrice().doubleValue() : 0)
+                    + " avg price: " + mZeroFormat.format(orderInfo.getAvgPrice() != null ? orderInfo.getAvgPrice().doubleValue() : 0)
                     + " uuid: "+ orderInfo.getUuid()
             );
         }
 
-        if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("ask") && orderInfo.getRemainingVolume().doubleValue() == 0) {
+        if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("ask")
+                && orderInfo.getRemainingVolume() != null && orderInfo.getRemainingVolume().doubleValue() == 0) {
             mIsShortMoney = false;
             coinInfo.setMarketId(key);
             coinInfo.setStatus(CoinInfo.SELL);
@@ -1061,7 +1062,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
             Log.d(TAG, "[DEBUG] updateBuyItemInfo Sell - !!! marketId: " + key
                     + " sell price: "+ (orderInfo.getPrice() != null ? mZeroFormat.format(orderInfo.getPrice().doubleValue()) : 0)
-                    + " avg price: " + mZeroFormat.format(orderInfo.getAvgPrice().doubleValue())
+                    + " avg price: " + mZeroFormat.format(orderInfo.getAvgPrice() != null ? orderInfo.getAvgPrice().doubleValue() : 0)
                     + " uuid: " + orderInfo.getUuid()
             );
         }
@@ -1083,7 +1084,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (coinInfo != null) {
                 Log.d(TAG, "[DEBUG] deleteOrderInfo - key: " + order.getMarket()
                         + " getState: " + orderInfo.getState()
-                        + " getPrice: " + mZeroFormat.format(orderInfo.getPrice().doubleValue())
+                        + " getPrice: " + mZeroFormat.format(orderInfo.getPrice() != null ? orderInfo.getPrice().doubleValue() : 0)
                         + " isPartialBuy: " + coinInfo.isPartialBuy()
                         + " uuid: " + orderInfo.getUuid());
 
@@ -1247,48 +1248,48 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     }
 
     private class CoinHolder extends RecyclerView.ViewHolder {
-        public TextView mCoinName;
-        public TextView mCoinStatus;
-        public TextView mCurrentPrice;
-        public TextView mRatePerMin;
-        public TextView mRate;
-        public TextView mTickAmount;
-        public TextView mAmountPerMin;
+        // Result List
+        public TextView mName;
+        public TextView mStatus;
         public TextView mChangeRate;
         public TextView mBuyPrice;
         public TextView mSellPrice;
         public TextView mProfitAmount;
+        public TextView mCurrentPrice;
+        public TextView mChangeRate1min;
+        public TextView mTickCounts;
+        public TextView mAmount1Min;
 
         public CoinHolder(View itemView, int mode) {
             super(itemView);
             if (mode == mBuyingListAdapter.MODE_MONITOR) {
-                mCoinName = itemView.findViewById(R.id.coin_name);
-                mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
-                mRate = itemView.findViewById(R.id.coin_change_rate);
-                mRatePerMin = itemView.findViewById(R.id.coin_1min_change_rate);
-                mTickAmount = itemView.findViewById(R.id.buying_price);
-                mAmountPerMin = itemView.findViewById(R.id.buy_time);
-            } else if (mode == mBuyingListAdapter.MODE_WAITING_FOR_BUYING){
-                mCoinName = itemView.findViewById(R.id.coin_name);
-                mCoinStatus = itemView.findViewById(R.id.coin_status);
-                mCurrentPrice = itemView.findViewById(R.id.coin_current_price);
-                mChangeRate = itemView.findViewById(R.id.coin_1min_change_rate);
-                mBuyPrice = itemView.findViewById(R.id.buying_price);
-                mSellPrice = itemView.findViewById(R.id.buy_time);
+                mName = itemView.findViewById(R.id.name);
+                mStatus = itemView.findViewById(R.id.status);
+                mCurrentPrice = itemView.findViewById(R.id.current_price);
+                mChangeRate = itemView.findViewById(R.id.change_rate);
+                mChangeRate1min = itemView.findViewById(R.id.change_rate);
+                mTickCounts = itemView.findViewById(R.id.tick_counts);
+                mAmount1Min = itemView.findViewById(R.id.amount_1min);
+            } else if (mode == mBuyingListAdapter.MODE_WAITING_OR_BUY){
+                mName = itemView.findViewById(R.id.name);
+                mStatus = itemView.findViewById(R.id.status);
+                mCurrentPrice = itemView.findViewById(R.id.current_price);
+                mChangeRate = itemView.findViewById(R.id.change_rate);
+                mBuyPrice = itemView.findViewById(R.id.buy_price);
             } else if (mode == mBuyingListAdapter.MODE_RESULT){
-                mCoinName = itemView.findViewById(R.id.coin_name);
-                mCoinStatus = itemView.findViewById(R.id.coin_status);
-                mChangeRate = itemView.findViewById(R.id.coin_1min_change_rate);
-                mBuyPrice = itemView.findViewById(R.id.buying_price);
-                mSellPrice = itemView.findViewById(R.id.buy_time);
-                mProfitAmount = itemView.findViewById(R.id.coin_current_price);
+                mName = itemView.findViewById(R.id.name);
+                mStatus = itemView.findViewById(R.id.status);
+                mChangeRate = itemView.findViewById(R.id.change_rate);
+                mBuyPrice = itemView.findViewById(R.id.buy_price);
+                mSellPrice = itemView.findViewById(R.id.sell_price);
+                mProfitAmount = itemView.findViewById(R.id.profit_amount);
             }
         }
     }
 
     private class CoinListAdapter extends RecyclerView.Adapter<CoinHolder> {
         private final int MODE_RESULT = 1;
-        private final int MODE_WAITING_FOR_BUYING = 2;
+        private final int MODE_WAITING_OR_BUY = 2;
         private final int MODE_MONITOR = 3;
 
         private List<String> mCoinListInfo;
@@ -1321,7 +1322,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (mMode == MODE_MONITOR) {
                 view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.evaluation_coin_item, parent, false);
-            } else if (mMode == MODE_WAITING_FOR_BUYING){
+            } else if (mMode == MODE_WAITING_OR_BUY){
                 view = LayoutInflater.from(parent.getContext())
                         .inflate(R.layout.evaluation_buying_coin_item, parent, false);
             } else if (mMode == MODE_RESULT) {
@@ -1337,7 +1338,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 String key = mCoinListInfo.get(position);
                 MarketInfo marketInfo = mMarketsMapInfo.get(key);
                 if (marketInfo != null) {
-                    holder.mCoinName.setText(marketInfo.getKorean_name());
+                    holder.mName.setText(marketInfo.getKorean_name());
                 }
                 TradeInfo lastTradeInfo = mTradeMapInfo.get(key).getLast();
                 TradeInfo firstTradeInfo = mTradeMapInfo.get(key).getFirst();
@@ -1356,19 +1357,19 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
                 if (lastTradeInfo != null && firstTradeInfo != null) {
                     holder.mCurrentPrice.setText(mNonZeroFormat.format(lastTradeInfo.getTradePrice()));
-                    holder.mRate.setText(mPercentFormat.format(changedRate));
-                    holder.mRatePerMin.setText(mPercentFormat.format(changedRate1min));
-                    holder.mTickAmount.setText(Integer.toString(tickCount));
-                    holder.mAmountPerMin.setText(mZeroFormat.format(amount / 1000000));
+                    holder.mChangeRate.setText(mPercentFormat.format(changedRate));
+                    holder.mChangeRate1min.setText(mPercentFormat.format(changedRate1min));
+                    holder.mTickCounts.setText(Integer.toString(tickCount));
+                    holder.mAmount1Min.setText(mZeroFormat.format(amount / 1000000));
                 }
 
-            } else if (mMode == MODE_WAITING_FOR_BUYING) {
+            } else if (mMode == MODE_WAITING_OR_BUY) {
                 String key = mBuyingListInfo.get(position);
                 MarketInfo marketInfo = mMarketsMapInfo.get(key);
                 if (marketInfo != null) {
-                    holder.mCoinName.setText(marketInfo.getKorean_name());
+                    holder.mName.setText(marketInfo.getKorean_name());
                 }
-                holder.mCoinName.setText(marketInfo.getKorean_name());
+                holder.mName.setText(marketInfo.getKorean_name());
 
                 CoinInfo buyingItem = mBuyingItemMapInfo.get(key);
                 if (buyingItem != null
@@ -1378,7 +1379,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     holder.mBuyPrice.setText(mNonZeroFormat.format(buyingItem.getBuyPrice()));
                     double currentPrice = buyingItem.getClosePrice();
                     holder.mCurrentPrice.setText(mNonZeroFormat.format(currentPrice));
-                    holder.mCoinStatus.setText(buyingItem.getStatus());
+                    holder.mStatus.setText(buyingItem.getStatus());
 
                     double prevPrice = buyingItem.getBuyPrice();
                     double changedPrice = currentPrice - prevPrice;
@@ -1398,9 +1399,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 String key = mResultListInfo.get(position).getMarketId();
                 MarketInfo marketInfo = mMarketsMapInfo.get(key);
                 if (marketInfo != null) {
-                    holder.mCoinName.setText(marketInfo.getKorean_name());
+                    holder.mName.setText(marketInfo.getKorean_name());
                 }
-                holder.mCoinName.setText(marketInfo.getKorean_name());
+                holder.mName.setText(marketInfo.getKorean_name());
                 CoinInfo resultItem = mResultListInfo.get(position);
                 if (resultItem != null
                         && (resultItem.getStatus().equals(CoinInfo.SELL))) {
@@ -1408,7 +1409,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     double changedPrice = resultItem.getSellPrice() - resultItem.getBuyPrice();
                     double prevPrice = resultItem.getBuyPrice();
                     double rate = prevPrice != 0 ? (changedPrice / (double) prevPrice) : 0;
-                    holder.mCoinStatus.setText(resultItem.getStatus());
+                    holder.mStatus.setText(resultItem.getStatus());
                     holder.mChangeRate.setText(mPercentFormat.format(rate));
                     holder.mSellPrice.setText(mNonZeroFormat.format(resultItem.getSellPrice()));
                     holder.mProfitAmount.setText(mNonZeroFormat.format(resultItem.getProfitAmount()));
@@ -1421,7 +1422,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             int count = 0;
             if (mMode == MODE_MONITOR) {
                 count = mCoinListInfo != null ? mCoinListInfo.size() : 0;
-            } else if (mMode == MODE_WAITING_FOR_BUYING) {
+            } else if (mMode == MODE_WAITING_OR_BUY) {
                 count = mBuyingListInfo != null ? mBuyingListInfo.size() : 0;
             } else if (mMode == MODE_RESULT) {
                 count = mResultListInfo != null ? mResultListInfo.size() : 0;

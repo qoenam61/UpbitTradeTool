@@ -16,7 +16,7 @@
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/coin_name"
+                android:id="@+id/name"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -31,11 +31,11 @@
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/coin_status"
+                android:id="@+id/status"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
-                android:gravity="right|center_vertical"
+                android:gravity="center"
                 android:textSize="@dimen/coin_list_text_size"
                 android:text="Waiting"/>
         </LinearLayout>
@@ -46,7 +46,7 @@
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/coin_current_price"
+                android:id="@+id/current_price"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -61,7 +61,7 @@
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/coin_1min_change_rate"
+                android:id="@+id/change_rate"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
@@ -76,22 +76,7 @@
             android:layout_margin="@dimen/coin_list_item_margin"
             android:orientation="vertical">
             <TextView
-                android:id="@+id/buying_price"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:gravity="right|center_vertical"
-                android:textSize="@dimen/coin_list_text_size"
-                android:text="0"/>
-        </LinearLayout>
-        <LinearLayout
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_margin="@dimen/coin_list_item_margin"
-            android:orientation="vertical">
-            <TextView
-                android:id="@+id/buy_time"
+                android:id="@+id/buy_price"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="1"
