@@ -43,7 +43,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:textSize="@dimen/coin_list_text_size"
-                        android:maxLength="8"
+                        android:maxLength="10"
                         android:inputType="numberDecimal"
                         android:text="0"/>
                     <EditText
@@ -52,7 +52,7 @@
                         android:layout_height="wrap_content"
                         android:gravity="center"
                         android:textSize="@dimen/coin_list_text_size"
-                        android:maxLength="8"
+                        android:maxLength="10"
                         android:inputType="numberDecimal"
                         android:hint="금액을 입력"/>
                 </LinearLayout>

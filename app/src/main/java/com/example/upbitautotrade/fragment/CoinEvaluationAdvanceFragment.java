@@ -544,9 +544,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
                 if (mIsShortMoney) {
                     Log.d(TAG, "[DEBUG] updateTradeMapInfoByTradeInfo: not Enough money !!!");
-                }
-
-                if (priceChangedRate >= mMonitorRate && !mIsShortMoney) {
+                } else if (priceChangedRate >= mMonitorRate && !mIsShortMoney) {
                     registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
 
                     CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice, tickCount);
@@ -1075,7 +1073,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
                 if (!coinInfo.isPartialBuy()) {
                     Log.d(TAG, "[DEBUG] deleteOrderInfo setPartialBuy false");
-                    if (orderInfo.getState().equals(Post.DONE)) {
+                    if (orderInfo.getState().equals(Post.DONE) || orderInfo.getState().equals(Post.WAIT)) {
                         mIsShortMoney = false;
 
                         removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
