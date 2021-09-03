@@ -812,7 +812,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         );
                     }
                 } else {
-                    if ((profitRate < mMonitorRate * -0.75 && diffPriceRate < mMonitorRate * -0.75)) {
+                    if ((profitRate < mMonitorRate * -0.5 && diffPriceRate < mMonitorRate * -0.5)) {
                         isSell = true;
                         Log.d(TAG, "[DEBUG] tacticalToSell SELL - 6 : " + key
                                 + " price: " + currentPrice
@@ -821,7 +821,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                                 + " profitRate: " + profitRate
                         );
                     } else {
-                        if (changedRate < mMonitorRate * -1.5) {
+                        if (changedRate < mMonitorRate * -0.5) {
                             isSell = true;
                             Log.d(TAG, "[DEBUG] tacticalToSell SELL - 7 : " + key
                                     + " price: " + currentPrice
@@ -833,7 +833,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
             }  else {
-                if (changedRate < mMonitorRate * -1.5) {
+                if (changedRate < mMonitorRate * -0.5) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - 5 : " + key
                             + " price: " + currentPrice
