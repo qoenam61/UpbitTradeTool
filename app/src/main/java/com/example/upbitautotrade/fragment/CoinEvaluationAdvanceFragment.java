@@ -1,5 +1,6 @@
 package com.example.upbitautotrade.fragment;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -13,6 +14,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -215,7 +217,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 mIsShortMoney = false;
-                
+
                 String buyingPrice = buyingPriceEditText.getText().toString();
                 String monitorTime = monitorTimeEditText.getText().toString();
                 String monitorRate = monitorRateEditText.getText().toString();
@@ -251,6 +253,15 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             public void shortMoney(String uuid, String type) {
                 if (type.equals("bid")) {
                     mIsShortMoney = true;
+                    Activity activity = getActivity();
+                    if (activity != null) {
+                        activity.runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                Toast.makeText(getContext(), "매수 금액이 부족합니다.", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
                 }
                 String key = null;
                 Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
