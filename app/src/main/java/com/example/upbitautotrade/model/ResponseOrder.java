@@ -35,19 +35,19 @@ public class ResponseOrder {
     Number	remainingVolume;
 
     @SerializedName("reserved_fee")
-    String	reservedFee;
+    Number	reservedFee;
 
     @SerializedName("remaining_fee")
-    String remainingFee;
+    Number remainingFee;
 
     @SerializedName("paid_fee")
-    String	paid_fee;
+    Number	paid_fee;
 
     @SerializedName("locked")
-    String	locked;
+    Number	locked;
 
     @SerializedName("executed_volume")
-    String	executedVolume;
+    Number	executedVolume;
 
     @SerializedName("trades_count")
     Integer	tradesCount;
@@ -96,23 +96,23 @@ public class ResponseOrder {
         return remainingVolume;
     }
 
-    public String getReservedFee() {
+    public Number getReservedFee() {
         return reservedFee;
     }
 
-    public String getRemainingFee() {
+    public Number getRemainingFee() {
         return remainingFee;
     }
 
-    public String getPaid_fee() {
+    public Number getPaid_fee() {
         return paid_fee;
     }
 
-    public String getLocked() {
+    public Number getLocked() {
         return locked;
     }
 
-    public String getExecutedVolume() {
+    public Number getExecutedVolume() {
         return executedVolume;
     }
 
@@ -128,11 +128,11 @@ public class ResponseOrder {
         this.remainingVolume = remainingVolume;
     }
 
-    public void setLocked(String locked) {
+    public void setLocked(Number locked) {
         this.locked = locked;
     }
 
-    public void setExecutedVolume(String executedVolume) {
+    public void setExecutedVolume(Number executedVolume) {
         this.executedVolume = executedVolume;
     }
 

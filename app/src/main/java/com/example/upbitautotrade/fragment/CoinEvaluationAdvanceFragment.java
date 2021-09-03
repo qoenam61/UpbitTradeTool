@@ -598,7 +598,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
             registerProcess(UPDATE_POST_ORDER_INFO, post);
             coinInfo.setBuyPrice(toBuyPrice);
-            coinInfo.setVolume(volume);
             mBuyingItemMapInfo.put(key, coinInfo);
         } else {
             Log.d(TAG, "[DEBUG] tacticalToBuy Log - key: " + key
@@ -852,7 +851,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         && order.getState().equals(Post.DONE)) {
                     String uuid = UUID.randomUUID().toString();
                     Post postSell = new Post(key, "ask",
-                            coinInfo.isPartialBuy() ? order.getVolume().toString() : Double.toString(coinInfo.getVolume()),
+                            coinInfo.isPartialBuy() ? order.getExecutedVolume().toString() : order.getVolume().toString(),
                             null, "market", uuid);
                     registerProcess(UPDATE_POST_ORDER_INFO, postSell);
                     order.setUuid(uuid);
@@ -874,7 +873,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     );
                     String uuid = UUID.randomUUID().toString();
                     Post postSell = new Post(key, "ask",
-                            coinInfo.isPartialBuy() ? order.getVolume().toString() : Double.toString(coinInfo.getVolume()),
+                            coinInfo.isPartialBuy() ? order.getExecutedVolume().toString() : order.getVolume().toString(),
                             null, "market", uuid);
                     registerProcess(UPDATE_POST_ORDER_INFO, postSell);
                     order.setUuid(uuid);
@@ -897,7 +896,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     );
                     String uuid = UUID.randomUUID().toString();
                     Post postSell = new Post(key, "ask",
-                            coinInfo.isPartialBuy() ? order.getVolume().toString() : Double.toString(coinInfo.getVolume()),
+                            coinInfo.isPartialBuy() ? order.getExecutedVolume().toString() : order.getVolume().toString(),
                             null, "market", uuid);
                     registerProcess(UPDATE_POST_ORDER_INFO, postSell);
                     order.setUuid(uuid);
