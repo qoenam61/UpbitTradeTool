@@ -62,7 +62,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     public final String MARKET_NAME = "KRW";
     public final String MARKET_WARNING = "CAUTION";
-    private final long RESET_TIMER = 60 * 60 * 1000;
+    private final long RESET_TIMER = 20 * 60 * 1000;
     private final long RESET_TIMER_GAP = 1 * 60 * 1000;
     private final int COIN_LIST_NUM = 30;
 
