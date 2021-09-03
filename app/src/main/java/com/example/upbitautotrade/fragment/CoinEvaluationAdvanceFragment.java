@@ -576,13 +576,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double type2 = (Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2)) / 3;
         double buyPriceType2 = CoinInfo.convertPrice(Math.sqrt(type2));
 
-        Log.d(TAG, "tacticalToBuy calc - !!!! marketId: " + key
-                + " priceAmount: " + mPriceAmount
-                + " candleRate: " + candleRate
-                + " upperTailRate: " + upperTailRate
-                + " lowerTailRate: " + lowerTailRate
-                + " tailRate: " + tailRate
-        );
+
 
         boolean isBuy = false;
         if (candleRate >= mMonitorRate) {
@@ -611,6 +605,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             coinInfo.setBuyPrice(toBuyPrice);
             coinInfo.setVolume(volume);
             mBuyingItemMapInfo.put(key, coinInfo);
+        } else {
+            Log.d(TAG, "[DEBUG] tacticalToBuy Log - key: " + key
+                    + " priceAmount: " + mPriceAmount
+                    + " candleRate: " + candleRate
+                    + " upperTailRate: " + upperTailRate
+                    + " lowerTailRate: " + lowerTailRate
+                    + " tailRate: " + tailRate
+            );
         }
     }
 
@@ -981,7 +983,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 if (order != null && key.equals(order.getMarket())
                         && order.getSide().equals("bid")
                         && order.getState().equals(Post.DONE)) {
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - expired : " + key
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - expired type 1 : " + key
                             + " price: " + currentPrice
                             + " changedRate: " + changedRate
                             + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
@@ -997,6 +999,37 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mResponseOrderInfoMap.put(key, order);
                 }
 
+            } else if (duration > mMonitorTime * 6
+                    && coinInfo.getMaxProfitRate() <= mMonitorRate * 2
+                    && (coinInfo.getTickCounts() < mMonitorTick)) {
+                ResponseOrder order = mResponseOrderInfoMap.get(key);
+                if (order != null && key.equals(order.getMarket())
+                        && order.getSide().equals("bid")
+                        && order.getState().equals(Post.DONE)) {
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - expired type 2: " + key
+                            + " price: " + currentPrice
+                            + " changedRate: " + changedRate
+                            + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                            + " profitRate: " + profitRate
+                            + " duration: " + duration
+                    );
+                    String uuid = UUID.randomUUID().toString();
+                    Post postSell = new Post(key, "ask",
+                            coinInfo.isPartialBuy() ? order.getVolume().toString() : Double.toString(coinInfo.getVolume()),
+                            null, "market", uuid);
+                    registerProcess(UPDATE_POST_ORDER_INFO, postSell);
+                    order.setUuid(uuid);
+                    mResponseOrderInfoMap.put(key, order);
+                }
+
+            } else {
+                Log.d(TAG, "[DEBUG] tacticalToSell Log - key: " + key
+                        + " price: " + currentPrice
+                        + " changedRate: " + changedRate
+                        + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                        + " profitRate: " + profitRate
+                        + " duration: " + duration
+                );
             }
         }
     }
