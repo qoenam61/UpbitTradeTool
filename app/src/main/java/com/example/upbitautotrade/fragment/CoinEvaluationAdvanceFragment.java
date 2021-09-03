@@ -607,6 +607,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             Post post = new Post(key, "bid", Double.toString(volume), Double.toString(toBuyPrice), "limit", uuid);
             registerProcess(UPDATE_POST_ORDER_INFO, post);
             coinInfo.setBuyPrice(toBuyPrice);
+            coinInfo.setVolume(volume);
             mBuyingItemMapInfo.put(key, coinInfo);
         }
     }
@@ -635,7 +636,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     coinInfo.setPartialBuy(false);
                 }
                 coinInfo.setStatus(CoinInfo.WAITING);
-                coinInfo.setVolume(orderInfo.getVolume().doubleValue());
                 coinInfo.setWaitTime(System.currentTimeMillis());
                 mBuyingItemMapInfo.put(key, coinInfo);
 
@@ -665,7 +665,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 coinInfo.setPartialBuy(false);
             }
             coinInfo.setStatus(CoinInfo.BUY);
-            coinInfo.setVolume(orderInfo.getVolume().doubleValue());
             coinInfo.setBuyTime(System.currentTimeMillis());
             Ticker ticker = mTickerMapInfo.get(key);
             if (ticker != null) {
@@ -877,10 +876,30 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             }
 
             boolean isSell = false;
-            if (coinInfo.getMaxProfitRate() > mMonitorRate * 4) {
+            if (coinInfo.getMaxProfitRate() > mMonitorRate * 16) {
+                if ((profitRate < mMonitorRate * -3.25)) {
+                    isSell = true;
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 1 : " + key
+                            + " price: " + currentPrice
+                            + " changedRate: " + changedRate
+                            + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                            + " profitRate: " + profitRate
+                    );
+                }
+            } else if (coinInfo.getMaxProfitRate() > mMonitorRate * 8) {
+                if ((profitRate < mMonitorRate * -2.5)) {
+                    isSell = true;
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 2 : " + key
+                            + " price: " + currentPrice
+                            + " changedRate: " + changedRate
+                            + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
+                            + " profitRate: " + profitRate
+                    );
+                }
+            } else if (coinInfo.getMaxProfitRate() > mMonitorRate * 4) {
                 if ((profitRate < mMonitorRate * -1.75)) {
                     isSell = true;
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 0 : " + key
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 3 : " + key
                             + " price: " + currentPrice
                             + " changedRate: " + changedRate
                             + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
@@ -890,7 +909,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             } else if (coinInfo.getMaxProfitRate() > mMonitorRate * 2) {
                 if ((profitRate < mMonitorRate * -1)) {
                     isSell = true;
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 1 : " + key
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 4 : " + key
                             + " price: " + currentPrice
                             + " changedRate: " + changedRate
                             + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
@@ -901,7 +920,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 if (coinInfo.getMaxProfitRate() >= mMonitorRate) {
                     if ((profitRate < mMonitorRate * -0.75)) {
                         isSell = true;
-                        Log.d(TAG, "[DEBUG] tacticalToSell SELL - 2 : " + key
+                        Log.d(TAG, "[DEBUG] tacticalToSell SELL - 5 : " + key
                                 + " price: " + currentPrice
                                 + " changedRate: " + changedRate
                                 + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
@@ -911,7 +930,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 } else {
                     if ((profitRate < mMonitorRate * -0.75 && diffPriceRate < mMonitorRate * -0.75)) {
                         isSell = true;
-                        Log.d(TAG, "[DEBUG] tacticalToSell SELL - 3 : " + key
+                        Log.d(TAG, "[DEBUG] tacticalToSell SELL - 6 : " + key
                                 + " price: " + currentPrice
                                 + " changedRate: " + changedRate
                                 + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
@@ -920,7 +939,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     } else {
                         if (changedRate < mMonitorRate * -1.5) {
                             isSell = true;
-                            Log.d(TAG, "[DEBUG] tacticalToSell SELL - 4 : " + key
+                            Log.d(TAG, "[DEBUG] tacticalToSell SELL - 7 : " + key
                                     + " price: " + currentPrice
                                     + " changedRate: " + changedRate
                                     + " getMaxProfitRate: " + coinInfo.getMaxProfitRate()
@@ -947,7 +966,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         && order.getSide().equals("bid")
                         && order.getState().equals(Post.DONE)) {
                     String uuid = UUID.randomUUID().toString();
-                    Post postSell = new Post(key, "ask", order.getVolume().toString(), null, "market", uuid);
+                    Post postSell = new Post(key, "ask",
+                            coinInfo.isPartialBuy() ? order.getVolume().toString() : Double.toString(coinInfo.getVolume()),
+                            null, "market", uuid);
                     registerProcess(UPDATE_POST_ORDER_INFO, postSell);
                     order.setUuid(uuid);
                     mResponseOrderInfoMap.put(key, order);
@@ -967,7 +988,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " duration: " + duration
                     );
                     String uuid = UUID.randomUUID().toString();
-                    Post postSell = new Post(key, "ask", order.getVolume().toString(), null, "market", uuid);
+                    Post postSell = new Post(key, "ask",
+                            coinInfo.isPartialBuy() ? order.getVolume().toString() : Double.toString(coinInfo.getVolume()),
+                            null, "market", uuid);
                     registerProcess(UPDATE_POST_ORDER_INFO, postSell);
                     order.setUuid(uuid);
                     mResponseOrderInfoMap.put(key, order);

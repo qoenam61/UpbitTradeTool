@@ -93,6 +93,10 @@ public class CoinInfo {
         this.mVolume = mVolume;
     }
 
+    public double getVolume() {
+        return mVolume;
+    }
+
     public void setMaxProfitRate(double currentPrice) {
         double changedPrice = currentPrice - getBuyPrice();
         double changedRate = changedPrice / getBuyPrice();
