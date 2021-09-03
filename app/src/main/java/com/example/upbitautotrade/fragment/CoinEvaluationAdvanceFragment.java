@@ -247,6 +247,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mViewModel.setOnPostErrorListener(new UpBitViewModel.RequestErrorListener() {
             @Override
             public void shortMoney(String uuid, String type) {
+                if (type.equals("bid")) {
+                    mIsShortMoney = true;
+                }
                 String key = null;
                 Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
                 while (iterator.hasNext()) {
@@ -261,9 +264,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
                     if (coinInfo == null) {
                         return;
-                    }
-                    if (type.equals("bid")) {
-                        mIsShortMoney = true;
                     }
                     Log.d(TAG, "[DEBUG] shortMoney key : " + key +" mIsShortMoney: " + mIsShortMoney + " uuid: " + uuid);
 
