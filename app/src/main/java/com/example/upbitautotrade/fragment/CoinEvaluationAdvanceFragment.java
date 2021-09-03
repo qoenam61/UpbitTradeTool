@@ -114,6 +114,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     boolean mIsShortMoney = false;
 
     private DecimalFormat mZeroFormat;
+    private DecimalFormat mExtendZeroFormat;
     private DecimalFormat mNonZeroFormat;
     private DecimalFormat mPercentFormat;
     private SimpleDateFormat mTimeFormat;
@@ -145,6 +146,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         mTradeMapInfo = new HashMap<>();
 
         mZeroFormat = new DecimalFormat("###,###,###,###.##");
+        mExtendZeroFormat = new DecimalFormat("###,###,###,###.###");
         mNonZeroFormat = new DecimalFormat("###,###,###,###");
         mPercentFormat = new DecimalFormat("###.##" + "%");
         mTimeFormat = new SimpleDateFormat("HH:mm:ss", Locale.KOREA);
@@ -1049,6 +1051,27 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             Ticker ticker = mTickerMapInfo.get(key);
             coinInfo.setSellPrice(ticker != null &&  ticker.getTradePrice() != null ? ticker.getTradePrice().doubleValue() : 0);
 
+            TextView profitRate = mView.findViewById(R.id.profit_rate);
+            TextView profitAmount = mView.findViewById(R.id.profit_amount);
+
+            if (profitRate != null && profitAmount != null) {
+                Iterator<CoinInfo> infoIterator = mResultListInfo.iterator();
+                double sellSum = 0;
+                double buySum = 0;
+                while (infoIterator.hasNext()) {
+                    CoinInfo info = infoIterator.next();
+                    sellSum += info.getSellAmount();
+                    buySum += info.getBuyAmount();
+                }
+                double diff = sellSum - buySum;
+                double rate = diff / buySum;
+                profitRate.setText(mPercentFormat.format(rate));
+                profitRate.setTextColor(rate > 0 ? Color.RED : rate < 0 ? Color.BLUE : Color.BLACK);
+                profitAmount.setText(mZeroFormat.format(diff));
+                profitAmount.setTextColor(diff > 0 ? Color.RED : diff < 0 ? Color.BLUE : Color.BLACK);
+
+            }
+
             mResultListInfo.add(coinInfo);
             mResultListAdapter.setResultItems(mResultListInfo);
 
@@ -1267,7 +1290,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mStatus = itemView.findViewById(R.id.status);
                 mCurrentPrice = itemView.findViewById(R.id.current_price);
                 mChangeRate = itemView.findViewById(R.id.change_rate);
-                mChangeRate1min = itemView.findViewById(R.id.change_rate);
+                mChangeRate1min = itemView.findViewById(R.id.change_rate_1min);
                 mTickCounts = itemView.findViewById(R.id.tick_counts);
                 mAmount1Min = itemView.findViewById(R.id.amount_1min);
             } else if (mode == mBuyingListAdapter.MODE_WAITING_OR_BUY){
@@ -1358,9 +1381,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 if (lastTradeInfo != null && firstTradeInfo != null) {
                     holder.mCurrentPrice.setText(mNonZeroFormat.format(lastTradeInfo.getTradePrice()));
                     holder.mChangeRate.setText(mPercentFormat.format(changedRate));
+                    holder.mChangeRate.setTextColor(changedRate > 0 ? Color.RED : changedRate < 0 ? Color.BLUE : Color.BLACK);
                     holder.mChangeRate1min.setText(mPercentFormat.format(changedRate1min));
+                    holder.mChangeRate1min.setTextColor(changedRate1min > 0 ? Color.RED : changedRate1min < 0 ? Color.BLUE : Color.BLACK);
                     holder.mTickCounts.setText(Integer.toString(tickCount));
-                    holder.mAmount1Min.setText(mZeroFormat.format(amount / 1000000));
+                    holder.mAmount1Min.setText(mExtendZeroFormat.format(amount / 1000000));
                 }
 
             } else if (mMode == MODE_WAITING_OR_BUY) {
@@ -1386,13 +1411,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     double rate = prevPrice != 0 ? (changedPrice / (double) prevPrice) : 0;
                     if (!buyingItem.getStatus().equals(CoinInfo.WAITING)) {
                         holder.mChangeRate.setText(mPercentFormat.format(rate));
+                        holder.mChangeRate.setTextColor(rate > 0 ? Color.RED : rate < 0 ? Color.BLUE : Color.BLACK);
+
                     } else {
                         holder.mChangeRate.setText("N/A");
-                    }
-                    if (buyingItem.getStatus().equals(CoinInfo.SELL)){
-                        holder.mSellPrice.setText(mNonZeroFormat.format(buyingItem.getSellPrice()));
-                    } else {
-                        holder.mSellPrice.setText("N/A");
                     }
                 }
             } else if (mMode == MODE_RESULT) {
@@ -1411,8 +1433,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     double rate = prevPrice != 0 ? (changedPrice / (double) prevPrice) : 0;
                     holder.mStatus.setText(resultItem.getStatus());
                     holder.mChangeRate.setText(mPercentFormat.format(rate));
+                    holder.mChangeRate.setTextColor(rate > 0 ? Color.RED : rate < 0 ? Color.BLUE : Color.BLACK);
                     holder.mSellPrice.setText(mNonZeroFormat.format(resultItem.getSellPrice()));
                     holder.mProfitAmount.setText(mNonZeroFormat.format(resultItem.getProfitAmount()));
+                    holder.mProfitAmount.setTextColor(resultItem.getProfitAmount() > 0 ? Color.RED : resultItem.getProfitAmount() < 0 ? Color.BLUE : Color.BLACK);
+
                 }
             }
         }

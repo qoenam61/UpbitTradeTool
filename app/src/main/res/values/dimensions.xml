@@ -3,6 +3,7 @@
     <dimen name="text_view_login_height">30dp</dimen>
     <dimen name="default_text_size">18sp</dimen>
     <dimen name="large_text_size">22sp</dimen>
+    <dimen name="low_text_size">15sp</dimen>
     <dimen name="coin_list_text_size">12sp</dimen>
     <dimen name="default_text_size_min">11sp</dimen>
     <dimen name="default_height">100dp</dimen>
