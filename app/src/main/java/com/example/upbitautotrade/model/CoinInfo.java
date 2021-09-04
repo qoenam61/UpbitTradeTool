@@ -17,7 +17,7 @@ public class CoinInfo {
     double buyPrice;
     double sellPrice;
 
-    double profitRate = 0;
+    double maxProfitRate = 0;
     double buyingAmount;
 
     double tickCounts;
@@ -29,6 +29,7 @@ public class CoinInfo {
     private double mVolume = -1;
 
 
+    public static final String READY = "Ready";
     public static final String WAITING = "Waiting";
     public static final String BUY = "Buy";
     public static final String SELL = "Sell";
@@ -100,17 +101,17 @@ public class CoinInfo {
     public void setMaxProfitRate(double currentPrice) {
         double changedPrice = currentPrice - getBuyPrice();
         double changedRate = changedPrice / getBuyPrice();
+        changedRate = (double)Math.round(changedRate * 1000) / 1000;
 
-        double prevProfitRate = profitRate;
-        if (prevProfitRate == 0) {
-            profitRate = changedRate;
+        if (maxProfitRate == 0) {
+            maxProfitRate = changedRate;
         } else {
-            profitRate = Math.max(prevProfitRate, changedRate);
+            maxProfitRate = Math.max(maxProfitRate, changedRate);
         }
     }
 
     public double getMaxProfitRate() {
-        return profitRate;
+        return maxProfitRate;
     }
 
     public void setMarketId(String marketId) {
