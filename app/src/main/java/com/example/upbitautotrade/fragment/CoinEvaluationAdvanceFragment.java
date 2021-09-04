@@ -281,6 +281,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             }
                         });
                     }
+                } else {
+                    mIsShortMoney = false;
                 }
                 String key = null;
                 Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
@@ -315,6 +317,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mBuyingItemKeyList.remove(key);
                     mBuyingItemMapInfo.remove(key);
                     mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+
+                    updateProfitInfo();
                 }
             }
 
@@ -560,14 +564,18 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mMonitorKeyList.add(key);
                 }
 
-                if (mIsShortMoney) {
-                    Log.d(TAG, "updateTradeMapInfoByTradeInfo: not Enough money !!!");
-                } else if (priceChangedRate >= mMonitorRate && !mIsShortMoney) {
-                    registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
+                if (!mBuyingItemMapInfo.containsKey(key)) {
+                    if (mIsShortMoney) {
+                        Log.d(TAG, "updateTradeMapInfoByTradeInfo: not Enough money !!!");
+                    } else if (priceChangedRate >= mMonitorRate && !mIsShortMoney) {
+                        registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
 
-                    CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice, tickCount);
-                    // Post to Buy
-                    tacticalToBuy(key, coinInfo);
+                        CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice, tickCount);
+                        // Post to Buy
+                        tacticalToBuy(key, coinInfo);
+                    }
+                } else {
+                    Log.d(TAG, "updateTradeMapInfoByTradeInfo - key : " + key + " skip tacticalToBuy() - duplicate  !!!");
                 }
             } else {
                 mMonitorKeyList.remove(key);
@@ -619,7 +627,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 1 - !!!! marketId: " + key
                         + " price: " + mZeroFormat.format(toBuyPrice)
-                        + " volume: " + mZeroFormat.format(volume)
+                        + " volume: " + mExtendZeroFormat.format(volume)
                         + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                         + " candleRate: " + mPercentFormat.format(candleRate)
                 );
@@ -629,7 +637,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 2 - !!!! marketId: " + key
                         + " price: " + mZeroFormat.format(toBuyPrice)
-                        + " volume: " + mZeroFormat.format(volume)
+                        + " volume: " + mExtendZeroFormat.format(volume)
                         + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                         + " candleRate: " + mPercentFormat.format(candleRate)
                 );            } else if (tailRate < -0.75) {
@@ -638,7 +646,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 3 - !!!! marketId: " + key
                         + " price: " + mZeroFormat.format(toBuyPrice)
-                        + " volume: " + mZeroFormat.format(volume)
+                        + " volume: " + mExtendZeroFormat.format(volume)
                         + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                         + " candleRate: " + mPercentFormat.format(candleRate)
                 );
@@ -906,6 +914,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     registerProcess(UPDATE_POST_ORDER_INFO, postSell);
                     order.setUuid(uuid);
                     mResponseOrderInfoMap.put(key, order);
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL : " + key
+                            + " price: " + mZeroFormat.format(currentPrice)
+                            + " volume: " + mExtendZeroFormat.format(coinInfo.isPartialBuy() ? order.getExecutedVolume().doubleValue() : order.getVolume().doubleValue())
+                            + " changedRate: " + mZeroFormat.format(changedRate)
+                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
+                            + " profitRate: " + mPercentFormat.format(profitRate)
+                            + " duration: " + mTimeFormat.format(duration)
+                    );
                 }
             } else if (duration > mMonitorTime * 3
                     && coinInfo.getMaxProfitRate() <= mMonitorRate * 0.5
@@ -916,6 +932,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         && order.getState().equals(Post.DONE)) {
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - short time expired  : " + key
                             + " price: " + mZeroFormat.format(currentPrice)
+                            + " volume: " + mExtendZeroFormat.format(coinInfo.isPartialBuy() ? order.getExecutedVolume().doubleValue() : order.getVolume().doubleValue())
                             + " changedRate: " + mZeroFormat.format(changedRate)
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
@@ -939,6 +956,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         && order.getState().equals(Post.DONE)) {
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - long time expired : " + key
                             + " price: " + mZeroFormat.format(currentPrice)
+                            + " volume: " + mExtendZeroFormat.format(coinInfo.isPartialBuy() ? order.getExecutedVolume().doubleValue() : order.getVolume().doubleValue())
                             + " changedRate: " + mZeroFormat.format(changedRate)
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
@@ -954,8 +972,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 }
 
             } else {
+                ResponseOrder order = mResponseOrderInfoMap.get(key);
                 Log.d(TAG, "[DEBUG] tacticalToSell Log (NOT SELL) - key: " + key
                         + " price: " + mZeroFormat.format(currentPrice)
+                        + " volume: " + mExtendZeroFormat.format(coinInfo.isPartialBuy() ? order.getExecutedVolume().doubleValue() : order.getVolume().doubleValue())
                         + " changedRate: " + mZeroFormat.format(changedRate)
                         + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                         + " profitRate: " + mPercentFormat.format(profitRate)
@@ -983,10 +1003,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (!mBuyingItemKeyList.contains(key)) {
                 if (orderInfo.getVolume() != null && orderInfo.getRemainingVolume() != null &&
                         orderInfo.getVolume().doubleValue() != orderInfo.getRemainingVolume().doubleValue()) {
-                    Log.d(TAG, "updateBuyItemInfo: WAIT setPartialBuy true");
+                    Log.d(TAG, "updateResponseOrderInfo: WAIT setPartialBuy true");
                     coinInfo.setPartialBuy(true);
                 } else {
-                    Log.d(TAG, "updateBuyItemInfo: WAIT setPartialBuy false");
+                    Log.d(TAG, "updateResponseOrderInfo: WAIT setPartialBuy false");
                     coinInfo.setPartialBuy(false);
                 }
                 mPreventReset = false;
@@ -999,8 +1019,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
                 mMonitorKeyList.remove(key);
                 mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
-                Log.d(TAG, "[DEBUG] updateBuyItemInfo WAIT - !!!! marketId: " + key
+                Log.d(TAG, "[DEBUG] updateResponseOrderInfo WAIT - !!!! marketId: " + key
                         + " price: " + mZeroFormat.format(coinInfo.getBuyPrice())
+                        + " volume: " + mExtendZeroFormat.format(orderInfo.getVolume() != null ? orderInfo.getVolume().doubleValue() : 0)
+                        + " order price: " + mZeroFormat.format(orderInfo.getPrice() != null ? orderInfo.getPrice().doubleValue() : 0)
+                        + " avg price: " + mZeroFormat.format(orderInfo.getAvgPrice() != null ? orderInfo.getAvgPrice().doubleValue() : 0)
                         + " uuid: "+ orderInfo.getUuid()
                 );
             }
@@ -1013,15 +1036,32 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mBuyingItemKeyList.add(key);
                 mPreventReset = false;
             }
+
+            ResponseOrder prevOrder = mResponseOrderInfoMap.get(key);
+            if (prevOrder != null && prevOrder.getMarket().equals(key)
+                    && prevOrder.getSide().equals("bid")
+                    && prevOrder.getState().equals(Post.DONE)) {
+                double volume = prevOrder.getVolume().doubleValue();
+                if (orderInfo.getVolume() != null) {
+                    volume += orderInfo.getVolume().doubleValue();
+                }
+                Log.d(TAG, "[DEBUG] updateResponseOrderInfo: duplicate BUY key : " + key
+                        + " volume - : " + mExtendZeroFormat.format(volume)
+                        + " order volume - : " + mExtendZeroFormat.format(orderInfo.getVolume().doubleValue()));
+                orderInfo.setVolume(volume);
+                coinInfo.setVolume(volume);
+            } else {
+                coinInfo.setVolume(orderInfo.getVolume() != null ? orderInfo.getVolume().doubleValue() : 0);
+            }
+
             if (orderInfo.getRemainingVolume() != null && orderInfo.getRemainingVolume().doubleValue() != 0) {
-                Log.d(TAG, "updateBuyItemInfo: DONE setPartialBuy true");
+                Log.d(TAG, "updateResponseOrderInfo: DONE setPartialBuy true");
                 coinInfo.setPartialBuy(true);
             } else {
-                Log.d(TAG, "updateBuyItemInfo: DONE setPartialBuy false");
+                Log.d(TAG, "updateResponseOrderInfo: DONE setPartialBuy false");
                 coinInfo.setPartialBuy(false);
             }
             coinInfo.setStatus(CoinInfo.BUY);
-            coinInfo.setVolume(orderInfo.getVolume() != null ? orderInfo.getVolume().doubleValue() : 0);
             coinInfo.setBuyTime(System.currentTimeMillis());
             Ticker ticker = mTickerMapInfo.get(key);
             if (ticker != null) {
@@ -1034,43 +1074,23 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             mMonitorKeyList.remove(key);
             mCoinListAdapter.setMonitoringItems(mMonitorKeyList);
 
-            Log.d(TAG, "[DEBUG] updateBuyItemInfo BUY - !!!! marketId: " + key
+            Log.d(TAG, "[DEBUG] updateResponseOrderInfo BUY - !!!! marketId: " + key
                     + " buy price: " + mZeroFormat.format(coinInfo.getBuyPrice())
+                    + " volume: " + mExtendZeroFormat.format(orderInfo.getVolume() != null ? orderInfo.getVolume().doubleValue() : 0)
                     + " order price: " + mZeroFormat.format(orderInfo.getPrice() != null ? orderInfo.getPrice().doubleValue() : 0)
                     + " avg price: " + mZeroFormat.format(orderInfo.getAvgPrice() != null ? orderInfo.getAvgPrice().doubleValue() : 0)
                     + " uuid: "+ orderInfo.getUuid()
             );
         }
 
-        if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("ask")
-                && orderInfo.getRemainingVolume() != null && orderInfo.getRemainingVolume().doubleValue() == 0) {
+        // SELL
+        if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("ask")) {
             mIsShortMoney = false;
             coinInfo.setMarketId(key);
             coinInfo.setStatus(CoinInfo.SELL);
             coinInfo.setSellTime(System.currentTimeMillis());
             Ticker ticker = mTickerMapInfo.get(key);
             coinInfo.setSellPrice(ticker != null &&  ticker.getTradePrice() != null ? ticker.getTradePrice().doubleValue() : 0);
-
-            TextView profitRate = mView.findViewById(R.id.profit_rate);
-            TextView profitAmount = mView.findViewById(R.id.profit_amount);
-
-            if (profitRate != null && profitAmount != null) {
-                Iterator<CoinInfo> infoIterator = mResultListInfo.iterator();
-                double sellSum = 0;
-                double buySum = 0;
-                while (infoIterator.hasNext()) {
-                    CoinInfo info = infoIterator.next();
-                    sellSum += info.getSellAmount();
-                    buySum += info.getBuyAmount();
-                }
-                double diff = sellSum - buySum;
-                double rate = diff / buySum;
-                profitRate.setText(mPercentFormat.format(rate));
-                profitRate.setTextColor(rate > 0 ? Color.RED : rate < 0 ? Color.BLUE : Color.BLACK);
-                profitAmount.setText(mZeroFormat.format(diff));
-                profitAmount.setTextColor(diff > 0 ? Color.RED : diff < 0 ? Color.BLUE : Color.BLACK);
-
-            }
 
             mResultListInfo.add(coinInfo);
             mResultListAdapter.setResultItems(mResultListInfo);
@@ -1083,8 +1103,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             mBuyingItemMapInfo.remove(key);
             mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
 
-            Log.d(TAG, "[DEBUG] updateBuyItemInfo Sell - !!! marketId: " + key
+            updateProfitInfo();
+
+            Log.d(TAG, "[DEBUG] updateResponseOrderInfo Sell - !!! marketId: " + key
+                    + " state: "+ (orderInfo.getState() != null ? orderInfo.getState() : "N/A")
                     + " sell price: "+ (orderInfo.getPrice() != null ? mZeroFormat.format(orderInfo.getPrice().doubleValue()) : 0)
+                    + " volume: " + mExtendZeroFormat.format(orderInfo.getVolume() != null ? orderInfo.getVolume().doubleValue() : 0)
                     + " avg price: " + mZeroFormat.format(orderInfo.getAvgPrice() != null ? orderInfo.getAvgPrice().doubleValue() : 0)
                     + " uuid: " + orderInfo.getUuid()
             );
@@ -1211,6 +1235,29 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         resetMonitorItemList.start();
     }
 
+    private void updateProfitInfo() {
+        TextView profitRate = mView.findViewById(R.id.profit_rate);
+        TextView profitAmount = mView.findViewById(R.id.profit_total_amount);
+        if (profitRate != null && profitAmount != null) {
+            Iterator<CoinInfo> infoIterator = mResultListInfo.listIterator();
+            double sellSum = 0;
+            double buySum = 0;
+            while (infoIterator.hasNext()) {
+                CoinInfo info = infoIterator.next();
+                if (info.getStatus().equals(CoinInfo.SELL)) {
+                    sellSum += info.getSellAmount();
+                    buySum += info.getBuyAmount();
+                }
+            }
+            double diff = sellSum - buySum;
+            double rate = diff / buySum;
+            profitRate.setText(mPercentFormat.format(rate));
+            profitRate.setTextColor(rate > 0 ? Color.RED : rate < 0 ? Color.BLUE : Color.BLACK);
+            profitAmount.setText(mNonZeroFormat.format(diff));
+            profitAmount.setTextColor(diff > 0 ? Color.RED : diff < 0 ? Color.BLUE : Color.BLACK);
+        }
+    }
+
     private void registerProcess(int type, Post post) {
         if (post == null) {
             return;
@@ -1276,6 +1323,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         public TextView mStatus;
         public TextView mChangeRate;
         public TextView mBuyPrice;
+        public TextView mBuyAmount;
         public TextView mSellPrice;
         public TextView mProfitAmount;
         public TextView mCurrentPrice;
@@ -1299,6 +1347,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 mCurrentPrice = itemView.findViewById(R.id.current_price);
                 mChangeRate = itemView.findViewById(R.id.change_rate);
                 mBuyPrice = itemView.findViewById(R.id.buy_price);
+                mBuyAmount = itemView.findViewById(R.id.buy_amount);
             } else if (mode == mBuyingListAdapter.MODE_RESULT){
                 mName = itemView.findViewById(R.id.name);
                 mStatus = itemView.findViewById(R.id.status);
@@ -1402,6 +1451,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         || buyingItem.getStatus().equals(CoinInfo.BUY)
                         || buyingItem.getStatus().equals(CoinInfo.SELL))) {
                     holder.mBuyPrice.setText(mNonZeroFormat.format(buyingItem.getBuyPrice()));
+                    if (!buyingItem.getStatus().equals(CoinInfo.WAITING)) {
+                        holder.mBuyAmount.setText(mNonZeroFormat.format(buyingItem.getBuyAmount()));
+                    } else {
+                        holder.mBuyAmount.setText("N/A");
+                    }
                     double currentPrice = buyingItem.getClosePrice();
                     holder.mCurrentPrice.setText(mNonZeroFormat.format(currentPrice));
                     holder.mStatus.setText(buyingItem.getStatus());
@@ -1415,6 +1469,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
                     } else {
                         holder.mChangeRate.setText("N/A");
+                        holder.mChangeRate.setTextColor(Color.LTGRAY);
                     }
                 }
             } else if (mMode == MODE_RESULT) {

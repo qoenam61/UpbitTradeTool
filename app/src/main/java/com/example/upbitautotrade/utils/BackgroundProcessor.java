@@ -197,7 +197,7 @@ public class BackgroundProcessor {
         }
 
         public long getSleepTime() {
-            return size() != 0 ? get(0).getSleepTime() : 50;
+            return size() != 0 ? get(0).getSleepTime() : 150;
         }
 
         public void stop() {

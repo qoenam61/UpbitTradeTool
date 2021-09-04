@@ -231,7 +231,7 @@
                             android:layout_width="@dimen/default_margin"
                             android:layout_height="match_parent"/>
                         <TextView
-                            android:id="@+id/profit_amount"
+                            android:id="@+id/profit_total_amount"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_centerVertical="true"
@@ -445,6 +445,21 @@
                                 android:textSize="@dimen/coin_list_text_size"
                                 android:textStyle="bold"
                                 android:text="매수가"/>
+                        </LinearLayout>
+                        <LinearLayout
+                            android:layout_width="0dp"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1"
+                            android:layout_margin="@dimen/coin_list_item_margin"
+                            android:orientation="vertical">
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="0dp"
+                                android:layout_weight="1"
+                                android:gravity="center"
+                                android:textSize="@dimen/coin_list_text_size"
+                                android:textStyle="bold"
+                                android:text="매수액"/>
                         </LinearLayout>
                     </LinearLayout>
 
