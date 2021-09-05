@@ -70,7 +70,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
     private final double PRICE_AMOUNT = 10000;
     private final double MONITORING_PERIOD_TIME = 1.5;
-    private final int TICK_COUNTS = 300;
+    private final int TICK_COUNTS = 600;
     private final double TRADE_RATE = 0.015;
     private final int TRADE_COUNTS = TICK_COUNTS;
 
@@ -273,17 +273,18 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mIsShortMoney = true;
                     mPreventReset = false;
 
-                    Map<String, CoinInfo> bidBuyingItemMapInfo = new HashMap<>();
-                    bidBuyingItemMapInfo.putAll(mBuyingItemMapInfo);
-                    Iterator<CoinInfo> bidBuyingItemIterator = bidBuyingItemMapInfo.values().iterator();
-                    while (bidBuyingItemIterator.hasNext()) {
-                        CoinInfo coinInfo = bidBuyingItemIterator.next();
-                        String key = coinInfo.getMarketId();
+                    Map<String, CoinInfo> buyingItem = new HashMap<>();
+                    buyingItem.putAll(mBuyingItemMapInfo);
+                    Iterator<String> delOrderIterator = buyingItem.keySet().iterator();
+                    while (delOrderIterator.hasNext()) {
+                        String key = delOrderIterator.next();
+                        CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
                         if (coinInfo.getStatus().equals(CoinInfo.READY)) {
+                            Log.d(TAG, "[DEBUG] Reset Coin Item Delete READY - key : " + key + " delteUUID: " + coinInfo.getUuid());
                             mBuyingItemMapInfo.remove(key);
-                            Log.d(TAG, "[DEBUG] shortMoney Delete READY - key : " + key +" mIsShortMoney: " + mIsShortMoney + " uuid: " + uuid);
                         }
                     }
+
                     Activity activity = getActivity();
                     if (activity != null) {
                         activity.runOnUiThread(new Runnable() {
@@ -296,6 +297,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 } else {
                     mIsShortMoney = false;
                 }
+
                 String key = null;
                 Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
                 while (iterator.hasNext()) {
@@ -572,7 +574,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 return;
             }
         } else {
-            if (tickCount >= TICK_COUNTS) {
+            if (tickCount >= mMonitorTick) {
                 if (!mMonitorKeyList.contains(key)) {
                     mMonitorKeyList.add(key);
                 }
@@ -581,8 +583,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     if (mIsShortMoney) {
                         Log.d(TAG, "updateTradeMapInfoByTradeInfo: not Enough money !!!");
                     } else if (priceChangedRate >= mMonitorRate && !mIsShortMoney) {
-                        registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
-
                         CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice, tickCount);
                         // Post to Buy
                         tacticalToBuy(key, coinInfo);
@@ -683,6 +683,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             registerProcess(UPDATE_POST_ORDER_INFO, post);
             coinInfo.setMarketId(key);
             coinInfo.setBuyPrice(toBuyPrice);
+            coinInfo.setUuid(uuid);
             coinInfo.setStatus(CoinInfo.READY);
             mBuyingItemMapInfo.put(key, coinInfo);
         } else {
@@ -791,37 +792,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         cancelBuyItemList(key, currentPrice);
 
         tacticalToSell(key, currentPrice, diffPriceRate);
-    }
-
-    private void cancelBuyItemList(String key, double currentPrice) {
-        CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
-        if (mBuyingItemKeyList.contains(key)
-                && coinInfo != null && (coinInfo.getStatus().equals(CoinInfo.WAITING)
-                || (coinInfo.getStatus().equals(CoinInfo.BUY) && coinInfo.isPartialBuy()))) {
-            // Request to Cancel.
-            double toBuyPrice = coinInfo.getBuyPrice();
-            long duration = System.currentTimeMillis() - coinInfo.getWaitTime();
-            if (toBuyPrice > currentPrice || duration > mMonitorTime) {
-                double changedPrice = currentPrice - toBuyPrice;
-                double changedRate = changedPrice / toBuyPrice;
-                changedRate = (double)Math.round(changedRate * 1000) / 1000;
-
-                if (changedRate > mMonitorRate * 2 || duration > mMonitorTime) {
-                    ResponseOrder order = mResponseOrderInfoMap.get(key);
-                    if (order != null && order.getMarket().equals(key)
-                            && order.getSide().equals("bid")
-                            && order.getState().equals(Post.WAIT)) {
-                        registerProcess(UPDATE_DELETE_ORDER_INFO, order.getUuid());
-                        Log.d(TAG, "[DEBUG] cancelBuyItemList Cancel - !!!! : " + key
-                                + " price: " + mZeroFormat.format(currentPrice)
-                                + " changedRate: " + mPercentFormat.format(changedRate)
-                                + " duration: " + mTimeFormat.format(duration)
-                                + " uuid: "+ order.getUuid()
-                        );
-                    }
-                }
-            }
-        }
     }
 
     private void tacticalToSell(String key, double currentPrice, double diffPriceRate) {
@@ -1032,6 +1002,37 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
     }
 
+    private void cancelBuyItemList(String key, double currentPrice) {
+        CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+        if (mBuyingItemKeyList.contains(key)
+                && coinInfo != null && (coinInfo.getStatus().equals(CoinInfo.WAITING)
+                || (coinInfo.getStatus().equals(CoinInfo.BUY) && coinInfo.isPartialBuy()))) {
+            // Request to Cancel.
+            double toBuyPrice = coinInfo.getBuyPrice();
+            long duration = System.currentTimeMillis() - coinInfo.getWaitTime();
+            if (toBuyPrice > currentPrice || duration > mMonitorTime) {
+                double changedPrice = currentPrice - toBuyPrice;
+                double changedRate = changedPrice / toBuyPrice;
+                changedRate = (double)Math.round(changedRate * 1000) / 1000;
+
+                if (changedRate > mMonitorRate * 2 || duration > mMonitorTime) {
+                    ResponseOrder order = mResponseOrderInfoMap.get(key);
+                    if (order != null && order.getMarket().equals(key)
+                            && order.getSide().equals("bid")
+                            && order.getState().equals(Post.WAIT)) {
+                        registerProcess(UPDATE_DELETE_ORDER_INFO, order.getUuid());
+                        Log.d(TAG, "[DEBUG] cancelBuyItemList Cancel - !!!! : " + key
+                                + " price: " + mZeroFormat.format(currentPrice)
+                                + " changedRate: " + mPercentFormat.format(changedRate)
+                                + " duration: " + mTimeFormat.format(duration)
+                                + " uuid: "+ order.getUuid()
+                        );
+                    }
+                }
+            }
+        }
+    }
+
 
     private void updateResponseOrderInfo(ResponseOrder orderInfo) {
         if (orderInfo == null) {
@@ -1079,6 +1080,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         // BUY
         if (orderInfo.getState().equals(Post.DONE) && orderInfo.getSide().equals("bid")) {
+            registerPeriodicUpdate(UPDATE_TICKER_INFO, key);
             removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
             if (!mBuyingItemKeyList.contains(key)) {
                 mBuyingItemKeyList.add(key);
@@ -1112,10 +1114,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             coinInfo.setMarketId(key);
             coinInfo.setStatus(CoinInfo.BUY);
             coinInfo.setBuyTime(System.currentTimeMillis());
-            Ticker ticker = mTickerMapInfo.get(key);
-            if (ticker != null) {
-                coinInfo.setMaxProfitRate(coinInfo.getBuyPrice());
-            }
+            coinInfo.setMaxProfitRate(coinInfo.getBuyPrice());
+
             mBuyingItemMapInfo.put(key, coinInfo);
 
             mResponseOrderInfoMap.put(key, orderInfo);
@@ -1234,19 +1234,27 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             while (true) {
                 long currentTime = System.currentTimeMillis();
                 if (mForceReset || !mPreventReset && mBuyingItemKeyList.isEmpty()
-                        && (mLastResetTime == 0 || currentTime - mLastResetTime >= RESET_TIMER - RESET_TIMER_GAP)) {
+                        && (mLastResetTime == 0 || currentTime - mLastResetTime >= RESET_TIMER - RESET_TIMER_GAP - (10 * 1000))) {
                     Log.d(TAG, "Reset Coin Item List");
 
-                    Map<String, CoinInfo> bidBuyingItemMapInfo = new HashMap<>();
-                    bidBuyingItemMapInfo.putAll(mBuyingItemMapInfo);
-                    Iterator<CoinInfo> bidBuyingItemIterator = bidBuyingItemMapInfo.values().iterator();
-                    while (bidBuyingItemIterator.hasNext()) {
-                        CoinInfo coinInfo = bidBuyingItemIterator.next();
+                    boolean isExistReady = false;
+                    Iterator<CoinInfo> delOrderIterator = mBuyingItemMapInfo.values().iterator();
+                    while (delOrderIterator.hasNext()) {
+                        CoinInfo coinInfo = delOrderIterator.next();
                         String key = coinInfo.getMarketId();
                         if (coinInfo.getStatus().equals(CoinInfo.READY)) {
-                            mBuyingItemMapInfo.remove(key);
-                            Log.d(TAG, "[DEBUG] Reset Coin Item Delete READY - key : " + key);
+                            Log.d(TAG, "[DEBUG] Reset Coin Item Delete READY - key : " + key + " delteUUID: " + coinInfo.getUuid());
+                            isExistReady = true;
                         }
+                    }
+
+                    if (isExistReady) {
+                        try {
+                            Thread.sleep(10 * 1000);
+                        } catch (InterruptedException e) {
+                            Log.w(TAG, "InterruptedException sleep timer");
+                        }
+                        continue;
                     }
 
                     Iterator<String> order = mResponseOrderInfoMap.keySet().iterator();

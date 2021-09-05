@@ -2,6 +2,7 @@ package com.example.upbitautotrade.model;
 
 
 import java.text.DecimalFormat;
+import java.util.UUID;
 
 public class CoinInfo {
     String marketId;
@@ -28,6 +29,7 @@ public class CoinInfo {
 
     private double mVolume = -1;
 
+    private String uuid;
 
     public static final String READY = "Ready";
     public static final String WAITING = "Waiting";
@@ -44,6 +46,14 @@ public class CoinInfo {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
+    }
+
+    public String getUuid() {
+        return uuid;
     }
 
     public String getStatus() {
