@@ -69,9 +69,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private final int COIN_LIST_NUM = 30;
 
     private final double PRICE_AMOUNT = 10000;
-    private final double MONITORING_PERIOD_TIME = 1.5;
-    private final int TICK_COUNTS = 600;
-    private final double TRADE_RATE = 0.015;
+    private final double MONITORING_PERIOD_TIME = 3;
+    private final int TICK_COUNTS = 1500;
+    private final double TRADE_RATE = 0.045;
     private final int TRADE_COUNTS = TICK_COUNTS;
 
     private View mView;
@@ -804,10 +804,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             changedRate = (double)Math.round(changedRate * 1000) / 1000;
             double profitRate = changedRate - coinInfo.getMaxProfitRate();
             profitRate = (double)Math.round(profitRate * 1000) / 1000;
+            double decisionRate = mMonitorRate / (mMonitorTime / (60 * 1000));
 
             long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
 
-            if (duration < mMonitorTime && changedRate >= mMonitorRate * -1.5) {
+            if (duration < mMonitorTime && changedRate >= decisionRate * -1.5) {
                 Log.d(TAG, "tacticalToSell SELL - skip : " + key
                         + " price: " + mZeroFormat.format(currentPrice)
                         + " changedRate: " + mPercentFormat.format(changedRate)
@@ -819,8 +820,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             }
 
             boolean isSell = false;
-            if (coinInfo.getMaxProfitRate() > mMonitorRate * 16) {
-                if ((profitRate < mMonitorRate * -3.25)) {
+            if (coinInfo.getMaxProfitRate() > decisionRate * 16) {
+                if ((profitRate < decisionRate * -3.25)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - 1 : " + key
                             + " price: " + mZeroFormat.format(currentPrice)
@@ -829,8 +830,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " profitRate: " + mPercentFormat.format(profitRate)
                     );
                 }
-            } else if (coinInfo.getMaxProfitRate() > mMonitorRate * 8) {
-                if ((profitRate < mMonitorRate * -2.5)) {
+            } else if (coinInfo.getMaxProfitRate() > decisionRate * 8) {
+                if ((profitRate < decisionRate * -2.5)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - 2 : " + key
                             + " price: " + mZeroFormat.format(currentPrice)
@@ -839,8 +840,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " profitRate: " + mPercentFormat.format(profitRate)
                     );
                 }
-            } else if (coinInfo.getMaxProfitRate() > mMonitorRate * 4) {
-                if ((profitRate < mMonitorRate * -1.75)) {
+            } else if (coinInfo.getMaxProfitRate() > decisionRate * 4) {
+                if ((profitRate < decisionRate * -1.75)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - 3 : " + key
                             + " price: " + mZeroFormat.format(currentPrice)
@@ -849,8 +850,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " profitRate: " + mPercentFormat.format(profitRate)
                     );
                 }
-            } else if (coinInfo.getMaxProfitRate() > mMonitorRate * 2) {
-                if ((profitRate < mMonitorRate * -1)) {
+            } else if (coinInfo.getMaxProfitRate() > decisionRate * 2) {
+                if ((profitRate < decisionRate * -1)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - 4 : " + key
                             + " price: " + mZeroFormat.format(currentPrice)
@@ -859,9 +860,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " profitRate: " + mPercentFormat.format(profitRate)
                     );
                 }
-            } else if (coinInfo.getMaxProfitRate() <= mMonitorRate * 2 && coinInfo.getMaxProfitRate() > mMonitorRate * 0.5) {
-                if (coinInfo.getMaxProfitRate() >= mMonitorRate) {
-                    if ((profitRate < mMonitorRate * -0.75)) {
+            } else if (coinInfo.getMaxProfitRate() <= decisionRate * 2 && coinInfo.getMaxProfitRate() > decisionRate * 0.5) {
+                if (coinInfo.getMaxProfitRate() >= decisionRate) {
+                    if ((profitRate < decisionRate * -0.75)) {
                         isSell = true;
                         Log.d(TAG, "[DEBUG] tacticalToSell SELL - 5 : " + key
                                 + " price: " + mZeroFormat.format(currentPrice)
@@ -871,7 +872,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         );
                     }
                 } else {
-                    if ((profitRate < mMonitorRate * -0.5 && diffPriceRate < mMonitorRate * -0.5)) {
+                    if ((profitRate < decisionRate * -0.5 && diffPriceRate < decisionRate * -0.5)) {
                         isSell = true;
                         Log.d(TAG, "[DEBUG] tacticalToSell SELL - 6 : " + key
                                 + " price: " + mZeroFormat.format(currentPrice)
@@ -880,7 +881,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                                 + " profitRate: " + mPercentFormat.format(profitRate)
                         );
                     } else {
-                        if (duration < mMonitorTime * 2 && changedRate < mMonitorRate * -0.5) {
+                        if (duration < mMonitorTime * 2 && changedRate < decisionRate * -0.5) {
                             isSell = true;
                             Log.d(TAG, "[DEBUG] tacticalToSell SELL - 7 : " + key
                                     + " price: " + mZeroFormat.format(currentPrice)
@@ -900,7 +901,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
             }  else {
-                if (duration < mMonitorTime * 2 && changedRate < mMonitorRate * -0.5) {
+                if (duration < mMonitorTime * 2 && changedRate < decisionRate * -0.5) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - 9 : " + key
                             + " price: " + mZeroFormat.format(currentPrice)
@@ -941,8 +942,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     );
                 }
             } else if (duration > mMonitorTime * 3
-                    && coinInfo.getMaxProfitRate() <= mMonitorRate * 0.5
-                    && profitRate < mMonitorRate * -0.5) {
+                    && coinInfo.getMaxProfitRate() <= decisionRate * 0.5
+                    && profitRate < decisionRate * -0.5) {
                 ResponseOrder order = mResponseOrderInfoMap.get(key);
                 if (order != null && key.equals(order.getMarket())
                         && order.getSide().equals("bid")
@@ -965,7 +966,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 }
 
             } else if (duration > mMonitorTime * 6
-                    && coinInfo.getMaxProfitRate() <= mMonitorRate * 2
+                    && coinInfo.getMaxProfitRate() <= decisionRate * 2
                     && (coinInfo.getTickCounts() < mMonitorTick)) {
                 ResponseOrder order = mResponseOrderInfoMap.get(key);
                 if (order != null && key.equals(order.getMarket())
@@ -1010,12 +1011,14 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             // Request to Cancel.
             double toBuyPrice = coinInfo.getBuyPrice();
             long duration = System.currentTimeMillis() - coinInfo.getWaitTime();
+            double decisionRate = mMonitorRate / (mMonitorTime / (60 * 1000));
+
             if (toBuyPrice > currentPrice || duration > mMonitorTime) {
                 double changedPrice = currentPrice - toBuyPrice;
                 double changedRate = changedPrice / toBuyPrice;
                 changedRate = (double)Math.round(changedRate * 1000) / 1000;
 
-                if (changedRate > mMonitorRate * 2 || duration > mMonitorTime) {
+                if (changedRate > decisionRate * 2 || duration > mMonitorTime) {
                     ResponseOrder order = mResponseOrderInfoMap.get(key);
                     if (order != null && order.getMarket().equals(key)
                             && order.getSide().equals("bid")
@@ -1458,9 +1461,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         private final int MODE_WAITING_OR_BUY = 2;
         private final int MODE_MONITOR = 3;
 
-        private List<String> mCoinListInfo;
-        private List<String> mBuyingListInfo;
-        private List<CoinInfo> mResultListInfo;
+        private List<String> mCoinListInfo = new ArrayList<>();
+        private List<String> mBuyingListInfo = new ArrayList<>();
+        private List<CoinInfo> mResultListInfo = new ArrayList<>();
         private int mMode;
 
         public CoinListAdapter(int mode) {
@@ -1468,17 +1471,20 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         }
 
         public void setMonitoringItems(List<String> coinList) {
-            mCoinListInfo = coinList;
+            mCoinListInfo.clear();
+            mCoinListInfo.addAll(coinList);
             notifyDataSetChanged();
         }
 
         public void setBuyingItems(List<String> coinList) {
-            mBuyingListInfo = coinList;
+            mBuyingListInfo.clear();
+            mBuyingListInfo.addAll(coinList);
             notifyDataSetChanged();
         }
 
         public void setResultItems(List<CoinInfo> coinList) {
-            mResultListInfo = coinList;
+            mResultListInfo.clear();
+            mResultListInfo.addAll(coinList);
             notifyDataSetChanged();
         }
 
@@ -1522,7 +1528,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 }
 
                 if (lastTradeInfo != null && firstTradeInfo != null) {
-                    holder.mCurrentPrice.setText(lastTradeInfo.getTradePrice().doubleValue() < 100 ? mZeroFormat.format(lastTradeInfo.getTradePrice()) : mNonZeroFormat.format(lastTradeInfo.getTradePrice()));
+                    holder.mCurrentPrice.setText(lastTradeInfo.getTradePrice().doubleValue() < 100 ?
+                            mZeroFormat.format(lastTradeInfo.getTradePrice().doubleValue()) :
+                            mNonZeroFormat.format(lastTradeInfo.getTradePrice().doubleValue()));
                     holder.mChangeRate.setText(mPercentFormat.format(changedRate));
                     holder.mChangeRate.setTextColor(changedRate > 0 ? Color.RED : changedRate < 0 ? Color.BLUE : Color.BLACK);
                     holder.mChangeRate1min.setText(mPercentFormat.format(changedRate1min));
