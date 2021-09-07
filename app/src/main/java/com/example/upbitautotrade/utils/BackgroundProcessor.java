@@ -365,13 +365,13 @@ public class BackgroundProcessor {
                                     try {
                                         Thread.sleep(taskList.getSleepTime());
                                     } catch (InterruptedException e) {
-                                        e.printStackTrace();
+                                        Log.w(TAG, "InterruptedException short1 sleep timer");
                                     }
                                 } else {
                                     try {
                                         Thread.sleep(taskList.getSleepTime());
                                     } catch (InterruptedException e) {
-                                        Log.w(TAG, "InterruptedException sleep timer");
+                                        Log.w(TAG, "InterruptedException short2 sleep timer");
                                     }
                                 }
                             }

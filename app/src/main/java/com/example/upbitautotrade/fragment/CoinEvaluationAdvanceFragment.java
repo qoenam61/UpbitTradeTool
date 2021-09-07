@@ -66,8 +66,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
     private final long RESET_TIMER = 20 * 60 * 1000;
     private final long RESET_TIMER_GAP = 1 * 60 * 1000;
-    private final int COIN_LIST_NUM = 30;
+    private final int COIN_LIST_MAX_NUM = 25;
 
+    private int mCoinListNum = COIN_LIST_MAX_NUM;
     private final double PRICE_AMOUNT = 10000;
     private final double MONITORING_PERIOD_TIME = 3;
     private final int TICK_COUNTS = 1500;
@@ -273,6 +274,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mIsShortMoney = true;
                     mPreventReset = false;
 
+                    try {
+                        Thread.sleep(15 * 1000);
+                    } catch (InterruptedException e) {
+                        Log.w(TAG, "shortMoney: bid");
+                    }
+
                     Map<String, CoinInfo> buyingItem = new HashMap<>();
                     buyingItem.putAll(mBuyingItemMapInfo);
                     Iterator<String> delOrderIterator = buyingItem.keySet().iterator();
@@ -383,9 +390,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             MarketInfo marketInfo = iterator.next();
                             if (marketInfo.getMarketId().contains(MARKET_NAME+"-")
                                     && !marketInfo.getMarket_warning().contains(MARKET_WARNING)) {
-//                                if (mDeadMarketList.contains(marketInfo.getMarketId())) {
-//                                    continue;
-//                                }
                                 if (marketInfo.getMarketId().contains(MARKET_NAME+"-"+MARKET_NAME)) {
                                     continue;
                                 }
@@ -397,7 +401,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             mProgressDialog.setMessage("Updating Coin List...");
                             mProgressDialog.show();
                         } else {
-                            if (mCoinItemList != null && mCoinItemList.size() >= COIN_LIST_NUM) {
+                            if (mCoinItemList != null && mCoinItemList.size() >= mCoinListNum) {
                                 registerPeriodicUpdate(mCoinItemList);
                             }
                         }
@@ -419,9 +423,45 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         if (mMarketsMapInfo.keySet().equals(mDayCandleMapInfo.keySet())) {
                             List<String> coinItemList = new ArrayList<>(mDayCandleMapInfo.keySet());
                             Collections.sort(coinItemList, (value1, value2) -> mDayCandleMapInfo.get(value1).compareTo(mDayCandleMapInfo.get(value2)));
-                            mCoinItemList.addAll(coinItemList.subList(0, COIN_LIST_NUM));
-                            registerPeriodicUpdate(mCoinItemList);
+//                            int listNum = 0;
+//                            for (int i = 0; i < coinItemList.size(); i++) {
+//                                String key = coinItemList.get(i);
+//                                if (listNum >= COIN_LIST_MAX_NUM) {
+//                                    continue;
+//                                }
+//                                if (key != null && mDayCandleMapInfo.get(key).getChangedVolumeRate() > 0 ) {
+//                                    listNum++;
+//                                }
+//                                /* if (key != null && mDayCandleMapInfo.get(key).getChangedVolumeRate() > 0 ) {
+//                                    listNum++;
+//                                    mCoinItemList.add(key);
+//                                    Log.d(TAG, "[DEBUG] getDayCandleInfo - getChangedVolumeRate key: " + key
+//                                            + " rate: " + mDayCandleMapInfo.get(key).getChangeRate()
+//                                            + " getChangedVolumeRate: " + mDayCandleMapInfo.get(key).getChangedVolumeRate()
+//                                            + " amount: "+(mDayCandleMapInfo.get(key).getChangedVolumeRate() * mDayCandleMapInfo.get(key).getCandleAccTradePrice().doubleValue())
+//                                    );
+//                                } else if (key != null && mDayCandleMapInfo.get(key).getCenterChangedRate() >= 0 ){
+//                                    listNum++;
+//                                    mCoinItemList.add(key);
+//                                    Log.d(TAG, "[DEBUG] getDayCandleInfo - getCenterChangedRate key: " + key
+//                                            + " rate: " + mDayCandleMapInfo.get(key).getChangeRate()
+//                                            + " getChangedVolumeRate: " + mDayCandleMapInfo.get(key).getChangedVolumeRate()
+//                                            + " amount: "+(mDayCandleMapInfo.get(key).getChangedVolumeRate() * mDayCandleMapInfo.get(key).getCandleAccTradePrice().doubleValue())
+//                                    );
+//                                }*/
+//                            }
+
+//                            mCoinListNum = Math.min(COIN_LIST_MAX_NUM, listNum);
+//                            Log.d(TAG, "COIN List NUM: " + mCoinListNum);
                             mProgressDialog.dismiss();
+//                            if (listNum <= 0) {
+//                                mCoinItemList.clear();
+//                                mDayCandleMapInfo.clear();
+//                                mActivity.getProcessor().registerProcess(UPDATE_MARKETS_INFO, null);
+//                                return;
+//                            }
+                            mCoinItemList.addAll(coinItemList.subList(0, mCoinListNum));
+                            registerPeriodicUpdate(mCoinItemList);
                         }
                     }
             );
@@ -1305,7 +1345,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         Log.w(TAG, "InterruptedException sleep timer");
                     }
 
-                    if (mCoinItemList.size() < COIN_LIST_NUM) {
+                    if (mCoinItemList.size() < mCoinListNum) {
                         mForceReset = true;
                         continue;
                     }

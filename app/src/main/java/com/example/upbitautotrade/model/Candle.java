@@ -76,6 +76,7 @@ public class Candle implements Serializable, Comparable<Candle> {
     }
 
     public Number getCandleAccTradePrice() {
+//        return Math.floor(candleAccTradePrice.doubleValue() / 1000000);
         return candleAccTradePrice;
     }
 
@@ -105,9 +106,12 @@ public class Candle implements Serializable, Comparable<Candle> {
 
     @Override
     public int compareTo(Candle o) {
-        if (this.getCandleAccTradePrice().doubleValue() < o.getCandleAccTradePrice().doubleValue()) {
+        double originalData = this.getCandleAccTradePrice().doubleValue();
+        double compareData = o.getCandleAccTradePrice().doubleValue();
+
+        if (originalData < compareData) {
             return 1;
-        } else if (this.getCandleAccTradePrice().doubleValue() > o.getCandleAccTradePrice().doubleValue()) {
+        } else if (originalData > compareData) {
             return -1;
         } else {
             return 0;

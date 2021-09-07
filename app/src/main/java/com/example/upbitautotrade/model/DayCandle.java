@@ -31,4 +31,33 @@ public class DayCandle extends Candle{
     public Number getConvertedTrade_price() {
         return convertedTrade_price;
     }
+
+    public double getChangedVolumeRate() {
+        double prevRate =  (getTradePrice().doubleValue() - getLowPrice().doubleValue()) / getLowPrice().doubleValue();
+        return (double)Math.round(prevRate * 1000) / 1000;
+    }
+
+    public double getCenterChangedRate() {
+        double centerPrice = (Math.pow(getHighPrice().doubleValue(), 2)
+                + Math.pow(getTradePrice().doubleValue(), 2)
+                + Math.pow(getOpeningPrice().doubleValue(), 2)
+                + Math.pow(getLowPrice().doubleValue(), 2)) / 4;
+        centerPrice = CoinInfo.convertPrice(Math.sqrt(centerPrice));
+        double prevRate =  (getTradePrice().doubleValue() - centerPrice) / centerPrice;
+        return (double)Math.round(prevRate * 1000) / 1000;
+    }
+
+    @Override
+    public int compareTo(Candle o) {
+        double originalData = this.getCandleAccTradePrice().doubleValue() * this.getChangedVolumeRate();
+        double compareData = o.getCandleAccTradePrice().doubleValue() * ((DayCandle)o).getChangedVolumeRate();
+
+        if (originalData < compareData) {
+            return 1;
+        } else if (originalData > compareData) {
+            return -1;
+        } else {
+            return 0;
+        }
+    }
 }
