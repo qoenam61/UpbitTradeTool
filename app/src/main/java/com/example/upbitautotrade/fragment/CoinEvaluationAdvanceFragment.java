@@ -287,7 +287,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         String key = delOrderIterator.next();
                         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
                         if (coinInfo.getStatus().equals(CoinInfo.READY)) {
-                            Log.d(TAG, "[DEBUG] Reset Coin Item Delete READY - key : " + key + " delteUUID: " + coinInfo.getUuid());
+                            Log.d(TAG, "[DEBUG] Reset Coin Item Delete READY - key : " + key + " deleteUUID: " + coinInfo.getUuid());
                             mBuyingItemMapInfo.remove(key);
                         }
                     }
@@ -703,7 +703,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " volume: " + mExtendZeroFormat.format(volume)
                         + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                         + " candleRate: " + mPercentFormat.format(candleRate)
-                );            } else if (tailRate < -0.75) {
+                );
+            } else if (tailRate < -0.75) {
                 toBuyPrice = buyPriceType2;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
