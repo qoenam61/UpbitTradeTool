@@ -654,38 +654,64 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         lowerTailGap = (double)Math.round(lowerTailGap * 1000) / 1000;
 
         double bodyGap = closePrice - openPrice;
-        double upperTailRate = upperTailGap / bodyGap;
-        upperTailRate = (double)Math.round(upperTailRate * 1000) / 1000;
+        double upperTailBodyRate = upperTailGap / bodyGap;
+        upperTailBodyRate = (double)Math.round(upperTailBodyRate * 1000) / 1000;
 
-        double lowerTailRate = lowerTailGap / bodyGap;
-        lowerTailRate = (double)Math.round(lowerTailRate * 1000) / 1000;
+        double lowerTailBodyRate = lowerTailGap / bodyGap;
+        lowerTailBodyRate = (double)Math.round(lowerTailBodyRate * 1000) / 1000;
 
-        double tailRate = lowerTailGap != 0 ? (upperTailGap - lowerTailGap) / lowerTailGap : 0;
-        tailRate = (double)Math.round(tailRate * 1000) / 1000;
+        double upperLowerTailRate = lowerTailGap != 0 ? (upperTailGap - lowerTailGap) / lowerTailGap : 0;
+        upperLowerTailRate = (double)Math.round(upperLowerTailRate * 1000) / 1000;
 
         double toBuyPrice = 0;
         double volume = 0;
         double candleRate = openPrice != 0 ? (closePrice - openPrice) / openPrice : 0;
         candleRate = (double)Math.round(candleRate * 1000) / 1000;
+        double highLowRate = lowPrice != 0 ? (highPrice - lowPrice) / lowPrice : 0;
+
 
         // type0
-        double type0 = (Math.pow(highPrice, 2) + Math.pow(closePrice, 2) + Math.pow(openPrice, 2)) / 3;
+        double type0 = (Math.pow(highPrice, 2) + Math.pow(highPrice, 2) + Math.pow(closePrice, 2) + Math.pow(openPrice, 2)) / 4;
         double buyPriceType0 = CoinInfo.convertPrice(Math.sqrt(type0));
 
         // type1
-        double type1 = (Math.pow(highPrice, 2) + Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2)) / 4;
-        double buyPriceType1 = CoinInfo.convertPrice(Math.sqrt(type1));
+        double type1 = (Math.pow(highPrice, 2) + Math.pow(closePrice, 2) + Math.pow(openPrice, 2)) / 3;
+        double buyPriceType1 = CoinInfo.convertPrice(Math.sqrt(type0));
 
         // type2
-        double type2 = (Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2)) / 3;
-        double buyPriceType2 = CoinInfo.convertPrice(Math.sqrt(type2));
+        double type2 = (Math.pow(highPrice, 2) + Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2)) / 4;
+        double buyPriceType2 = CoinInfo.convertPrice(Math.sqrt(type1));
 
+        // type3
+        double type3 = (Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2)) / 3;
+        double buyPriceType3 = CoinInfo.convertPrice(Math.sqrt(type2));
+
+        // type4
+        double type4 = (Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2) + Math.pow(lowPrice, 2)) / 4;
+        double buyPriceType4 = CoinInfo.convertPrice(Math.sqrt(type2));
 
 
         boolean isBuy = false;
-        if (candleRate >= mMonitorRate) {
-            if (upperTailRate == 0 && lowerTailRate == 0) {
-                toBuyPrice = buyPriceType0;
+        if (candleRate >= mMonitorRate || highLowRate >= mMonitorRate) {
+            if ((upperTailBodyRate == 0 && lowerTailBodyRate == 0) && candleRate >= mMonitorRate) {
+                if (coinInfo.getTickCounts() > mMonitorTick * 2) {
+                    toBuyPrice = buyPriceType0;
+                } else {
+                    toBuyPrice = buyPriceType1;
+                }
+                volume = (mPriceAmount / toBuyPrice);
+                isBuy = true;
+                Log.d(TAG, "[DEBUG] tacticalToBuy 0 - !!!! marketId: " + key
+                        + " price: " + mZeroFormat.format(toBuyPrice)
+                        + " volume: " + mExtendZeroFormat.format(volume)
+                        + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                        + " candleRate: " + mPercentFormat.format(candleRate)
+                        + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                        + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                        + " getTickCounts: " + coinInfo.getTickCounts()
+                );
+            } else if (upperTailBodyRate <= 0.25 && lowerTailBodyRate <= 0.25 && highLowRate >= mMonitorRate) {
+                toBuyPrice = buyPriceType2;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 1 - !!!! marketId: " + key
@@ -693,9 +719,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " volume: " + mExtendZeroFormat.format(volume)
                         + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                         + " candleRate: " + mPercentFormat.format(candleRate)
+                        + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                        + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
                 );
-            } else if (upperTailRate <= 0.3 && lowerTailRate <= 0.3) {
-                toBuyPrice = buyPriceType1;
+            } else if (upperLowerTailRate <= -1 && lowerTailBodyRate > 0.25 && highLowRate >= mMonitorRate) {
+                toBuyPrice = buyPriceType3;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 2 - !!!! marketId: " + key
@@ -703,9 +731,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " volume: " + mExtendZeroFormat.format(volume)
                         + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                         + " candleRate: " + mPercentFormat.format(candleRate)
+                        + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                        + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                        + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
                 );
-            } else if (tailRate < -0.75) {
-                toBuyPrice = buyPriceType2;
+            } else if (upperLowerTailRate < -0.75 && lowerTailBodyRate > 0.25 && highLowRate >= mMonitorRate) {
+                toBuyPrice = buyPriceType4;
                 volume = (mPriceAmount / toBuyPrice);
                 isBuy = true;
                 Log.d(TAG, "[DEBUG] tacticalToBuy 3 - !!!! marketId: " + key
@@ -713,6 +744,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " volume: " + mExtendZeroFormat.format(volume)
                         + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                         + " candleRate: " + mPercentFormat.format(candleRate)
+                        + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                        + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                        + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
                 );
             }
         }
@@ -731,9 +765,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             Log.d(TAG, "tacticalToBuy Log (NOT BUY) - key: " + key
                     + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     + " candleRate: " + mPercentFormat.format(candleRate)
-                    + " upperTailRate: " + mPercentFormat.format(upperTailRate)
-                    + " lowerTailRate: " + mPercentFormat.format(lowerTailRate)
-                    + " tailRate: " + mPercentFormat.format(tailRate)
+                    + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                    + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                    + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
             );
         }
     }
