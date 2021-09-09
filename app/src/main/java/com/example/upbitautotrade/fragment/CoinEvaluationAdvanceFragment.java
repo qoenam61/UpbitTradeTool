@@ -1182,8 +1182,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             coinInfo.setMarketId(key);
             coinInfo.setStatus(CoinInfo.SELL);
             coinInfo.setSellTime(System.currentTimeMillis());
-            Ticker ticker = mTickerMapInfo.get(key);
-            coinInfo.setSellPrice(ticker != null &&  ticker.getTradePrice() != null ? ticker.getTradePrice().doubleValue() : 0);
+            Deque<TradeInfo> tradeInfo = mTradeMapInfo.get(key);
+            double sellPrice = tradeInfo != null &&  tradeInfo.getLast().getTradePrice() != null ? tradeInfo.getLast().getTradePrice().doubleValue() : 0;
+            coinInfo.setSellPrice(CoinInfo.convertSellPrice(sellPrice));
 
             mResultListInfo.add(coinInfo);
             mResultListAdapter.setResultItems(mResultListInfo);
@@ -1200,7 +1201,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
             Log.d(TAG, "[DEBUG] updateResponseOrderInfo Sell - !!! marketId: " + key
                     + " state: "+ (orderInfo.getState() != null ? orderInfo.getState() : "N/A")
-                    + " sell price: "+ (orderInfo.getPrice() != null ? mZeroFormat.format(orderInfo.getPrice().doubleValue()) : 0)
+                    + " sell price: "+ sellPrice
+                    + " convert sell price: "+ CoinInfo.convertSellPrice(sellPrice)
                     + " volume: " + mExtendZeroFormat.format(orderInfo.getVolume() != null ? orderInfo.getVolume().doubleValue() : 0)
                     + " avg price: " + mZeroFormat.format(orderInfo.getAvgPrice() != null ? orderInfo.getAvgPrice().doubleValue() : 0)
                     + " uuid: " + orderInfo.getUuid()

@@ -408,8 +408,8 @@ public class BackgroundProcessor {
                 iterator.remove();
             }
         }
-        mThreadPool.shutdownNow();
         mThreadPool.purge();
+        mThreadPool.shutdownNow();
         mThreadPool.getQueue().clear();
         makeThreadPoolExecutor();
         mProcessTaskMap.clear();

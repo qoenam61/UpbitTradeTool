@@ -2,7 +2,6 @@ package com.example.upbitautotrade.model;
 
 
 import java.text.DecimalFormat;
-import java.util.UUID;
 
 public class CoinInfo {
     String marketId;
@@ -248,6 +247,65 @@ public class CoinInfo {
             // 1000
             double extra = Math.round(((price % 1000)) / 1000) * 1000;
             priceResult = Math.floor(price / 1000) * 1000 + extra;
+            result = mFormatUnder100_000_000.format(priceResult);
+        }
+        return result != null ? Double.parseDouble(result) : null;
+    }
+
+
+    public static double convertSellPrice(double price) {
+        DecimalFormat mFormatUnder10 = new DecimalFormat("#.##");
+        DecimalFormat mFormatUnder100 = new DecimalFormat("##.#");
+        DecimalFormat mFormatUnder1_000 = new DecimalFormat("###");
+        DecimalFormat mFormatUnder10_000 = new DecimalFormat("####");
+        DecimalFormat mFormatUnder100_000 = new DecimalFormat("#####");
+        DecimalFormat mFormatUnder1_000_000 = new DecimalFormat("######");
+        DecimalFormat mFormatUnder10_000_000 = new DecimalFormat("#######");
+        DecimalFormat mFormatUnder100_000_000 = new DecimalFormat("########");
+
+        String result = null;
+        double priceResult = 0;
+        if (price < 10) {
+            priceResult = (Math.floor(price * 100) / 100) - 0.01;
+            result = mFormatUnder10.format(priceResult);
+        } else if (price < 100) {
+            priceResult = (Math.floor(price * 10) / 10) - 0.1;
+            result = mFormatUnder100.format(priceResult);
+        } else if (price < 1000) {
+            priceResult = (Math.floor(price)) - 1;
+            result = mFormatUnder1_000.format(priceResult);
+        } else if (price < 10000) {
+            // 5
+            double extra = Math.round(((price % 10) * 2) / 10 ) * 5;
+            priceResult = (Math.floor(price / 10) * 10 + extra) - 5;
+            result = mFormatUnder10_000.format(priceResult);
+        } else if (price < 100000) {
+            // 10
+            double extra = Math.round(((price % 100)) / 100 ) * 100;
+            priceResult = (Math.floor(price / 100) * 100 + extra) - 10;
+            result = mFormatUnder100_000.format(priceResult);
+        } else if (price < 1000000) {
+            // 50, 100
+            double extra = 0;
+            double offset = 0;
+            if (price < 500000) {
+                extra = Math.round(((price % 100) * 2) / 100) * 50;
+                offset = 50;
+            } else {
+                extra = Math.round(((price % 100)) / 100) * 100;
+                offset = 100;
+            }
+            priceResult = (Math.floor(price / 100) * 100 + extra) - offset;
+            result = mFormatUnder1_000_000.format(priceResult);
+        } else if (price < 10000000) {
+            // 1000
+            double extra = Math.round(((price % 1000)) / 1000) * 1000;
+            priceResult = (Math.floor(price / 1000) * 1000 + extra) - 1000;
+            result = mFormatUnder10_000_000.format(priceResult);
+        } else if (price < 100000000) {
+            // 1000
+            double extra = Math.round(((price % 1000)) / 1000) * 1000;
+            priceResult = (Math.floor(price / 1000) * 1000 + extra) - 1000;
             result = mFormatUnder100_000_000.format(priceResult);
         }
         return result != null ? Double.parseDouble(result) : null;
