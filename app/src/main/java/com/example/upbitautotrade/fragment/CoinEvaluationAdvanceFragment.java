@@ -940,6 +940,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                         + " profitRate: " + mPercentFormat.format(profitRate)
                         + " duration: " + mTimeFormat.format(duration)
+                        + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                 );
                 return;
             }
@@ -953,6 +954,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " changedRate: " + mPercentFormat.format(changedRate)
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
+                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                     );
                 }
             } else if (coinInfo.getMaxProfitRate() > decisionRate * 8) {
@@ -963,6 +965,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " changedRate: " + mPercentFormat.format(changedRate)
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
+                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                     );
                 }
             } else if (coinInfo.getMaxProfitRate() > decisionRate * 4) {
@@ -973,6 +976,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " changedRate: " + mPercentFormat.format(changedRate)
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
+                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                     );
                 }
             } else if (coinInfo.getMaxProfitRate() > decisionRate * 2) {
@@ -983,6 +987,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " changedRate: " + mPercentFormat.format(changedRate)
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
+                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                     );
                 }
             } else if (coinInfo.getMaxProfitRate() <= decisionRate * 2 && coinInfo.getMaxProfitRate() > decisionRate * 0.5) {
@@ -994,6 +999,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                                 + " changedRate: " + mPercentFormat.format(changedRate)
                                 + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                                 + " profitRate: " + mPercentFormat.format(profitRate)
+                                + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                         );
                     }
                 } else {
@@ -1005,6 +1011,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                                 + " changedRate: " + mPercentFormat.format(changedRate)
                                 + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                                 + " profitRate: " + mPercentFormat.format(profitRate)
+                                + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                         );
                     } else {
                         if (duration < mMonitorTime * 2 && changedRate < decisionRate * -0.5) {
@@ -1014,6 +1021,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                                     + " changedRate: " + mPercentFormat.format(changedRate)
                                     + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                                     + " profitRate: " + mPercentFormat.format(profitRate)
+                                    + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                             );
                         } else if (changedRate < 0) {
                             isSell = true;
@@ -1022,6 +1030,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                                     + " changedRate: " + mPercentFormat.format(changedRate)
                                     + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                                     + " profitRate: " + mPercentFormat.format(profitRate)
+                                    + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                             );
                         }
                     }
@@ -1035,6 +1044,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " changedRate: " + mPercentFormat.format(changedRate)
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
+                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                     );
                 } else if (changedRate < 0) {
                     isSell = true;
@@ -1043,6 +1053,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " changedRate: " + mPercentFormat.format(changedRate)
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
+                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                     );
                 }
             }
@@ -1066,6 +1077,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
                             + " duration: " + mTimeFormat.format(duration)
+                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                     );
                 }
             } else if (duration > mMonitorTime * 3
@@ -1082,6 +1094,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
                             + " duration: " + mTimeFormat.format(duration)
+                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                     );
                     String uuid = UUID.randomUUID().toString();
                     Post postSell = new Post(key, "ask",
@@ -1106,6 +1119,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                             + " profitRate: " + mPercentFormat.format(profitRate)
                             + " duration: " + mTimeFormat.format(duration)
+                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                     );
                     String uuid = UUID.randomUUID().toString();
                     Post postSell = new Post(key, "ask",
@@ -1125,6 +1139,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                         + " profitRate: " + mPercentFormat.format(profitRate)
                         + " duration: " + mTimeFormat.format(duration)
+                        + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
                 );
             }
         }
