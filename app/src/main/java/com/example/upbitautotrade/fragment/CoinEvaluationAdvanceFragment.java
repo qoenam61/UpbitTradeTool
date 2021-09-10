@@ -647,20 +647,17 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double highPrice = coinInfo.getHighPrice();
         double lowPrice = coinInfo.getLowPrice();
 
-        double upperTailGap = highPrice - closePrice;
-        upperTailGap = (double)Math.round(upperTailGap * 1000) / 1000;
-
-        double lowerTailGap = openPrice - lowPrice;
-        lowerTailGap = (double)Math.round(lowerTailGap * 1000) / 1000;
-
+        double upperTailGapPrice = highPrice - closePrice;
+        double lowerTailGapPrice = openPrice - lowPrice;
         double bodyGap = closePrice - openPrice;
-        double upperTailBodyRate = upperTailGap / bodyGap;
+
+        double upperTailBodyRate = bodyGap != 0 ? upperTailGapPrice / bodyGap : -1;
         upperTailBodyRate = (double)Math.round(upperTailBodyRate * 1000) / 1000;
 
-        double lowerTailBodyRate = lowerTailGap / bodyGap;
+        double lowerTailBodyRate = bodyGap != 0 ? lowerTailGapPrice / bodyGap : -1;
         lowerTailBodyRate = (double)Math.round(lowerTailBodyRate * 1000) / 1000;
 
-        double upperLowerTailRate = lowerTailGap != 0 ? (upperTailGap - lowerTailGap) / lowerTailGap : 0;
+        double upperLowerTailRate = lowerTailGapPrice != 0 ? (upperTailGapPrice - lowerTailGapPrice) / lowerTailGapPrice : -1;
         upperLowerTailRate = (double)Math.round(upperLowerTailRate * 1000) / 1000;
 
         double toBuyPrice = 0;
@@ -668,86 +665,115 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double candleRate = openPrice != 0 ? (closePrice - openPrice) / openPrice : 0;
         candleRate = (double)Math.round(candleRate * 1000) / 1000;
         double highLowRate = lowPrice != 0 ? (highPrice - lowPrice) / lowPrice : 0;
+        highLowRate = (double)Math.round(highLowRate * 1000) / 1000;
 
 
-        // type0
+        // type0 : HHCO
         double type0 = (Math.pow(highPrice, 2) + Math.pow(highPrice, 2) + Math.pow(closePrice, 2) + Math.pow(openPrice, 2)) / 4;
-        double buyPriceType0 = CoinInfo.convertPrice(Math.sqrt(type0));
+        double priceTypeHHCO = CoinInfo.convertPrice(Math.sqrt(type0));
 
-        // type1
+        // type1 : HCO
         double type1 = (Math.pow(highPrice, 2) + Math.pow(closePrice, 2) + Math.pow(openPrice, 2)) / 3;
-        double buyPriceType1 = CoinInfo.convertPrice(Math.sqrt(type0));
+        double priceTypeHCO = CoinInfo.convertPrice(Math.sqrt(type1));
 
-        // type2
+        // type2 : HCOL
         double type2 = (Math.pow(highPrice, 2) + Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2)) / 4;
-        double buyPriceType2 = CoinInfo.convertPrice(Math.sqrt(type1));
+        double priceTypeHCOL = CoinInfo.convertPrice(Math.sqrt(type2));
 
-        // type3
+        // type3 : COL
         double type3 = (Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2)) / 3;
-        double buyPriceType3 = CoinInfo.convertPrice(Math.sqrt(type2));
+        double priceTypeCOL = CoinInfo.convertPrice(Math.sqrt(type3));
 
-        // type4
+        // type4 : COLL
         double type4 = (Math.pow(closePrice, 2) + Math.pow(openPrice, 2) + Math.pow(lowPrice, 2) + Math.pow(lowPrice, 2)) / 4;
-        double buyPriceType4 = CoinInfo.convertPrice(Math.sqrt(type2));
+        double priceTypeCOLL = CoinInfo.convertPrice(Math.sqrt(type4));
 
 
         boolean isBuy = false;
         if (candleRate >= mMonitorRate || highLowRate >= mMonitorRate) {
-            if ((upperTailBodyRate == 0 && lowerTailBodyRate == 0) && candleRate >= mMonitorRate) {
-                if (coinInfo.getTickCounts() > mMonitorTick * 2) {
-                    toBuyPrice = buyPriceType0;
-                } else {
-                    toBuyPrice = buyPriceType1;
+            if (bodyGap != 0) {
+                if (upperTailBodyRate == 0 && lowerTailBodyRate == 0 && candleRate >= mMonitorRate) {
+                    if (coinInfo.getTickCounts() > mMonitorTick * 2) {
+                        toBuyPrice = priceTypeHHCO;
+                    } else {
+                        toBuyPrice = priceTypeHCO;
+                    }
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 0 HHCO/HCO - !!!! marketId: " + key
+                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                            + " candleRate: " + mPercentFormat.format(candleRate)
+                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                            + " getTickCounts: " + coinInfo.getTickCounts()
+                    );
+                } else if (upperTailBodyRate <= 0.33 && lowerTailBodyRate >= 3 && highLowRate >= mMonitorRate) {
+                    toBuyPrice = priceTypeHCOL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 1 HCOL - !!!! marketId: " + key
+                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                            + " candleRate: " + mPercentFormat.format(candleRate)
+                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                    );
+                } else if (upperTailBodyRate <= 0.33 && lowerTailBodyRate >= 1 && highLowRate >= mMonitorRate) {
+                    toBuyPrice = priceTypeCOL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 2 COL - !!!! marketId: " + key
+                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                            + " candleRate: " + mPercentFormat.format(candleRate)
+                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                    );
+                } else if (upperTailBodyRate <= 0.33 && lowerTailBodyRate <= 0.33 && highLowRate >= mMonitorRate) {
+                    toBuyPrice = priceTypeHCOL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 3 HCOL - !!!! marketId: " + key
+                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                            + " candleRate: " + mPercentFormat.format(candleRate)
+                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                    );
                 }
-                volume = (mPriceAmount / toBuyPrice);
-                isBuy = true;
-                Log.d(TAG, "[DEBUG] tacticalToBuy 0 - !!!! marketId: " + key
-                        + " price: " + mZeroFormat.format(toBuyPrice)
-                        + " volume: " + mExtendZeroFormat.format(volume)
-                        + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                        + " candleRate: " + mPercentFormat.format(candleRate)
-                        + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                        + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
-                        + " getTickCounts: " + coinInfo.getTickCounts()
-                );
-            } else if (upperTailBodyRate <= 0.25 && lowerTailBodyRate <= 0.25 && highLowRate >= mMonitorRate) {
-                toBuyPrice = buyPriceType2;
-                volume = (mPriceAmount / toBuyPrice);
-                isBuy = true;
-                Log.d(TAG, "[DEBUG] tacticalToBuy 1 - !!!! marketId: " + key
-                        + " price: " + mZeroFormat.format(toBuyPrice)
-                        + " volume: " + mExtendZeroFormat.format(volume)
-                        + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                        + " candleRate: " + mPercentFormat.format(candleRate)
-                        + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                        + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
-                );
-            } else if (upperLowerTailRate <= -1 && lowerTailBodyRate > 0.25 && highLowRate >= mMonitorRate) {
-                toBuyPrice = buyPriceType3;
-                volume = (mPriceAmount / toBuyPrice);
-                isBuy = true;
-                Log.d(TAG, "[DEBUG] tacticalToBuy 2 - !!!! marketId: " + key
-                        + " price: " + mZeroFormat.format(toBuyPrice)
-                        + " volume: " + mExtendZeroFormat.format(volume)
-                        + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                        + " candleRate: " + mPercentFormat.format(candleRate)
-                        + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                        + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
-                        + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
-                );
-            } else if (upperLowerTailRate < -0.75 && lowerTailBodyRate > 0.25 && highLowRate >= mMonitorRate) {
-                toBuyPrice = buyPriceType4;
-                volume = (mPriceAmount / toBuyPrice);
-                isBuy = true;
-                Log.d(TAG, "[DEBUG] tacticalToBuy 3 - !!!! marketId: " + key
-                        + " price: " + mZeroFormat.format(toBuyPrice)
-                        + " volume: " + mExtendZeroFormat.format(volume)
-                        + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                        + " candleRate: " + mPercentFormat.format(candleRate)
-                        + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                        + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
-                        + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
-                );
+            } else {
+                if (upperLowerTailRate <= -3 && highLowRate >= mMonitorRate) {
+                    toBuyPrice = priceTypeCOL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 4 COL - !!!! marketId: " + key
+                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                            + " candleRate: " + mPercentFormat.format(candleRate)
+                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                            + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
+                    );
+                } else if (upperLowerTailRate <= -1 && highLowRate >= mMonitorRate) {
+                    toBuyPrice = priceTypeCOLL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 5 COLL - !!!! marketId: " + key
+                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                            + " candleRate: " + mPercentFormat.format(candleRate)
+                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                            + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
+                    );
+                }
             }
         }
 
