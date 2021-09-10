@@ -946,7 +946,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
             boolean isSell = false;
             if (coinInfo.getMaxProfitRate() > decisionRate * 16) {
-                if ((profitRate < decisionRate * -3.25)) {
+                if ((profitRate < decisionRate * -3)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - 1 : " + key
                             + " price: " + mZeroFormat.format(currentPrice)
@@ -997,6 +997,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         );
                     }
                 } else {
+                    // Stop Loss 1
                     if ((profitRate < decisionRate * -0.5 && diffPriceRate < decisionRate * -0.5)) {
                         isSell = true;
                         Log.d(TAG, "[DEBUG] tacticalToSell SELL - 6 : " + key
@@ -1026,6 +1027,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 }
             }  else {
+                // Stop Loss 2
                 if (duration < mMonitorTime * 2 && changedRate < decisionRate * -0.5) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - 9 : " + key
