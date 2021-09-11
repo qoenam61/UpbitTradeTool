@@ -577,7 +577,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private void updateTradeMapInfoByTradeInfo(String key, Deque<TradeInfo> tradeInfoQueue, double highPrice, double lowPrice) {
         double openPrice = tradeInfoQueue.getFirst().getTradePrice().doubleValue();
         double closePrice = tradeInfoQueue.getLast().getTradePrice().doubleValue();
-        double priceChangedRate = openPrice != 0 ? (closePrice - openPrice) / openPrice : 0;
+        double candleRate = openPrice != 0 ? (closePrice - openPrice) / openPrice : 0;
+        candleRate = (double)Math.round(candleRate * 1000) / 1000;
+
+        double highLowRate = lowPrice != 0 ? (highPrice - lowPrice) / lowPrice : 0;
+        highLowRate = (double)Math.round(highLowRate * 1000) / 1000;
+
         double tickCount = tradeInfoQueue.size();
 
         if (mBuyingItemKeyList.contains(key)) {
@@ -607,7 +612,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                         + " high: " + mZeroFormat.format(coinInfo.getHighPrice())
                         + " low: " + mZeroFormat.format(coinInfo.getLowPrice())
                         + " getBuyPrice: " + mZeroFormat.format(coinInfo.getBuyPrice())
-                        + " priceChangedRate: " + mPercentFormat.format(priceChangedRate)
+                        + " priceChangedRate: " + mPercentFormat.format(candleRate)
+                        + " highLowRate: " + mPercentFormat.format(highLowRate)
                         + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
                         + " getTickCounts: " + coinInfo.getTickCounts()
                 );
@@ -622,7 +628,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 if (!mBuyingItemMapInfo.containsKey(key)) {
                     if (mIsShortMoney) {
                         Log.d(TAG, "updateTradeMapInfoByTradeInfo: not Enough money !!!");
-                    } else if (priceChangedRate >= mMonitorRate && !mIsShortMoney) {
+                    } else if (candleRate >= mMonitorRate || highLowRate >= mMonitorRate) {
                         CoinInfo coinInfo = new CoinInfo(openPrice, closePrice, highPrice, lowPrice, tickCount);
                         // Post to Buy
                         tacticalToBuy(key, coinInfo);
@@ -707,7 +713,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         boolean isBuy = false;
         if (candleRate >= mMonitorRate || highLowRate >= mMonitorRate) {
             if (bodyGapPrice != 0) {
-                if (upperTailBodyRate == 0 && lowerTailBodyRate == 0 && candleRate >= mMonitorRate) {
+                if (upperTailBodyRate == 0 && lowerTailBodyRate == 0) {
                     if (coinInfo.getTickCounts() > mMonitorTick * 2) {
                         toBuyPrice = priceTypeHHCO;
                     } else {
@@ -720,7 +726,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate <= 0.25 && lowerTailBodyRate == 0 && highLowRate >= mMonitorRate) {
+                } else if (upperTailBodyRate < 0.25 && upperTailBodyRate >= 0 && lowerTailBodyRate == 0) {
                     toBuyPrice = priceTypeHCO;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -729,7 +735,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate <= 0.5 && lowerTailBodyRate == 0 && highLowRate >= mMonitorRate) {
+                } else if (upperTailBodyRate < 0.5 && upperTailBodyRate >= 0.25 && lowerTailBodyRate == 0) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -738,7 +744,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate <= 0.33 && lowerTailBodyRate >= 3 && highLowRate >= mMonitorRate) {
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 3) {
                     toBuyPrice = priceTypeHCO;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -747,7 +753,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate <= 0.33 && lowerTailBodyRate >= 1 && highLowRate >= mMonitorRate) {
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 1) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -756,7 +762,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate <= 0.33 && lowerTailBodyRate <= 0.33 && highLowRate >= mMonitorRate) {
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0
+                        && lowerTailBodyRate < 0.33 && lowerTailBodyRate >= 0) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -767,7 +774,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     );
                 }
             } else {
-                if (upperLowerTailRate > -0.75 && upperLowerTailRate <= -1 && highLowRate >= mMonitorRate) {
+                if (upperLowerTailRate >= -1 && upperLowerTailRate < -0.75) {
                     toBuyPrice = priceTypeCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -776,7 +783,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperLowerTailRate >= -0.5 && upperLowerTailRate <= -0.75 && highLowRate >= mMonitorRate) {
+                } else if (upperLowerTailRate >= -0.75 && upperLowerTailRate < -0.5) {
                     toBuyPrice = priceTypeCOLL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
