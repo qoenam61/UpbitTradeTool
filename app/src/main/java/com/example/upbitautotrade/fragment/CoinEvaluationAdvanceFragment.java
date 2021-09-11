@@ -607,9 +607,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 updateTradeMapInfoByTicker(key, null);
 
                 Log.d(TAG, "updateTradeMapInfoByTradeInfo - key: " + key
-                        + " open: " + mZeroFormat.format(coinInfo.getOpenPrice())
-                        + " close: " + mZeroFormat.format(coinInfo.getClosePrice())
                         + " high: " + mZeroFormat.format(coinInfo.getHighPrice())
+                        + " close: " + mZeroFormat.format(coinInfo.getClosePrice())
+                        + " open: " + mZeroFormat.format(coinInfo.getOpenPrice())
                         + " low: " + mZeroFormat.format(coinInfo.getLowPrice())
                         + " getBuyPrice: " + mZeroFormat.format(coinInfo.getBuyPrice())
                         + " priceChangedRate: " + mPercentFormat.format(candleRate)
@@ -620,6 +620,17 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 return;
             }
         } else {
+
+            Log.d(TAG, "[DEBUG] makeTradeMapInfo: - key: " + key
+                    + " high: " + mZeroFormat.format(highPrice)
+                    + " close: " + mZeroFormat.format(closePrice)
+                    + " open: " + mZeroFormat.format(openPrice)
+                    + " low: " + mZeroFormat.format(lowPrice)
+                    + " priceChangedRate: " + mPercentFormat.format(candleRate)
+                    + " highLowRate: " + mPercentFormat.format(highLowRate)
+                    + " getTickCounts: " + tickCount
+            );
+
             if (tickCount >= mMonitorTick) {
                 if (!mMonitorKeyList.contains(key)) {
                     mMonitorKeyList.add(key);
@@ -883,9 +894,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mResultListAdapter.setResultItems(mResultListInfo);
 
                     Log.d(TAG, "updateTradeMapInfoByTicker - key: " + key
-                            + " open: " + mZeroFormat.format(coinInfo.getOpenPrice())
-                            + " close: " + mZeroFormat.format(coinInfo.getClosePrice())
                             + " high: " + mZeroFormat.format(coinInfo.getHighPrice())
+                            + " close: " + mZeroFormat.format(coinInfo.getClosePrice())
+                            + " open: " + mZeroFormat.format(coinInfo.getOpenPrice())
                             + " low: " + mZeroFormat.format(coinInfo.getLowPrice())
                             + " getBuyPrice: " + mZeroFormat.format(coinInfo.getBuyPrice())
                             + " priceChangedRate: " + mPercentFormat.format(priceChangedRate)
