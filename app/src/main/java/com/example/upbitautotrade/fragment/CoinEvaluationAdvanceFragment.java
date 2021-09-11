@@ -649,12 +649,12 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         double upperTailGapPrice = highPrice - closePrice;
         double lowerTailGapPrice = openPrice - lowPrice;
-        double bodyGap = closePrice - openPrice;
+        double bodyGapPrice = closePrice - openPrice;
 
-        double upperTailBodyRate = bodyGap != 0 ? upperTailGapPrice / bodyGap : -1;
+        double upperTailBodyRate = bodyGapPrice != 0 ? upperTailGapPrice / bodyGapPrice : -1;
         upperTailBodyRate = (double)Math.round(upperTailBodyRate * 1000) / 1000;
 
-        double lowerTailBodyRate = bodyGap != 0 ? lowerTailGapPrice / bodyGap : -1;
+        double lowerTailBodyRate = bodyGapPrice != 0 ? lowerTailGapPrice / bodyGapPrice : -1;
         lowerTailBodyRate = (double)Math.round(lowerTailBodyRate * 1000) / 1000;
 
         double upperLowerTailRate = lowerTailGapPrice != 0 ? (upperTailGapPrice - lowerTailGapPrice) / lowerTailGapPrice : -1;
@@ -667,6 +667,21 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double highLowRate = lowPrice != 0 ? (highPrice - lowPrice) / lowPrice : 0;
         highLowRate = (double)Math.round(highLowRate * 1000) / 1000;
 
+        Log.d(TAG, "[DEBUG] tacticalToBuy Candle - marketId: " + key
+                + " highPrice: " + mZeroFormat.format(highPrice)
+                + " closePrice: " + mZeroFormat.format(closePrice)
+                + " openPrice: " + mZeroFormat.format(openPrice)
+                + " lowPrice: " + mZeroFormat.format(lowPrice)
+                + " upperTailGapPrice: " + mZeroFormat.format(upperTailGapPrice)
+                + " lowerTailGapPrice: " + mZeroFormat.format(lowerTailGapPrice)
+                + " bodyGapPrice: " + mZeroFormat.format(bodyGapPrice)
+                + " candleRate: " + mPercentFormat.format(candleRate)
+                + " highLowRate: " + mPercentFormat.format(highLowRate)
+                + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                + " upperLowerTailRate: " + mPercentFormat.format(upperLowerTailRate)
+                + " getTickCounts: " + coinInfo.getTickCounts()
+        );
 
         // type0 : HHCO
         double type0 = (Math.pow(highPrice, 2) + Math.pow(highPrice, 2) + Math.pow(closePrice, 2) + Math.pow(openPrice, 2)) / 4;
@@ -691,7 +706,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
         boolean isBuy = false;
         if (candleRate >= mMonitorRate || highLowRate >= mMonitorRate) {
-            if (bodyGap != 0) {
+            if (bodyGapPrice != 0) {
                 if (upperTailBodyRate == 0 && lowerTailBodyRate == 0 && candleRate >= mMonitorRate) {
                     if (coinInfo.getTickCounts() > mMonitorTick * 2) {
                         toBuyPrice = priceTypeHHCO;
@@ -701,73 +716,54 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
                     Log.d(TAG, "[DEBUG] tacticalToBuy 0 HHCO/HCO - !!!! marketId: " + key
-                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                            + " candleRate: " + mPercentFormat.format(candleRate)
-                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
-                            + " getTickCounts: " + coinInfo.getTickCounts()
                     );
                 } else if (upperTailBodyRate <= 0.25 && lowerTailBodyRate == 0 && highLowRate >= mMonitorRate) {
                     toBuyPrice = priceTypeHCO;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
                     Log.d(TAG, "[DEBUG] tacticalToBuy 1 HCO - !!!! marketId: " + key
-                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                            + " candleRate: " + mPercentFormat.format(candleRate)
-                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
                     );
                 } else if (upperTailBodyRate <= 0.5 && lowerTailBodyRate == 0 && highLowRate >= mMonitorRate) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
                     Log.d(TAG, "[DEBUG] tacticalToBuy 2 HCOL - !!!! marketId: " + key
-                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                            + " candleRate: " + mPercentFormat.format(candleRate)
-                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
                     );
                 } else if (upperTailBodyRate <= 0.33 && lowerTailBodyRate >= 3 && highLowRate >= mMonitorRate) {
                     toBuyPrice = priceTypeHCO;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
                     Log.d(TAG, "[DEBUG] tacticalToBuy 3 HCO - !!!! marketId: " + key
-                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                            + " candleRate: " + mPercentFormat.format(candleRate)
-                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
                     );
                 } else if (upperTailBodyRate <= 0.33 && lowerTailBodyRate >= 1 && highLowRate >= mMonitorRate) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
                     Log.d(TAG, "[DEBUG] tacticalToBuy 4 HCOL - !!!! marketId: " + key
-                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                            + " candleRate: " + mPercentFormat.format(candleRate)
-                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
                     );
                 } else if (upperTailBodyRate <= 0.33 && lowerTailBodyRate <= 0.33 && highLowRate >= mMonitorRate) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
                     Log.d(TAG, "[DEBUG] tacticalToBuy 5 HCOL - !!!! marketId: " + key
-                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                            + " candleRate: " + mPercentFormat.format(candleRate)
-                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
                     );
                 }
             } else {
@@ -776,26 +772,18 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
                     Log.d(TAG, "[DEBUG] tacticalToBuy 6 COL - !!!! marketId: " + key
-                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                            + " candleRate: " + mPercentFormat.format(candleRate)
-                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
-                            + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
                     );
                 } else if (upperLowerTailRate >= -0.5 && upperLowerTailRate <= -0.75 && highLowRate >= mMonitorRate) {
                     toBuyPrice = priceTypeCOLL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
                     Log.d(TAG, "[DEBUG] tacticalToBuy 7 COLL - !!!! marketId: " + key
-                            + " price: " + mZeroFormat.format(toBuyPrice)
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                            + " candleRate: " + mPercentFormat.format(candleRate)
-                            + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                            + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
-                            + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
                     );
                 }
             }
@@ -811,14 +799,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             coinInfo.setUuid(uuid);
             coinInfo.setStatus(CoinInfo.READY);
             mBuyingItemMapInfo.put(key, coinInfo);
-        } else {
-            Log.d(TAG, "tacticalToBuy Log (NOT BUY) - key: " + key
-                    + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                    + " candleRate: " + mPercentFormat.format(candleRate)
-                    + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
-                    + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
-                    + " tailRate: " + mPercentFormat.format(upperLowerTailRate)
-            );
         }
     }
 
@@ -929,19 +909,26 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             changedRate = (double)Math.round(changedRate * 1000) / 1000;
             double profitRate = changedRate - coinInfo.getMaxProfitRate();
             profitRate = (double)Math.round(profitRate * 1000) / 1000;
+            double maxProfitRate = coinInfo.getMaxProfitRate();
+
             double decisionRate = mMonitorRate / (mMonitorTime / (60 * 1000));
 
             long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
 
+            Log.d(TAG, "[DEBUG] tacticalToSell Calc : " + key
+                    + " currentPrice: " + mZeroFormat.format(currentPrice)
+                    + " buyPrice: " + mZeroFormat.format(toBuyPrice)
+                    + " changedPrice: " + mZeroFormat.format(changedPrice)
+                    + " changedRate: " + mPercentFormat.format(changedRate)
+                    + " profitRate: " + mPercentFormat.format(profitRate)
+                    + " maxProfitRate: " + mPercentFormat.format(maxProfitRate)
+                    + " decisionRate: " + mPercentFormat.format(decisionRate)
+                    + " duration: " + mTimeFormat.format(duration)
+            );
+
+
             if (duration < mMonitorTime && changedRate >= decisionRate * -1.5) {
-                Log.d(TAG, "tacticalToSell SELL - skip : " + key
-                        + " price: " + mZeroFormat.format(currentPrice)
-                        + " changedRate: " + mPercentFormat.format(changedRate)
-                        + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                        + " profitRate: " + mPercentFormat.format(profitRate)
-                        + " duration: " + mTimeFormat.format(duration)
-                        + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                );
+                Log.d(TAG, "tacticalToSell SELL - skip : " + key);
                 return;
             }
 
@@ -949,89 +936,41 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             if (coinInfo.getMaxProfitRate() > decisionRate * 16) {
                 if ((profitRate < decisionRate * -3)) {
                     isSell = true;
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 1 : " + key
-                            + " price: " + mZeroFormat.format(currentPrice)
-                            + " changedRate: " + mPercentFormat.format(changedRate)
-                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                            + " profitRate: " + mPercentFormat.format(profitRate)
-                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                    );
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type1) : " + key);
                 }
             } else if (coinInfo.getMaxProfitRate() > decisionRate * 8) {
                 if ((profitRate < decisionRate * -2.5)) {
                     isSell = true;
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 2 : " + key
-                            + " price: " + mZeroFormat.format(currentPrice)
-                            + " changedRate: " + mPercentFormat.format(changedRate)
-                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                            + " profitRate: " + mPercentFormat.format(profitRate)
-                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                    );
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type2) : " + key);
                 }
             } else if (coinInfo.getMaxProfitRate() > decisionRate * 4) {
                 if ((profitRate < decisionRate * -1.75)) {
                     isSell = true;
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 3 : " + key
-                            + " price: " + mZeroFormat.format(currentPrice)
-                            + " changedRate: " + mPercentFormat.format(changedRate)
-                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                            + " profitRate: " + mPercentFormat.format(profitRate)
-                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                    );
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type3) : " + key);
                 }
             } else if (coinInfo.getMaxProfitRate() > decisionRate * 2) {
                 if ((profitRate < decisionRate * -1)) {
                     isSell = true;
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 4 : " + key
-                            + " price: " + mZeroFormat.format(currentPrice)
-                            + " changedRate: " + mPercentFormat.format(changedRate)
-                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                            + " profitRate: " + mPercentFormat.format(profitRate)
-                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                    );
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type4) : " + key);
                 }
             } else if (coinInfo.getMaxProfitRate() <= decisionRate * 2 && coinInfo.getMaxProfitRate() > decisionRate * 0.5) {
                 if (coinInfo.getMaxProfitRate() >= decisionRate) {
                     if ((profitRate < decisionRate * -0.75)) {
                         isSell = true;
-                        Log.d(TAG, "[DEBUG] tacticalToSell SELL - 5 : " + key
-                                + " price: " + mZeroFormat.format(currentPrice)
-                                + " changedRate: " + mPercentFormat.format(changedRate)
-                                + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                                + " profitRate: " + mPercentFormat.format(profitRate)
-                                + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                        );
+                        Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type5) : " + key);
                     }
                 } else {
                     // Stop Loss 1
                     if ((profitRate < decisionRate * -0.5 && diffPriceRate < decisionRate * -0.5)) {
                         isSell = true;
-                        Log.d(TAG, "[DEBUG] tacticalToSell SELL - 6 : " + key
-                                + " price: " + mZeroFormat.format(currentPrice)
-                                + " changedRate: " + mPercentFormat.format(changedRate)
-                                + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                                + " profitRate: " + mPercentFormat.format(profitRate)
-                                + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                        );
+                        Log.d(TAG, "[DEBUG] tacticalToSell SELL - Stop Loss(Type1) : " + key);
                     } else {
                         if (duration < mMonitorTime * 2 && changedRate < decisionRate * -0.5) {
                             isSell = true;
-                            Log.d(TAG, "[DEBUG] tacticalToSell SELL - 7 : " + key
-                                    + " price: " + mZeroFormat.format(currentPrice)
-                                    + " changedRate: " + mPercentFormat.format(changedRate)
-                                    + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                                    + " profitRate: " + mPercentFormat.format(profitRate)
-                                    + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                            );
+                            Log.d(TAG, "[DEBUG] tacticalToSell SELL - Stop Loss(Type2) : " + key);
                         } else if (changedRate < 0) {
                             isSell = true;
-                            Log.d(TAG, "[DEBUG] tacticalToSell SELL - 8 : " + key
-                                    + " price: " + mZeroFormat.format(currentPrice)
-                                    + " changedRate: " + mPercentFormat.format(changedRate)
-                                    + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                                    + " profitRate: " + mPercentFormat.format(profitRate)
-                                    + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                            );
+                            Log.d(TAG, "[DEBUG] tacticalToSell SELL - Stop Loss(Type3) : " + key);
                         }
                     }
                 }
@@ -1039,22 +978,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 // Stop Loss 2
                 if (duration < mMonitorTime * 2 && changedRate < decisionRate * -0.5) {
                     isSell = true;
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 9 : " + key
-                            + " price: " + mZeroFormat.format(currentPrice)
-                            + " changedRate: " + mPercentFormat.format(changedRate)
-                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                            + " profitRate: " + mPercentFormat.format(profitRate)
-                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                    );
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - Stop Loss(Type4) : " + key);
                 } else if (changedRate < 0) {
                     isSell = true;
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - 10 : " + key
-                            + " price: " + mZeroFormat.format(currentPrice)
-                            + " changedRate: " + mPercentFormat.format(changedRate)
-                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                            + " profitRate: " + mPercentFormat.format(profitRate)
-                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                    );
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - Stop Loss(Type5) : " + key);
                 }
             }
 
@@ -1070,14 +997,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     registerProcess(UPDATE_POST_ORDER_INFO, postSell);
                     order.setUuid(uuid);
                     mResponseOrderInfoMap.put(key, order);
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL : " + key
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL !!!: " + key
                             + " price: " + mZeroFormat.format(currentPrice)
+                            + " isPartialBuy: " + coinInfo.isPartialBuy()
                             + " volume: " + mExtendZeroFormat.format(coinInfo.isPartialBuy() ? order.getExecutedVolume().doubleValue() : order.getVolume().doubleValue())
-                            + " changedRate: " + mPercentFormat.format(changedRate)
-                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                            + " profitRate: " + mPercentFormat.format(profitRate)
-                            + " duration: " + mTimeFormat.format(duration)
-                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
+                            + " uuid: " + uuid
                     );
                 }
             } else if (duration > mMonitorTime * 3
@@ -1087,15 +1011,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 if (order != null && key.equals(order.getMarket())
                         && order.getSide().equals("bid")
                         && order.getState().equals(Post.DONE)) {
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - short time expired  : " + key
-                            + " price: " + mZeroFormat.format(currentPrice)
-                            + " volume: " + mExtendZeroFormat.format(coinInfo.isPartialBuy() ? order.getExecutedVolume().doubleValue() : order.getVolume().doubleValue())
-                            + " changedRate: " + mPercentFormat.format(changedRate)
-                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                            + " profitRate: " + mPercentFormat.format(profitRate)
-                            + " duration: " + mTimeFormat.format(duration)
-                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                    );
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - Stop Loss(expired short time)  : " + key);
                     String uuid = UUID.randomUUID().toString();
                     Post postSell = new Post(key, "ask",
                             coinInfo.isPartialBuy() ? order.getExecutedVolume().toString() : order.getVolume().toString(),
@@ -1112,15 +1028,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 if (order != null && key.equals(order.getMarket())
                         && order.getSide().equals("bid")
                         && order.getState().equals(Post.DONE)) {
-                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - long time expired : " + key
-                            + " price: " + mZeroFormat.format(currentPrice)
-                            + " volume: " + mExtendZeroFormat.format(coinInfo.isPartialBuy() ? order.getExecutedVolume().doubleValue() : order.getVolume().doubleValue())
-                            + " changedRate: " + mPercentFormat.format(changedRate)
-                            + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                            + " profitRate: " + mPercentFormat.format(profitRate)
-                            + " duration: " + mTimeFormat.format(duration)
-                            + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                    );
+                    Log.d(TAG, "[DEBUG] tacticalToSell SELL - Stop Loss(expired long time)  : " + key);
                     String uuid = UUID.randomUUID().toString();
                     Post postSell = new Post(key, "ask",
                             coinInfo.isPartialBuy() ? order.getExecutedVolume().toString() : order.getVolume().toString(),
@@ -1130,17 +1038,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     mResponseOrderInfoMap.put(key, order);
                 }
 
-            } else {
-                ResponseOrder order = mResponseOrderInfoMap.get(key);
-                Log.d(TAG, "tacticalToSell Log (NOT SELL) - key: " + key
-                        + " price: " + mZeroFormat.format(currentPrice)
-                        + " volume: " + mExtendZeroFormat.format(coinInfo.isPartialBuy() ? order.getExecutedVolume().doubleValue() : order.getVolume().doubleValue())
-                        + " changedRate: " + mPercentFormat.format(changedRate)
-                        + " getMaxProfitRate: " + mPercentFormat.format(coinInfo.getMaxProfitRate())
-                        + " profitRate: " + mPercentFormat.format(profitRate)
-                        + " duration: " + mTimeFormat.format(duration)
-                        + " decisionRate: " + mExtendZeroFormat.format(decisionRate)
-                );
             }
         }
     }
