@@ -633,7 +633,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             double upperLowerTailRate = lowerTailGapPrice != 0 ? (upperTailGapPrice - lowerTailGapPrice) / lowerTailGapPrice : -1;
             upperLowerTailRate = (double)Math.round(upperLowerTailRate * 1000) / 1000;
 
-            Log.d(TAG, "[DEBUG] makeTradeMapInfo: - key: " + key
+            Log.d(TAG, "makeTradeMapInfo: - key: " + key
                     + " high: " + mZeroFormat.format(highPrice)
                     + " close: " + mZeroFormat.format(closePrice)
                     + " open: " + mZeroFormat.format(openPrice)
