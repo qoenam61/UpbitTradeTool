@@ -66,7 +66,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
     private final long RESET_TIMER = 20 * 60 * 1000;
     private final long RESET_TIMER_GAP = 1 * 60 * 1000;
-    private final int COIN_LIST_MAX_NUM = 25;
+    private final int COIN_LIST_MAX_NUM = 30;
 
     private int mCoinListNum = COIN_LIST_MAX_NUM;
     private final double PRICE_AMOUNT = 10000;
@@ -620,14 +620,32 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 return;
             }
         } else {
+            double upperTailGapPrice = highPrice - closePrice;
+            double lowerTailGapPrice = openPrice - lowPrice;
+            double bodyGapPrice = closePrice - openPrice;
+
+            double upperTailBodyRate = bodyGapPrice != 0 ? upperTailGapPrice / bodyGapPrice : -1;
+            upperTailBodyRate = (double)Math.round(upperTailBodyRate * 1000) / 1000;
+
+            double lowerTailBodyRate = bodyGapPrice != 0 ? lowerTailGapPrice / bodyGapPrice : -1;
+            lowerTailBodyRate = (double)Math.round(lowerTailBodyRate * 1000) / 1000;
+
+            double upperLowerTailRate = lowerTailGapPrice != 0 ? (upperTailGapPrice - lowerTailGapPrice) / lowerTailGapPrice : -1;
+            upperLowerTailRate = (double)Math.round(upperLowerTailRate * 1000) / 1000;
 
             Log.d(TAG, "[DEBUG] makeTradeMapInfo: - key: " + key
                     + " high: " + mZeroFormat.format(highPrice)
                     + " close: " + mZeroFormat.format(closePrice)
                     + " open: " + mZeroFormat.format(openPrice)
                     + " low: " + mZeroFormat.format(lowPrice)
-                    + " priceChangedRate: " + mPercentFormat.format(candleRate)
+                    + " candleRate: " + mPercentFormat.format(candleRate)
                     + " highLowRate: " + mPercentFormat.format(highLowRate)
+                    + " upperTailGapPrice: " + mZeroFormat.format(upperTailGapPrice)
+                    + " lowerTailGapPrice: " + mZeroFormat.format(lowerTailGapPrice)
+                    + " bodyGapPrice: " + mZeroFormat.format(bodyGapPrice)
+                    + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
+                    + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
+                    + " upperLowerTailRate: " + mPercentFormat.format(upperLowerTailRate)
                     + " getTickCounts: " + tickCount
             );
 
@@ -689,11 +707,11 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 + " closePrice: " + mZeroFormat.format(closePrice)
                 + " openPrice: " + mZeroFormat.format(openPrice)
                 + " lowPrice: " + mZeroFormat.format(lowPrice)
+                + " candleRate: " + mPercentFormat.format(candleRate)
+                + " highLowRate: " + mPercentFormat.format(highLowRate)
                 + " upperTailGapPrice: " + mZeroFormat.format(upperTailGapPrice)
                 + " lowerTailGapPrice: " + mZeroFormat.format(lowerTailGapPrice)
                 + " bodyGapPrice: " + mZeroFormat.format(bodyGapPrice)
-                + " candleRate: " + mPercentFormat.format(candleRate)
-                + " highLowRate: " + mPercentFormat.format(highLowRate)
                 + " upperTailRate: " + mPercentFormat.format(upperTailBodyRate)
                 + " lowerTailRate: " + mPercentFormat.format(lowerTailBodyRate)
                 + " upperLowerTailRate: " + mPercentFormat.format(upperLowerTailRate)
