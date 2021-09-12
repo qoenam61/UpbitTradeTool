@@ -764,7 +764,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.5 && upperTailBodyRate >= 0.25 && lowerTailBodyRate == 0) {
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.25 && lowerTailBodyRate == 0) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -773,30 +773,67 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 3) {
+                } else if (upperTailBodyRate < 0.5 && upperTailBodyRate >= 0.33 && lowerTailBodyRate == 0) {
+                    toBuyPrice = priceTypeCOL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 3 COL - !!!! marketId: " + key
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                    );
+                } else if (upperTailBodyRate < 0.25 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 3) {
                     toBuyPrice = priceTypeHCO;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
-                    Log.d(TAG, "[DEBUG] tacticalToBuy 3 HCO - !!!! marketId: " + key
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 4 HCO - !!!! marketId: " + key
                             + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 1) {
-                    toBuyPrice = priceTypeHCOL;
-                    volume = (mPriceAmount / toBuyPrice);
-                    isBuy = true;
-                    Log.d(TAG, "[DEBUG] tacticalToBuy 4 HCOL - !!!! marketId: " + key
-                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
-                            + " volume: " + mExtendZeroFormat.format(volume)
-                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
-                    );
-                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0
-                        && lowerTailBodyRate < 0.33 && lowerTailBodyRate >= 0) {
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.25 && lowerTailBodyRate >= 3) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
                     Log.d(TAG, "[DEBUG] tacticalToBuy 5 HCOL - !!!! marketId: " + key
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                    );
+                } else if (upperTailBodyRate < 0.25 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 1.5) {
+                    toBuyPrice = priceTypeHCOL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 6 HCOL - !!!! marketId: " + key
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                    );
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.25 && lowerTailBodyRate >= 1.5) {
+                    toBuyPrice = priceTypeCOL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 7 COL - !!!! marketId: " + key
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                    );
+                } else if (upperTailBodyRate < 0.25 && upperTailBodyRate >= 0
+                        && lowerTailBodyRate < 0.25 && lowerTailBodyRate >= 0) {
+                    toBuyPrice = priceTypeHCOL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 8 HCOL - !!!! marketId: " + key
+                            + " buyPrice: " + mZeroFormat.format(toBuyPrice)
+                            + " volume: " + mExtendZeroFormat.format(volume)
+                            + " priceAmount: " + mZeroFormat.format(mPriceAmount)
+                    );
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.25
+                        && lowerTailBodyRate < 0.33 && lowerTailBodyRate >= 0.25) {
+                    toBuyPrice = priceTypeCOL;
+                    volume = (mPriceAmount / toBuyPrice);
+                    isBuy = true;
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 9 COL - !!!! marketId: " + key
                             + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
@@ -807,7 +844,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     toBuyPrice = priceTypeCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
-                    Log.d(TAG, "[DEBUG] tacticalToBuy 6 COL - !!!! marketId: " + key
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 10 COL - !!!! marketId: " + key
                             + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
@@ -816,7 +853,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     toBuyPrice = priceTypeCOLL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
-                    Log.d(TAG, "[DEBUG] tacticalToBuy 7 COLL - !!!! marketId: " + key
+                    Log.d(TAG, "[DEBUG] tacticalToBuy 11 COLL - !!!! marketId: " + key
                             + " buyPrice: " + mZeroFormat.format(toBuyPrice)
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
