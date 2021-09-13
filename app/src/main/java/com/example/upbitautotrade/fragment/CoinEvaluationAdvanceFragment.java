@@ -72,7 +72,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     private final double PRICE_AMOUNT = 10000;
     private final double MONITORING_PERIOD_TIME = 3;
     private final int TICK_COUNTS = 1500;
-    private final double TRADE_RATE = 0.045;
+    private final double TRADE_RATE = 0.03;
     private final int TRADE_COUNTS = TICK_COUNTS;
 
     private View mView;
@@ -325,8 +325,9 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     coinInfo.setMarketId(key);
                     coinInfo.setStatus(CoinInfo.SELL);
                     coinInfo.setSellTime(System.currentTimeMillis());
-                    Ticker ticker = mTickerMapInfo.get(key);
-                    coinInfo.setSellPrice(ticker != null &&  ticker.getTradePrice() != null ? ticker.getTradePrice().doubleValue() : 0);
+                    Deque<TradeInfo> tradeInfo = mTradeMapInfo.get(key);
+                    double sellPrice = tradeInfo != null &&  tradeInfo.getLast().getTradePrice() != null ? tradeInfo.getLast().getTradePrice().doubleValue() : 0;
+                    coinInfo.setSellPrice(CoinInfo.convertSellPrice(sellPrice));
 
                     mResultListInfo.add(coinInfo);
                     mResultListAdapter.setResultItems(mResultListInfo);
@@ -755,7 +756,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.25 && upperTailBodyRate >= 0 && lowerTailBodyRate == 0) {
+                } else if (upperTailBodyRate < 0.15 && upperTailBodyRate >= 0 && lowerTailBodyRate == 0) {
                     toBuyPrice = priceTypeHCO;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -764,7 +765,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.25 && lowerTailBodyRate == 0) {
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.15 && lowerTailBodyRate == 0) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -782,7 +783,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.25 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 3) {
+                } else if (upperTailBodyRate < 0.15 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 3) {
                     toBuyPrice = priceTypeHCO;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -791,7 +792,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.25 && lowerTailBodyRate >= 3) {
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.15 && lowerTailBodyRate >= 3) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -800,7 +801,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.25 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 1.5) {
+                } else if (upperTailBodyRate < 0.15 && upperTailBodyRate >= 0 && lowerTailBodyRate >= 1.5) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -809,7 +810,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.25 && lowerTailBodyRate >= 1.5) {
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.15 && lowerTailBodyRate >= 1.5) {
                     toBuyPrice = priceTypeCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -818,8 +819,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.25 && upperTailBodyRate >= 0
-                        && lowerTailBodyRate < 0.25 && lowerTailBodyRate >= 0) {
+                } else if (upperTailBodyRate < 0.15 && upperTailBodyRate >= 0
+                        && lowerTailBodyRate < 0.15 && lowerTailBodyRate >= 0) {
                     toBuyPrice = priceTypeHCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -828,8 +829,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                             + " volume: " + mExtendZeroFormat.format(volume)
                             + " priceAmount: " + mZeroFormat.format(mPriceAmount)
                     );
-                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.25
-                        && lowerTailBodyRate < 0.33 && lowerTailBodyRate >= 0.25) {
+                } else if (upperTailBodyRate < 0.33 && upperTailBodyRate >= 0.15
+                        && lowerTailBodyRate < 0.33 && lowerTailBodyRate >= 0.15) {
                     toBuyPrice = priceTypeCOL;
                     volume = (mPriceAmount / toBuyPrice);
                     isBuy = true;
@@ -1057,6 +1058,10 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - Stop Loss(Type5) : " + key);
                 }
             }
+
+            Deque<TradeInfo> tradeInfo = mTradeMapInfo.get(key);
+            double sellPrice = tradeInfo != null &&  tradeInfo.getLast().getTradePrice() != null ? tradeInfo.getLast().getTradePrice().doubleValue() : 0;
+            coinInfo.setSellPrice(CoinInfo.convertSellPrice(sellPrice));
 
             if (isSell) {
                 ResponseOrder order = mResponseOrderInfoMap.get(key);
