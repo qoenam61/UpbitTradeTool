@@ -881,10 +881,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double lowPrice = 0;
         double highPrice = 0;
 
-        double currentPrice = 0;
-        double diffPrice = 0;
-        double diffPriceRate = 0;
-
         double openPrice = 0;
         double closePrice = 0;
         double priceChangedRate = 0;
@@ -925,11 +921,6 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
 
                 CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
                 if (coinInfo != null) {
-                    currentPrice = ticker.getTradePrice().doubleValue();
-                    diffPrice = currentPrice - coinInfo.getClosePrice();
-                    diffPriceRate = diffPrice / coinInfo.getClosePrice();
-                    diffPriceRate = (double)Math.round(diffPriceRate * 1000) / 1000;
-
                     if (coinInfo.getStatus().equals(CoinInfo.BUY)) {
                         long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
                         if (duration >= mMonitorTime) {
@@ -961,19 +952,18 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     );
                 }
             }
-        } else {
-            CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
-            if (coinInfo != null) {
-                currentPrice = coinInfo.getClosePrice();
-            }
         }
-
+        double currentPrice = 0;
+        CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+        if (coinInfo != null) {
+            currentPrice = coinInfo.getClosePrice();
+        }
         cancelBuyItemList(key, currentPrice);
 
-        tacticalToSell(key, currentPrice, diffPriceRate);
+        tacticalToSell(key, currentPrice);
     }
 
-    private void tacticalToSell(String key, double currentPrice, double diffPriceRate) {
+    private void tacticalToSell(String key, double currentPrice) {
         CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
         if (mBuyingItemKeyList.contains(key) && coinInfo != null && coinInfo.getStatus().equals(CoinInfo.BUY)) {
             // Post to Sell
@@ -985,7 +975,8 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             profitRate = (double)Math.round(profitRate * 1000) / 1000;
             double maxProfitRate = coinInfo.getMaxProfitRate();
 
-            double decisionRate = mMonitorRate / (mMonitorTime / (60 * 1000));
+//            double decisionRate = mMonitorRate / (mMonitorTime / (60 * 1000));
+            double decisionRate = 0.01;
 
             long duration = System.currentTimeMillis() - coinInfo.getBuyTime();
 
@@ -1001,7 +992,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             );
 
 
-            if (duration < mMonitorTime && changedRate >= decisionRate * -1.5) {
+            if (duration < mMonitorTime && changedRate >= decisionRate * -3) {
                 Log.d(TAG, "tacticalToSell SELL - skip : " + key);
                 return;
             }
@@ -1035,7 +1026,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     }
                 } else {
                     // Stop Loss 1
-                    if ((profitRate < decisionRate * -0.5 && diffPriceRate < decisionRate * -0.5)) {
+                    if (profitRate < decisionRate * -0.5) {
                         isSell = true;
                         Log.d(TAG, "[DEBUG] tacticalToSell SELL - Stop Loss(Type1) : " + key);
                     } else {
