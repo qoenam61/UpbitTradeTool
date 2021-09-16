@@ -992,34 +992,37 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
             );
 
 
-            if (duration < mMonitorTime && changedRate >= decisionRate * -3) {
+            if (duration < mMonitorTime
+                    && changedRate >= decisionRate * -3
+                    && profitRate < decisionRate * 2
+                    && maxProfitRate < decisionRate * 2) {
                 Log.d(TAG, "tacticalToSell SELL - skip : " + key);
                 return;
             }
 
             boolean isSell = false;
-            if (coinInfo.getMaxProfitRate() > decisionRate * 16) {
+            if (maxProfitRate > decisionRate * 16) {
                 if ((profitRate < decisionRate * -3)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type1) : " + key);
                 }
-            } else if (coinInfo.getMaxProfitRate() > decisionRate * 8) {
+            } else if (maxProfitRate > decisionRate * 8) {
                 if ((profitRate < decisionRate * -2.5)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type2) : " + key);
                 }
-            } else if (coinInfo.getMaxProfitRate() > decisionRate * 4) {
+            } else if (maxProfitRate > decisionRate * 4) {
                 if ((profitRate < decisionRate * -1.75)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type3) : " + key);
                 }
-            } else if (coinInfo.getMaxProfitRate() > decisionRate * 2) {
+            } else if (maxProfitRate > decisionRate * 2) {
                 if ((profitRate < decisionRate * -1)) {
                     isSell = true;
                     Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type4) : " + key);
                 }
-            } else if (coinInfo.getMaxProfitRate() <= decisionRate * 2 && coinInfo.getMaxProfitRate() > decisionRate * 0.5) {
-                if (coinInfo.getMaxProfitRate() >= decisionRate) {
+            } else if (maxProfitRate <= decisionRate * 2 && maxProfitRate > decisionRate * 0.5) {
+                if (maxProfitRate >= decisionRate) {
                     if ((profitRate < decisionRate * -0.75)) {
                         isSell = true;
                         Log.d(TAG, "[DEBUG] tacticalToSell SELL - Take a profit(Type5) : " + key);
@@ -1074,7 +1077,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                     );
                 }
             } else if (duration > mMonitorTime * 3
-                    && coinInfo.getMaxProfitRate() <= decisionRate * 0.5
+                    && maxProfitRate <= decisionRate * 0.5
                     && profitRate < decisionRate * -0.5) {
                 ResponseOrder order = mResponseOrderInfoMap.get(key);
                 if (order != null && key.equals(order.getMarket())
@@ -1091,7 +1094,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 }
 
             } else if (duration > mMonitorTime * 6
-                    && coinInfo.getMaxProfitRate() <= decisionRate * 2
+                    && maxProfitRate <= decisionRate * 2
                     && (coinInfo.getTickCounts() < mMonitorTick)) {
                 ResponseOrder order = mResponseOrderInfoMap.get(key);
                 if (order != null && key.equals(order.getMarket())
