@@ -266,108 +266,109 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
                 inputMethodManager.hideSoftInputFromWindow(monitorTickEditText.getWindowToken(), 0);
             }
         });
+        if (mViewModel != null) {
+            mViewModel.setOnPostErrorListener(new UpBitViewModel.RequestErrorListener() {
+                @Override
+                public void shortMoney(String uuid, String type) {
+                    if (type.equals("bid")) {
+                        mIsShortMoney = true;
+                        mPreventReset = false;
 
-        mViewModel.setOnPostErrorListener(new UpBitViewModel.RequestErrorListener() {
-            @Override
-            public void shortMoney(String uuid, String type) {
-                if (type.equals("bid")) {
-                    mIsShortMoney = true;
-                    mPreventReset = false;
+                        try {
+                            Thread.sleep(15 * 1000);
+                        } catch (InterruptedException e) {
+                            Log.w(TAG, "shortMoney: bid");
+                        }
 
-                    try {
-                        Thread.sleep(15 * 1000);
-                    } catch (InterruptedException e) {
-                        Log.w(TAG, "shortMoney: bid");
+                        Map<String, CoinInfo> buyingItem = new HashMap<>();
+                        buyingItem.putAll(mBuyingItemMapInfo);
+                        Iterator<String> delOrderIterator = buyingItem.keySet().iterator();
+                        while (delOrderIterator.hasNext()) {
+                            String key = delOrderIterator.next();
+                            CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+                            if (coinInfo.getStatus().equals(CoinInfo.READY)) {
+                                Log.d(TAG, "[DEBUG] Reset Coin Item Delete READY - key : " + key + " deleteUUID: " + coinInfo.getUuid());
+                                mBuyingItemMapInfo.remove(key);
+                            }
+                        }
+
+                        Activity activity = getActivity();
+                        if (activity != null) {
+                            activity.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(getContext(), "매수 금액이 부족합니다.", Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                    } else {
+                        mIsShortMoney = false;
                     }
 
-                    Map<String, CoinInfo> buyingItem = new HashMap<>();
-                    buyingItem.putAll(mBuyingItemMapInfo);
-                    Iterator<String> delOrderIterator = buyingItem.keySet().iterator();
-                    while (delOrderIterator.hasNext()) {
-                        String key = delOrderIterator.next();
-                        CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
-                        if (coinInfo.getStatus().equals(CoinInfo.READY)) {
-                            Log.d(TAG, "[DEBUG] Reset Coin Item Delete READY - key : " + key + " deleteUUID: " + coinInfo.getUuid());
-                            mBuyingItemMapInfo.remove(key);
+                    String key = null;
+                    Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
+                    while (iterator.hasNext()) {
+                        ResponseOrder order = iterator.next();
+                        if (order.getUuid().equals(uuid)) {
+                            key = order.getMarket();
+                            break;
                         }
                     }
 
-                    Activity activity = getActivity();
-                    if (activity != null) {
-                        activity.runOnUiThread(new Runnable() {
-                            @Override
-                            public void run() {
-                                Toast.makeText(getContext(), "매수 금액이 부족합니다.", Toast.LENGTH_LONG).show();
-                            }
-                        });
-                    }
-                } else {
-                    mIsShortMoney = false;
-                }
+                    if (key != null) {
+                        CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
+                        if (coinInfo == null) {
+                            return;
+                        }
+                        Log.d(TAG, "[DEBUG] shortMoney key : " + key + " mIsShortMoney: " + mIsShortMoney + " uuid: " + uuid);
 
-                String key = null;
-                Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
-                while (iterator.hasNext()) {
-                    ResponseOrder order = iterator.next();
-                    if (order.getUuid().equals(uuid)) {
-                        key = order.getMarket();
-                        break;
-                    }
-                }
+                        coinInfo.setMarketId(key);
+                        coinInfo.setStatus(CoinInfo.SELL);
+                        coinInfo.setSellTime(System.currentTimeMillis());
+                        Deque<TradeInfo> tradeInfo = mTradeMapInfo.get(key);
+                        double sellPrice = tradeInfo != null && tradeInfo.getLast().getTradePrice() != null ? tradeInfo.getLast().getTradePrice().doubleValue() : 0;
+                        coinInfo.setSellPrice(CoinInfo.convertSellPrice(sellPrice));
 
-                if (key != null) {
-                    CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
-                    if (coinInfo == null) {
-                        return;
-                    }
-                    Log.d(TAG, "[DEBUG] shortMoney key : " + key +" mIsShortMoney: " + mIsShortMoney + " uuid: " + uuid);
+                        mResultListInfo.add(coinInfo);
+                        mResultListAdapter.setResultItems(mResultListInfo);
 
-                    coinInfo.setMarketId(key);
-                    coinInfo.setStatus(CoinInfo.SELL);
-                    coinInfo.setSellTime(System.currentTimeMillis());
-                    Deque<TradeInfo> tradeInfo = mTradeMapInfo.get(key);
-                    double sellPrice = tradeInfo != null &&  tradeInfo.getLast().getTradePrice() != null ? tradeInfo.getLast().getTradePrice().doubleValue() : 0;
-                    coinInfo.setSellPrice(CoinInfo.convertSellPrice(sellPrice));
+                        removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
+                        removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
 
-                    mResultListInfo.add(coinInfo);
-                    mResultListAdapter.setResultItems(mResultListInfo);
+                        mResponseOrderInfoMap.remove(key);
+                        mBuyingItemKeyList.remove(key);
+                        mBuyingItemMapInfo.remove(key);
+                        mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
 
-                    removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
-                    removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
-
-                    mResponseOrderInfoMap.remove(key);
-                    mBuyingItemKeyList.remove(key);
-                    mBuyingItemMapInfo.remove(key);
-                    mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
-
-                    updateProfitInfo();
-                }
-            }
-
-            @Override
-            public void deleteError(String uuid) {
-                String key = null;
-                Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
-                while (iterator.hasNext()) {
-                    ResponseOrder order = iterator.next();
-                    if (order.getUuid().equals(uuid)) {
-                        key = order.getMarket();
-                        break;
+                        updateProfitInfo();
                     }
                 }
 
-                if (key != null) {
-                    Log.d(TAG, "[DEBUG] deleteError key : " + key +" uuid: " + uuid);
-                    removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
-                    removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
+                @Override
+                public void deleteError(String uuid) {
+                    String key = null;
+                    Iterator<ResponseOrder> iterator = mResponseOrderInfoMap.values().iterator();
+                    while (iterator.hasNext()) {
+                        ResponseOrder order = iterator.next();
+                        if (order.getUuid().equals(uuid)) {
+                            key = order.getMarket();
+                            break;
+                        }
+                    }
 
-                    mResponseOrderInfoMap.remove(key);
-                    mBuyingItemKeyList.remove(key);
-                    mBuyingItemMapInfo.remove(key);
-                    mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+                    if (key != null) {
+                        Log.d(TAG, "[DEBUG] deleteError key : " + key + " uuid: " + uuid);
+                        removeMonitoringPeriodicUpdate(UPDATE_SEARCH_ORDER_INFO, key);
+                        removeMonitoringPeriodicUpdate(UPDATE_TICKER_INFO, key);
+
+                        mResponseOrderInfoMap.remove(key);
+                        mBuyingItemKeyList.remove(key);
+                        mBuyingItemMapInfo.remove(key);
+                        mBuyingListAdapter.setBuyingItems(mBuyingItemKeyList);
+                    }
                 }
-            }
-        });
+            });
+        }
 
         return mView;
     }
@@ -584,7 +585,19 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
         double highLowRate = lowPrice != 0 ? (highPrice - lowPrice) / lowPrice : 0;
         highLowRate = (double)Math.round(highLowRate * 1000) / 1000;
 
-        double tickCount = tradeInfoQueue.size();
+        double tickCount = 0;
+        Iterator<TradeInfo> tradeInfoIterator = tradeInfoQueue.iterator();
+        while (tradeInfoIterator.hasNext()) {
+            TradeInfo tradeInfo = tradeInfoIterator.next();
+            if (tradeInfoQueue.peekLast().getTimestamp() - tradeInfo.getTimestamp() > 60 * 1000) {
+//                Log.d(TAG, "[DEBUG] updateTradeMapInfoByTradeInfo skip count : " + mTimeFormat.format(tradeInfo.getTimestamp()));
+                continue;
+            } else {
+//                Log.d(TAG, "[DEBUG] updateTradeMapInfoByTradeInfo add count : " + mTimeFormat.format(tradeInfo.getTimestamp()));
+                tickCount++;
+            }
+        }
+        Log.d(TAG, "[DEBUG] updateTradeMapInfoByTradeInfo - tickCount: " + tickCount);
 
         if (mBuyingItemKeyList.contains(key)) {
             CoinInfo coinInfo = mBuyingItemMapInfo.get(key);
