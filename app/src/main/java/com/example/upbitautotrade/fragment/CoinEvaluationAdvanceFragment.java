@@ -66,7 +66,7 @@ public class CoinEvaluationAdvanceFragment extends Fragment {
     public final String MARKET_WARNING = "CAUTION";
     private final long RESET_TIMER = 20 * 60 * 1000;
     private final long RESET_TIMER_GAP = 1 * 60 * 1000;
-    private final int COIN_LIST_MAX_NUM = 30;
+    private final int COIN_LIST_MAX_NUM = 50;
 
     private int mCoinListNum = COIN_LIST_MAX_NUM;
     private final double PRICE_AMOUNT = 10000;
